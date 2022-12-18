@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Archery Handicap and Classification Calculator{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <datalist id="bowstylelist">
+    <option>Compound</option>
+    <option>Recurve</option>
+    <option>Barebow</option>
+    <option>Longbow</option>
+  </datalist>
+
+  <datalist id="roundlist">
+    <option>York</option>
+    <option>Hereford</option>
+    <option>Bristol I</option>
+    <option>Bristol II</option>
+  </datalist>
+
+  <datalist id="genderlist">
+    <option>Female</option>
+    <option>Male</option>
+  </datalist>
+
+  <datalist id="agelist">
+    <option>Adult</option>
+    <option>Master (50+)</option>
+    <option>Under 21</option>
+    <option>Under 18</option>
+    <option>Under 16</option>
+    <option>Under 15</option>
+    <option>Under 14</option>
+    <option>Under 12</option>
+  </datalist>
+
+  {% from "_formhelpers.html" import render_field %}
+  <form method=post>
+    <dl>
+      {{ render_field(form.bowstyle, list="bowstylelist") }}
+      {{ render_field(form.gender, list="genderlist") }}
+      {{ render_field(form.age, list="agelist") }}
+      {{ render_field(form.roundname, list="roundlist") }}
+      {{ render_field(form.score) }}
+    </dl>
+    <p><input type=submit value=Register>
+  </form>
+
+  <p>Results! for {{ form.roundname.data }}</p>
+
+{% endblock %}

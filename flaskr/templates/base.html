@@ -1,0 +1,26 @@
+<!doctype html>
+<title>{% block title %}{% endblock %}ArcheryCalculator.co.uk</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<nav>
+  <h1>ArcheryCalculator.co.uk</h1>
+<!--
+  <ul>
+    <li><a href="{{ url_for('home') }}">Register</a>
+    <li><a href="{{ url_for('home') }}">Log In</a>
+  </ul>
+-->
+</nav>
+
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+
+  {% block content %}{% endblock %}
+</section>
+
