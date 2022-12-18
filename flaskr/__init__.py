@@ -1,7 +1,18 @@
 import os
 
 from flask import Flask
+from flask import (
+    Blueprint, flash, g, redirect, render_template, request, session, url_for
+)
 
+from wtforms import Form, validators, SearchField, IntegerField
+
+class HCForm(Form):
+    bowstyle  = SearchField('Bowstyle', [validators.InputRequired("Please provide.")])
+    gender    = SearchField('Gender under AGB', [validators.InputRequired("Please provide.")])
+    age       = SearchField('Age category', [validators.InputRequired("Please provide.")])
+    roundname = SearchField('Round', [validators.InputRequired("Please provide.")])
+    score     = IntegerField('Score', [validators.InputRequired("Please provide.")])
 
 def create_app(test_config=None):
     # create and configure the app
@@ -24,10 +35,22 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    # Simple home page
+    @app.route('/', methods=['GET', 'POST'])
+    def home():
+        form = HCForm(request.form)
+        if request.method == 'POST' and form.validate():
+#            user = User(form.username.data, form.email.data,
+#                        form.password.data)
+#            db_session.add(user)
+#            return redirect(url_for('/'))
+            return render_template("calculate.html", form=form)
+        return render_template('home.html', form=form)
+
+## a simple page that says hello
+#    @app.route('/hello')
+#    def hello():
+#        return 'Hello, World!'
 
     return app
 
