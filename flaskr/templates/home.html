@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block content %}
+
   <datalist id="bowstylelist">
-    <option>Compound</option>
-    <option>Recurve</option>
-    <option>Barebow</option>
-    <option>Longbow</option>
+  {% for bowstyle in bowstyles %}
+  <option>{{bowstyle['bowstyle']}}</option>
+  {% endfor %}
   </datalist>
 
   <datalist id="roundlist">
@@ -20,19 +20,15 @@
   </datalist>
 
   <datalist id="genderlist">
-    <option>Female</option>
-    <option>Male</option>
+  {% for gender in genders %}
+  <option>{{gender['gender']}}</option>
+  {% endfor %}
   </datalist>
 
   <datalist id="agelist">
-    <option>Adult</option>
-    <option>Master (50+)</option>
-    <option>Under 21</option>
-    <option>Under 18</option>
-    <option>Under 16</option>
-    <option>Under 15</option>
-    <option>Under 14</option>
-    <option>Under 12</option>
+  {% for age_group in ages %}
+  <option>{{age_group['age_group']}}</option>
+  {% endfor %}
   </datalist>
 
   {% from "_formhelpers.html" import render_field %}
@@ -46,5 +42,5 @@
     </dl>
     <p><input type=submit value=Register>
   </form>
-
+  <p>{{ bowstyles }}</p>
 {% endblock %}
