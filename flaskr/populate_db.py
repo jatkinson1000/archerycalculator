@@ -12,7 +12,7 @@ bowstyles = {
     "longbow": "TF",
 }
 
-genders = ["male", "female"]
+genders = ["Male", "Female"]
 
 ages = {
     "Adult": "AGB",
@@ -25,7 +25,7 @@ ages = {
     "Under 12": "AGB",
 }
 
-rounds = list(rounds.AGB_outdoor_imperial.values())
+rounds = rounds.AGB_outdoor_imperial
 
 
 def load_bowstyles(db):
@@ -54,6 +54,7 @@ def load_ages(db):
 def load_rounds(db):
     for item in rounds:
         db.execute(
-            "INSERT INTO rounds (round_name,gov_body) VALUES (?,?);", (item.name, "AGB")
+            "INSERT INTO rounds (round_name,code_name,gov_body) VALUES (?,?,?);",
+            (rounds[item].name, item, "AGB"),
         )
     db.commit()

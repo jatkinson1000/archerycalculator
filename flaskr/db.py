@@ -12,7 +12,7 @@ def get_db():
         g.db = sqlite3.connect(
             current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
         )
-        # Return rows as dicts
+        # Return rows as dicts when using cursor
         g.db.row_factory = sqlite3.Row
 
     return g.db
@@ -28,7 +28,6 @@ def close_db(e=None):
 def init_db():
     # call the SQL functions in the schema.sql file to init the tables in db
     db = get_db()
-    print(db)
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
     populate_db.load_bowstyles(db)

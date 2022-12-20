@@ -76,7 +76,10 @@ nav ul li a, nav ul li span, header .action {
   border: 1px solid #377ba8;
 }
 
-/*.post > header {
+
+/*
+
+.post > header {
   display: flex;
   align-items: flex-end;
   font-size: 0.85em;
@@ -98,11 +101,13 @@ nav ul li a, nav ul li span, header .action {
 
 .post .body {
   white-space: pre-line;
-}*/
+}
 
-/*.content:last-child {
+.content:last-child {
   margin-bottom: 0;
 }
+
+*/
 
 .content form {
   margin: 1em 0;
@@ -122,13 +127,14 @@ nav ul li a, nav ul li span, header .action {
 .content textarea {
   min-height: 12em;
   resize: vertical;
-}*/
+}
 
 input.danger {
   color: #cc2f2e;
 }
 
 input[type=submit] {
+  padding: 0.25rem;
   align-self: start;
   min-width: 10em;
 }

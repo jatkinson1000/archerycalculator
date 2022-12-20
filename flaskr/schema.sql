@@ -23,5 +23,6 @@ CREATE TABLE ages (
 CREATE TABLE rounds (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   round_name TEXT NOT NULL,
+  code_name TEXT UNIQUE NOT NULL,
   gov_body TEXT NOT NULL
 );

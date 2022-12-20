@@ -41,5 +41,7 @@
     </dl>
     <p><input type=submit value=Register>
   </form>
-  <p>{{ bowstyles }}</p>
+  {% if error %}
+  <p>{{ error }}</p>
+  {% endif %}
 {% endblock %}
