@@ -13,10 +13,9 @@
   </datalist>
 
   <datalist id="roundlist">
-    <option>York</option>
-    <option>Hereford</option>
-    <option>Bristol I</option>
-    <option>Bristol II</option>
+  {% for round in rounds %}
+  <option>{{round['round_name']}}</option>
+  {% endfor %}
   </datalist>
 
   <datalist id="genderlist">

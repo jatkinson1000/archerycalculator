@@ -1,4 +1,8 @@
-from flask import g
+from archeryutils.archeryutils import (
+    rounds,
+    # handicap_equations as hc_eq,
+    # handicap_functions as hc_func,
+)
 
 
 bowstyles = {
@@ -21,9 +25,10 @@ ages = {
     "Under 12": "AGB",
 }
 
+rounds = list(rounds.AGB_outdoor_imperial.values())
+
 
 def load_bowstyles(db):
-    cur = db.cursor()
     for item in bowstyles.items():
         db.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
@@ -31,17 +36,24 @@ def load_bowstyles(db):
         )
     db.commit()
 
+
 def load_genders(db):
-    cur = db.cursor()
     for item in genders:
         db.execute("INSERT INTO genders (gender) VALUES (?);", [item])
     db.commit()
 
 
 def load_ages(db):
-    cur = db.cursor()
     for item in ages.items():
         db.execute(
             "INSERT INTO ages (age_group,gov_body) VALUES (?,?);", (item[0], item[1])
+        )
+    db.commit()
+
+
+def load_rounds(db):
+    for item in rounds:
+        db.execute(
+            "INSERT INTO rounds (round_name,gov_body) VALUES (?,?);", (item.name, "AGB")
         )
     db.commit()

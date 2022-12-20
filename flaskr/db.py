@@ -34,6 +34,7 @@ def init_db():
     populate_db.load_bowstyles(db)
     populate_db.load_ages(db)
     populate_db.load_genders(db)
+    populate_db.load_rounds(db)
 
 
 # define command line argument 'init-db' to run init_db function at startup

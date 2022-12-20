@@ -2,14 +2,14 @@ import os
 
 from flask import Flask
 from flask import (
-    Blueprint,
-    flash,
-    g,
-    redirect,
+    # Blueprint,
+    # flash,
+    # g,
+    # redirect,
     render_template,
     request,
-    session,
-    url_for,
+    # session,
+    # url_for,
 )
 
 from wtforms import Form, validators, SearchField, IntegerField
@@ -57,19 +57,32 @@ def create_app(test_config=None):
         bowstyles = database.execute(
             "SELECT bowstyle,disciplines FROM bowstyles"
         ).fetchall()
-        genders = database.execute(
-            "SELECT gender FROM genders"
-        ).fetchall()
-        ages = database.execute(
-            "SELECT age_group FROM ages"
-        ).fetchall()
+        genders = database.execute("SELECT gender FROM genders").fetchall()
+        ages = database.execute("SELECT age_group FROM ages").fetchall()
+        rounds = database.execute("SELECT round_name FROM rounds").fetchall()
 
         form = HCForm(request.form)
         if request.method == "POST" and form.validate():
-            return render_template("calculate.html", form=form, bowstyles=bowstyles, genders=genders, ages=ages)
-        return render_template("home.html", form=form, bowstyles=bowstyles, genders=genders, ages=ages)
+            # Perform calculations and return the results
+            return render_template(
+                "calculate.html",
+                form=form,
+                bowstyles=bowstyles,
+                genders=genders,
+                ages=ages,
+                rounds=rounds,
+            )
+        # If first visit load the default form with no inputs
+        return render_template(
+            "home.html",
+            form=form,
+            bowstyles=bowstyles,
+            genders=genders,
+            ages=ages,
+            rounds=rounds,
+        )
 
-    ## a simple page that says hello
+    # A simple page that says hello
     #    @app.route('/hello')
     #    def hello():
     #        return 'Hello, World!'

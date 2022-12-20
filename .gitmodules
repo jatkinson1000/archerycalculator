@@ -1,3 +1,4 @@
 [submodule "archeryutils"]
 	path = archeryutils
 	url = https://github.com/jatkinson1000/archeryutils
+        branch = rootfinding
