@@ -12,18 +12,8 @@ from flask import (
     # url_for,
 )
 
-from wtforms import Form, validators, SearchField, IntegerField
 from . import db
-
-
-class HCForm(Form):
-    bowstyle = SearchField("Bowstyle", [validators.InputRequired("Please provide.")])
-    gender = SearchField(
-        "Gender under AGB", [validators.InputRequired("Please provide.")]
-    )
-    age = SearchField("Age category", [validators.InputRequired("Please provide.")])
-    roundname = SearchField("Round", [validators.InputRequired("Please provide.")])
-    score = IntegerField("Score", [validators.InputRequired("Please provide.")])
+from . import HCForm
 
 
 def create_app(test_config=None):
@@ -61,7 +51,8 @@ def create_app(test_config=None):
         ages = database.execute("SELECT age_group FROM ages").fetchall()
         rounds = database.execute("SELECT round_name FROM rounds").fetchall()
 
-        form = HCForm(request.form)
+        form = HCForm.HCForm(request.form)
+
         if request.method == "POST" and form.validate():
             # Perform calculations and return the results
             return render_template(
