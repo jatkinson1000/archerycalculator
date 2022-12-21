@@ -12,11 +12,10 @@ from flask import (
     # url_for,
 )
 
-from archeryutils.archeryutils import (
-    rounds,
-    handicap_equations as hc_eq,
-    handicap_functions as hc_func,
-)
+from archeryutils import rounds
+from archeryutils.handicaps import handicap_equations as hc_eq
+from archeryutils.handicaps import handicap_functions as hc_func
+from archeryutils.classifications import classifications as class_func
 
 from . import db
 from . import HCForm
@@ -43,9 +42,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # TODO: separate function to pre-populate databases in other file
-
-    # Simple home page
+    # Single home page (for now)
     @app.route("/", methods=["GET", "POST"])
     def home():
 
@@ -77,10 +74,10 @@ def create_app(test_config=None):
             error = None
 
             # Get the appropriate round from the database
-            codename = database.execute(
+            round_codename = database.execute(
                 "SELECT code_name FROM rounds WHERE round_name IS (?)", [roundname]
             ).fetchone()["code_name"]
-            round_obj = rounds.AGB_outdoor_imperial[codename]
+            round_obj = rounds.AGB_outdoor_imperial[round_codename]
 
             # Generate the handicap params
             hc_params = hc_eq.HcParams()
@@ -100,6 +97,18 @@ def create_app(test_config=None):
                 hc_from_score = hc_func.handicap_from_score(
                     float(score), round_obj, scheme, hc_params, int_prec=True
                 )
+                # Calculate the classification
+                class_from_score = class_func.calculate_AGB_outdoor_classification(
+                    round_codename,
+                    float(score),
+                    bowstyle.lower(),
+                    gender.lower(),
+                    age.lower(),
+                )
+                class_from_score = database.execute(
+                    "SELECT longname FROM classes WHERE shortname IS (?)",
+                    [class_from_score],
+                ).fetchone()["longname"]
 
                 # Perform calculations and return the results
                 return render_template(
@@ -116,6 +125,7 @@ def create_app(test_config=None):
                     score=score,
                     maxscore=int(max_score),
                     handicap=hc_from_score,
+                    classification=class_from_score,
                 )
 
             # If errors reload default

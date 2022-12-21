@@ -42,7 +42,8 @@
     <p><input type=submit value=Register>
   </form>
 
-  <p>Results! For a score of {{score}} on {{ form.roundname.data }} the handicap is {{handicap}}.</p>
-  <p>Results! Maximum score on a {{ form.roundname.data }} is {{maxscore}}</p>
+  <p>The <b>handicap</b> For a score of {{score}} on a {{ form.roundname.data }} is <b>{{handicap}}</b>.</p>
+  <p>Your <b>classification</b> a score of {{score}} on a {{ form.roundname.data }} is <b>{{classification}}</b>.</p>
+  <p>The maximum possible score on a {{ form.roundname.data }} is {{maxscore}}</p>
 
 {% endblock %}
