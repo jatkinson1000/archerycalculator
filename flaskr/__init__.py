@@ -72,12 +72,21 @@ def create_app(test_config=None):
             score = request.form["score"]
 
             error = None
-
+            all_rounds_objs = rounds.read_json_to_round_dict(
+                [
+                    "AGB_outdoor_imperial.json",
+                    "AGB_outdoor_metric.json",
+                    # "AGB_indoor.json",
+                    "WA_outdoor.json",
+                    # "WA_indoor.json",
+                    # "Custom.json",
+                ]
+            )
             # Get the appropriate round from the database
             round_codename = database.execute(
                 "SELECT code_name FROM rounds WHERE round_name IS (?)", [roundname]
             ).fetchone()["code_name"]
-            round_obj = rounds.AGB_outdoor_imperial[round_codename]
+            round_obj = all_rounds_objs[round_codename]
 
             # Generate the handicap params
             hc_params = hc_eq.HcParams()
