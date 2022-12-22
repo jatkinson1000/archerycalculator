@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools >= 43"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "archerycalculator"
+version = "0.1.1"
+description = "A flask web app to perform archery calculations"
+authors = [
+  { name="Jack Atkinson", email="jack.atkinson1000@gmail.com" },
+]
+readme = "README.md"
+license = {file = "LICENCE"}
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Development Status :: 3 - Alpha",
+#    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dynamic = ["dependencies"]
+
+[project.urls]
+"Homepage" = "https://github.com/jatkinson1000/archerycalculator"
+"Bug Tracker" = "https://github.com/jatkinson1000/archerycalculator/Issues"
+
+[tool.setuptools]
+# By default, include-package-data is true in pyproject.toml, so you do
+# NOT have to specify this line.
+include-package-data = true
+
+[tool.setuptools.package-data]
+mypkg = ["* = *.json",]
+
+[tool.setuptools.packages.find]
+where = ["archeryutils", "flaskr"]  # list of folders that contain the packages (["."] by default)
+include = ["my_package*"]  # package names should match these glob patterns (["*"] by default)
+exclude = ["my_package.tests*"]  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
+
+#[options.extras_require]
+#tests = pytest
+
+[tool.flake8]
+# ignore = ['E231', 'E241']
+per-file-ignores = [
+    '__init__.py:F401',
+]
+max-line-length = 88
+count = true
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
