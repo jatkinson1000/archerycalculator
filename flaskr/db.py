@@ -3,7 +3,7 @@ import sqlite3
 import click
 from flask import current_app, g
 
-from . import populate_db
+import populate_db
 
 
 def get_db():

@@ -17,8 +17,8 @@ from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
 
-from . import db
-from . import HCForm
+import db
+import HCForm
 
 
 def create_app(test_config=None):
@@ -177,3 +177,7 @@ def create_app(test_config=None):
     db.init_app(app)
 
     return app
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run()
