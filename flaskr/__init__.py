@@ -64,6 +64,7 @@ def create_app(test_config=None):
         form = HCForm.HCForm(request.form)
 
         if request.method == "POST" and form.validate():
+            error = None
             bowstyle = request.form["bowstyle"]
             gender = request.form["gender"]
             age = request.form["age"]
@@ -71,7 +72,28 @@ def create_app(test_config=None):
             bowstyle = request.form["bowstyle"]
             score = request.form["score"]
 
-            error = None
+            # Check the inputs are all valid
+            bowstylecheck = database.execute(
+                "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
+            ).fetchall()
+            if len(bowstylecheck) == 0:
+                error = "Invalid bowstyle. Please select from dropdown."
+            gendercheck = database.execute(
+                "SELECT id FROM genders WHERE gender IS (?)", [gender]
+            ).fetchall()
+            if len(gendercheck) == 0:
+                error = "Please select gender from dropdown options."
+            agecheck = database.execute(
+                "SELECT id FROM ages WHERE age_group IS (?)", [age]
+            ).fetchall()
+            if len(agecheck) == 0:
+                error = "Invalid age group. Please select from dropdown."
+            roundcheck = database.execute(
+                "SELECT id FROM rounds WHERE round_name IS (?)", [roundname]
+            ).fetchall()
+            if len(roundcheck) == 0:
+                error = "Invalid round name. Please select from dropdown."
+
             all_rounds_objs = rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
@@ -101,7 +123,8 @@ def create_app(test_config=None):
                     f"{score} is larger than the maximum possible "
                     f"score of {int(max_score)} for a {roundname}."
                 )
-            else:
+
+            if error is None:
                 # Calculate the handicap
                 hc_from_score = hc_func.handicap_from_score(
                     float(score), round_obj, scheme, hc_params, int_prec=True
@@ -136,22 +159,22 @@ def create_app(test_config=None):
                     handicap=hc_from_score,
                     classification=class_from_score,
                 )
-
-            # If errors reload default
-            return render_template(
-                "home.html",
-                form=form,
-                bowstyles=all_bowstyles,
-                genders=all_genders,
-                ages=all_ages,
-                rounds=all_rounds,
-                error=error,
-                # bowstyle=bowstyle,
-                # gender=gender,
-                # age=age,
-                # roundname=roundname,
-                # score=score,
-            )
+            else:
+                # If errors reload default
+                return render_template(
+                    "home.html",
+                    form=form,
+                    bowstyles=all_bowstyles,
+                    genders=all_genders,
+                    ages=all_ages,
+                    rounds=all_rounds,
+                    error=error,
+                    # bowstyle=bowstyle,
+                    # gender=gender,
+                    # age=age,
+                    # roundname=roundname,
+                    # score=score,
+                )
 
         # If first visit load the default form with no inputs
         return render_template(

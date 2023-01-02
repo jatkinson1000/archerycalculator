@@ -61,4 +61,8 @@ def load_classes(db):
             "INSERT INTO classes (shortname,longname) VALUES (?,?);",
             (shortname, classes["classes_long"][i]),
         )
+    db.execute(
+        "INSERT INTO classes (shortname,longname) VALUES (?,?);",
+        ("UC", "Unclassified"),
+    )
     db.commit()
