@@ -17,8 +17,8 @@ from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
 
-import db
-import HCForm
+from flaskr import db
+from flaskr import HCForm
 
 
 def create_app(test_config=None):
