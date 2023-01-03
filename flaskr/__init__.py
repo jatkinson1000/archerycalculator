@@ -129,6 +129,11 @@ def create_app(test_config=None):
                 hc_from_score = hc_func.handicap_from_score(
                     float(score), round_obj, scheme, hc_params, int_prec=True
                 )
+                RAD2DEG = 57.295779513
+                sig_t = hc_eq.sigma_t(hc_from_score, scheme, 0.0, hc_params)
+                sig_r_18 = hc_eq.sigma_r(hc_from_score, scheme, 18.0, hc_params)
+                sig_r_50 = hc_eq.sigma_r(hc_from_score, scheme, 50.0, hc_params)
+                sig_r_70 = hc_eq.sigma_r(hc_from_score, scheme, 70.0, hc_params)
                 # Calculate the classification
                 class_from_score = class_func.calculate_AGB_outdoor_classification(
                     round_codename,
@@ -158,6 +163,10 @@ def create_app(test_config=None):
                     maxscore=int(max_score),
                     handicap=hc_from_score,
                     classification=class_from_score,
+                    sig_t=2.0*RAD2DEG*sig_t,
+                    sig_r_18=2.0*100.0*sig_r_18,
+                    sig_r_50=2.0*100.0*sig_r_50,
+                    sig_r_70=2.0*100.0*sig_r_70,
                 )
             else:
                 # If errors reload default
@@ -193,9 +202,16 @@ def create_app(test_config=None):
         )
 
     # A simple page that says hello
-    #    @app.route('/hello')
-    #    def hello():
-    #        return 'Hello, World!'
+    # @app.route('/hello')
+    # def hello():
+    #     return 'Hello, World!'
+
+    # A simple page that says hello
+    @app.route('/rounds')
+    def rounds_page():
+        return render_template("rounds.html",
+                               rounds=[],
+                               error=None)
 
     db.init_app(app)
 

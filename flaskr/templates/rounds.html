@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Available Rounds{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>The following is a list of the rounds that are available for handicap and
+classification calculation</p>
+
+
+
+  {% if error %}
+  <p>{{ error }}</p>
+  {% endif %}
+{% endblock %}
