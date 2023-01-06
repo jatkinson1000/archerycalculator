@@ -4,14 +4,14 @@ from flask import (
     request,
 )
 
-from flaskr.db import get_db
+from archerycalculator.db import get_db
 
 from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
 
-from flaskr import HCForm
+from archerycalculator import HCForm
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
 
