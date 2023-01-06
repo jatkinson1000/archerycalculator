@@ -7,7 +7,7 @@ from flask import (
     # g,
     # redirect,
     render_template,
-    request,
+    # request,
     # session,
     # url_for,
 )
@@ -36,29 +36,19 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-
-
-
-
     # A simple page that says hello
-    @app.route('/rounds')
+    @app.route("/rounds")
     def rounds_page():
-        return render_template("rounds.html",
-                               rounds=[],
-                               error=None)
-
-
-
-
-
+        return render_template("rounds.html", rounds=[], error=None)
 
     from flaskr import calculator
+
     app.register_blueprint(calculator.bp)
     # Not 100% sure next line is neccessary... TODO: investigate further
-    app.add_url_rule('/', endpoint='calculator')
+    app.add_url_rule("/", endpoint="calculator")
 
     db.init_app(app)
-    
+
     return app
 
 

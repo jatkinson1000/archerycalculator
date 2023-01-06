@@ -42,11 +42,11 @@
     <p><input type=submit value=Calculate>
   </form>
 
-  <p>The <b>handicap</b> For a score of {{score}} on a {{ form.roundname.data }} is <b>{{handicap}}</b>.</p>
-  <p>Your <b>classification</b> a score of {{score}} on a {{ form.roundname.data }} is <b>{{classification}}</b>.</p>
-  <p>The maximum possible score on a {{ form.roundname.data }} is {{maxscore}}</p>
-  <p>A handicap of {{handicap}} represents an angular spread of {{'%0.3f'|format(sig_t)}} degrees and
-     a typical group size of {{'%0.2f'|format(sig_r_18)}}cm at 18m, {{'%0.2f'|format(sig_r_50)}}cm at 50m,
-     and {{'%0.2f'|format(sig_r_70)}}cm at 70m.</p>
+  <p>The <b>handicap</b> For a score of {{ results["score" ]}} on a {{ results["roundname"] }} is <b>{{ results["handicap"] }}</b>.</p>
+  <p>Your <b>classification</b> a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.</p>
+  <p>The maximum possible score on a {{ results["roundname.data"] }} is {{ results["maxscore"] }}</p>
+  <p>A handicap of {{ results["handicap"] }} represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees and
+     a typical group size of {{ '%0.2f'|format(sig_r_18) }}cm at 18m, {{ '%0.2f'|format(sig_r_50) }}cm at 50m,
+     and {{ '%0.2f'|format(sig_r_70) }}cm at 70m.</p>
 
 {% endblock %}
