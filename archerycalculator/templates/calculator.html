@@ -42,10 +42,13 @@
     <input type=submit value=Calculate>
 
     {% if results %}
-      <p>The <b>handicap</b> For a score of {{ results["score" ]}} on a {{ results["roundname"] }} is <b>{{ results["handicap"] }}</b>.</p>
+      <p>The <b>handicap</b> For a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ '%0.0f'|format(results["handicap"]) }}</b>.</p>
+      {% if results["decimalHC"] %}
+        <p>The <b>decimal handicap</b> For a score of {{ results["score" ]}} on a {{ results["roundname"] }} is <b>{{ '%0.3f'|format(results["handicap"]) }}</b>.</p>
+      {% endif %}
       <p>Your <b>classification</b> a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.</p>
       <p>The maximum possible score on a {{ results["roundname.data"] }} is {{ results["maxscore"] }}</p>
-      <p>A handicap of {{ results["handicap"] }} represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees and
+      <p>This handicap represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees at the bow and
          a typical group size of {{ '%0.2f'|format(sig_r_18) }}cm at 18m, {{ '%0.2f'|format(sig_r_50) }}cm at 50m,
          and {{ '%0.2f'|format(sig_r_70) }}cm at 70m.</p>
     {% endif %}
@@ -56,8 +59,12 @@
     <p>The following are 'advanced' options which should be left unchanged by the average user.
     Adjusting these values may produce results that do not match the official Archery GB Handicap tables.</p>
     <dl>
+      {{ render_field(form.decimalHC) }}
+      <p>Returns a fractional value of handicap corresponding to the score rather than the whole numbers from the official tables.</p>
       {{ render_field(form.diameter) }}
+      <p>The tables are generated using an average arrow diameter. Here you can specify the value to use.</p>
       {{ render_field(form.scheme) }}
+      <p>Use an alternative scheme for calculating the handicap (does not affect the classifications).</p>
     </dl
 
   </form>

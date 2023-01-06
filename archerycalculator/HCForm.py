@@ -1,4 +1,4 @@
-from wtforms import Form, validators, SearchField, IntegerField, DecimalField, SelectField
+from wtforms import Form, validators, SearchField, IntegerField, DecimalField, SelectField, BooleanField
 
 
 class HCForm(Form):
@@ -11,5 +11,6 @@ class HCForm(Form):
     score = IntegerField("Score", [validators.InputRequired("Please provide.")])
  
     # Advanced options
-    diameter = DecimalField("Arrow diameter", default=0.0)
+    decimalHC = BooleanField(label="Return Decimal Handicap", false_values=(False, ""))
+    diameter = DecimalField("Custom Arrow diameter [mm]", default=0.0, places=4)
     scheme = SelectField("Handicap Scheme", choices=[('AGB', 'Archery GB'), ('AGBold', 'Old Archery GB'), ('AA', 'Archery Australia'), ('AA2', 'Old Archery Australia')], coerce=str, validate_choice=False)
