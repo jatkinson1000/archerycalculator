@@ -75,6 +75,23 @@ nav ul li.right {float: right;}
   nav ul li {float: none;}
 }
 
+footer {
+  background: #3bf;
+  color: white;
+  text-align: center;
+  text-align: center;
+}
+
+footer a {
+  text-decoration: none;
+  color: white;
+}
+
+footer a:hover:not(.active) {
+  color: black;
+}
+
+
 
 
 .content {
