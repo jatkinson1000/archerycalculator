@@ -46,9 +46,9 @@ mypkg = ["* = *.json",]
 [tool.setuptools.packages]
 find = {}
 #[tool.setuptools.packages.find]
-#where = ["flaskr"]  # list of folders that contain the packages (["."] by default)
-#include = ["flaskr*"]  # package names should match these glob patterns (["*"] by default)
-#exclude = ["flaskr.tests*"]  # exclude packages matching these glob patterns (empty by default)
+#where = ["archerycalculator"]  # list of folders that contain the packages (["."] by default)
+#include = ["archerycalculator*"]  # package names should match these glob patterns (["*"] by default)
+#exclude = ["archerycalculator.tests*"]  # exclude packages matching these glob patterns (empty by default)
 #namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
 [tool.flake8]

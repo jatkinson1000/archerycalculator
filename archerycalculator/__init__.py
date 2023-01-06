@@ -12,7 +12,7 @@ from flask import (
     # url_for,
 )
 
-from flaskr import db
+from archerycalculator import db
 
 
 def create_app(test_config=None):
@@ -20,7 +20,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
+        DATABASE=os.path.join(app.instance_path, "archerycalculator.sqlite"),
     )
 
     if test_config is None:
@@ -41,7 +41,7 @@ def create_app(test_config=None):
     def rounds_page():
         return render_template("rounds.html", rounds=[], error=None)
 
-    from flaskr import calculator
+    from archerycalculator import calculator
 
     app.register_blueprint(calculator.bp)
     # Not 100% sure next line is neccessary... TODO: investigate further
