@@ -45,6 +45,11 @@ def calculator():
         roundname = request.form["roundname"]
         bowstyle = request.form["bowstyle"]
         score = request.form["score"]
+        
+        diameter = request.form["diameter"]
+        scheme = request.form["scheme"]
+        print(diameter)
+        print(scheme)
 
         resultskeys = ["bowstyle", "gender", "age", "roundname", "score"]
         results = dict(zip(resultskeys, [None] * len(resultskeys)))
@@ -140,7 +145,7 @@ def calculator():
 
             # Perform calculations and return the results
             return render_template(
-                "calculate.html",
+                "calculator.html",
                 form=form,
                 bowstyles=all_bowstyles,
                 genders=all_genders,
@@ -155,22 +160,24 @@ def calculator():
         else:
             # If errors reload default with error message
             return render_template(
-                "home.html",
+                "calculator.html",
                 form=form,
                 bowstyles=all_bowstyles,
                 genders=all_genders,
                 ages=all_ages,
                 rounds=all_rounds,
+                results=None,
                 error=error,
             )
 
     # If first visit load the default form with no inputs
     return render_template(
-        "home.html",
+        "calculator.html",
         form=form,
         bowstyles=all_bowstyles,
         genders=all_genders,
         ages=all_ages,
         rounds=all_rounds,
+        results=None,
         error=None,
     )

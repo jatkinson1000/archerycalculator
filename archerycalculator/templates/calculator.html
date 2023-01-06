@@ -39,9 +39,31 @@
       {{ render_field(form.roundname, list="roundlist") }}
       {{ render_field(form.score) }}
     </dl>
-    <p><input type=submit value=Calculate>
+    <input type=submit value=Calculate>
+
+    {% if results %}
+      <p>The <b>handicap</b> For a score of {{ results["score" ]}} on a {{ results["roundname"] }} is <b>{{ results["handicap"] }}</b>.</p>
+      <p>Your <b>classification</b> a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.</p>
+      <p>The maximum possible score on a {{ results["roundname.data"] }} is {{ results["maxscore"] }}</p>
+      <p>A handicap of {{ results["handicap"] }} represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees and
+         a typical group size of {{ '%0.2f'|format(sig_r_18) }}cm at 18m, {{ '%0.2f'|format(sig_r_50) }}cm at 50m,
+         and {{ '%0.2f'|format(sig_r_70) }}cm at 70m.</p>
+    {% endif %}
+
+    <hr width="100%" 
+        align="center">
+    
+    <p>The following are 'advanced' options which should be left unchanged by the average user.
+    Adjusting these values may produce results that do not match the official Archery GB Handicap tables.</p>
+    <dl>
+      {{ render_field(form.diameter) }}
+      {{ render_field(form.scheme) }}
+    </dl
+
   </form>
+
   {% if error %}
   <p>{{ error }}</p>
   {% endif %}
+
 {% endblock %}
