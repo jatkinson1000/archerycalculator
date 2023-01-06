@@ -89,6 +89,7 @@ footer a {
 
 footer a:hover:not(.active) {
   color: black;
+  text-decoration: underline; 
 }
 
 
