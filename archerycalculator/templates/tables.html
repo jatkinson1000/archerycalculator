@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Archery Handicap Table Generator{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+  <datalist id="roundlist">
+  {% for round in rounds %}
+  <option>{{round['round_name']}}</option>
+  {% endfor %}
+  </datalist>
+
+  {% from "_formhelpers.html" import render_field %}
+  <form method=post>
+    <dl>
+      {{ render_field(form.round1, list="roundlist") }}
+      {{ render_field(form.round2, list="roundlist") }}
+      {{ render_field(form.round3, list="roundlist") }}
+      {{ render_field(form.round4, list="roundlist") }}
+      {{ render_field(form.round5, list="roundlist") }}
+      {{ render_field(form.round6, list="roundlist") }}
+      {{ render_field(form.round7, list="roundlist") }}
+    </dl>
+    <input type=submit value=Generate>
+
+  </form>
+
+  {% if error %}
+  <p>{{ error }}</p>
+  {% endif %}
+
+{% endblock %}
