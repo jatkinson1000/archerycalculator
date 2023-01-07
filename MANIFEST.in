@@ -1,4 +1,4 @@
-include flaskr/schema.sql
-graft flaskr/static
-graft flaskr/templates
+include archerycalculator/schema.sql
+graft archerycalculator/static
+graft archerycalculator/templates
 global-exclude *.pyc

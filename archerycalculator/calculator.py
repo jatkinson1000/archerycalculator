@@ -4,14 +4,14 @@ from flask import (
     request,
 )
 
-from flaskr.db import get_db
+from archerycalculator.db import get_db
 
 from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
 
-from flaskr import HCForm
+from archerycalculator import HCForm
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
 
@@ -39,15 +39,27 @@ def calculator():
 
     if request.method == "POST" and form.validate():
         error = None
+
+        # Get essential form results
         bowstyle = request.form["bowstyle"]
         gender = request.form["gender"]
         age = request.form["age"]
         roundname = request.form["roundname"]
         bowstyle = request.form["bowstyle"]
         score = request.form["score"]
-
+       
         resultskeys = ["bowstyle", "gender", "age", "roundname", "score"]
         results = dict(zip(resultskeys, [None] * len(resultskeys)))
+
+        # advanced options
+        diameter = float(request.form["diameter"])*1.0e-3
+        scheme = request.form["scheme"]
+        integer_precision = True
+        if request.form.getlist("decimalHC"):
+            integer_precision = False
+            results["decimalHC"] = True
+        if diameter == 0.0:
+            diameter = None
 
         # Check the inputs are all valid
         bowstylecheck = database.execute(
@@ -96,7 +108,6 @@ def calculator():
 
         # Generate the handicap params
         hc_params = hc_eq.HcParams()
-        scheme = "AGB"
 
         # Check score against maximum score and return error if inappropriate
         max_score = round_obj.max_score()
@@ -113,7 +124,7 @@ def calculator():
         if error is None:
             # Calculate the handicap
             hc_from_score = hc_func.handicap_from_score(
-                float(score), round_obj, scheme, hc_params, int_prec=True
+                float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=integer_precision
             )
             results["handicap"] = hc_from_score
 
@@ -140,7 +151,7 @@ def calculator():
 
             # Perform calculations and return the results
             return render_template(
-                "calculate.html",
+                "calculator.html",
                 form=form,
                 bowstyles=all_bowstyles,
                 genders=all_genders,
@@ -155,22 +166,24 @@ def calculator():
         else:
             # If errors reload default with error message
             return render_template(
-                "home.html",
+                "calculator.html",
                 form=form,
                 bowstyles=all_bowstyles,
                 genders=all_genders,
                 ages=all_ages,
                 rounds=all_rounds,
+                results=None,
                 error=error,
             )
 
     # If first visit load the default form with no inputs
     return render_template(
-        "home.html",
+        "calculator.html",
         form=form,
         bowstyles=all_bowstyles,
         genders=all_genders,
         ages=all_ages,
         rounds=all_rounds,
+        results=None,
         error=None,
     )
