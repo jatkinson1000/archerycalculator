@@ -1,6 +1,12 @@
 <!doctype html>
+
+<head>
+    <script src="https://kit.fontawesome.com/5e18878647.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
 <title>{% block title %}{% endblock %}ArcheryCalculator.co.uk</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <nav>
   <h1>ArcheryCalculator.co.uk</h1>
@@ -24,3 +30,8 @@
   {% block content %}{% endblock %}
 </section>
 
+<footer>
+    <p> website by <a href="https://jackatkinson.net/" target="_blank">jack atkinson</a> &#169; 2023 - <a href="https://github.com/jatkinson1000/archerycalculator" class="fa-brands fa-github" target="_blank"></a> - <a href="#" class="fa-solid fa-mug-hot" target="_blank"></a> - <a href="https://www.paypal.com/donate/?hosted_button_id=JEABJ3UJU4XD4" class="fa-brands fa-cc-paypal" target="_blank"></a> </p>
+</footer>
+
+</body>

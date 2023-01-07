@@ -42,11 +42,13 @@ def create_app(test_config=None):
         return render_template("rounds.html", rounds=[], error=None)
 
     from archerycalculator import calculator
-
     app.register_blueprint(calculator.bp)
     # Not 100% sure next line is neccessary... TODO: investigate further
     app.add_url_rule("/", endpoint="calculator")
 
+    from archerycalculator import about
+    app.register_blueprint(about.bp)
+    
     db.init_app(app)
 
     return app
