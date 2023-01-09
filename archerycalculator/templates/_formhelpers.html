@@ -10,3 +10,36 @@
   {% endif %}
   </dd>
 {% endmacro %}
+
+{% macro render_textin_field(field) %}
+  <span >{{ field.label }}:</span>
+  <span>{{ field(**kwargs)|safe }}</span>
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
+{% macro render_handicap_table(rounds, results) %}
+<table>
+   <thead>
+      <th>Handicap</th>
+      {% for item in rounds %}
+        <th>{{ item }}</th>
+      {% endfor %}
+   </thead>
+   <tbody>
+      {% for row in results %}
+        <tr>
+        {% for item in row %}
+          <td>{{ item|int }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+   </tbody>
+</table>
+{% endmacro %}
