@@ -124,10 +124,16 @@ def calculator():
         if error is None:
             # Calculate the handicap
             hc_from_score = hc_func.handicap_from_score(
-                float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=integer_precision
+                float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=True
             )
             results["handicap"] = hc_from_score
 
+            if not integer_precision:
+                decimal_hc_from_score = hc_func.handicap_from_score(
+                    float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=integer_precision
+                )
+                results["decimal_handicap"] = decimal_hc_from_score
+            
             # Calculate the classification
             class_from_score = class_func.calculate_AGB_outdoor_classification(
                 round_codename,
