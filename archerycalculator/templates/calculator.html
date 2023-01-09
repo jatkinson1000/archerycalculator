@@ -45,7 +45,9 @@
 
     {% if results %}
       <p>The <b>handicap</b> For a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ '%0.0f'|format(results["handicap"]) }}</b>.</p>
+      {% if results["decimalHC"] %}
         <p>The <b>decimal handicap</b> For a score of {{ results["score" ]}} on a {{ results["roundname"] }} is <b>{{ '%0.3f'|format(results["handicap"]) }}</b>.</p>
+      {% endif %}
       <p>Your <b>classification</b> a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.</p>
       <p>The maximum possible score on a {{ results["roundname"] }} is {{ results["maxscore"] }}</p>
       This handicap represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees at the bow and
