@@ -154,3 +154,30 @@ input[type=submit] {
 input[type=submit]:hover {
   background-color: #4cf;
 }
+
+/* TABLES */
+table tbody,table thead {
+  display: table;
+  text-align: right;
+}
+
+table{
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: None;
+    overflow: hidden;
+    width: 100px;
+    padding: 0;
+    text-align: left;
+}
+td:first-child {
+  font-weight: bold;
+  text-align: center;
+}
+
+tbody tr:nth-child(odd){
+  background-color: #eee;
+}

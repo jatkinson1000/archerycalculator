@@ -23,3 +23,23 @@
   {% endif %}
   </dd>
 {% endmacro %}
+
+{% macro render_handicap_table(rounds, results) %}
+<table>
+   <thead>
+      <th>Handicap</th>
+      {% for item in rounds %}
+        <th>{{ item }}</th>
+      {% endfor %}
+   </thead>
+   <tbody>
+      {% for row in results %}
+        <tr>
+        {% for item in row %}
+          <td>{{ item|int }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+   </tbody>
+</table>
+{% endmacro %}

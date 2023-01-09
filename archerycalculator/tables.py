@@ -3,6 +3,7 @@ from flask import (
     render_template,
     request,
 )
+import numpy as np
 
 from archerycalculator.db import get_db
 
@@ -48,7 +49,7 @@ def tables():
         rounds_req.append(request.form["round5"])
         rounds_req.append(request.form["round6"])
         rounds_req.append(request.form["round7"])
-        
+
         rounds_req = [i for i in rounds_req if i]
         round_objs = []
         for round_i in rounds_req:
@@ -56,17 +57,27 @@ def tables():
                 "SELECT id FROM rounds WHERE round_name IS (?)", [round_i]
             ).fetchall()
             if len(roundcheck) == 0:
-                error = "Invalid round name. Please select from dropdown."
+                error = f"Invalid round name '{round_i}'. Please select from dropdown."
 
             # Get the appropriate rounds from the database
-            round_objs.append(all_rounds_objs[
-                database.execute(
-            "SELECT code_name FROM rounds WHERE round_name IS (?)", [round_i]
-            ).fetchone()["code_name"]])
+            round_objs.append(
+                all_rounds_objs[
+                    database.execute(
+                        "SELECT code_name FROM rounds WHERE round_name IS (?)",
+                        [round_i],
+                    ).fetchone()["code_name"]
+                ]
+            )
 
         # Generate the handicap params
         hc_params = hc_eq.HcParams()
 
+        results = np.zeros([151, len(round_objs) + 1])
+        results[:, 0] = np.arange(0, 151).astype(np.int32)
+        for i, round_obj_i in enumerate(round_objs):
+            results[:, i + 1] = hc_eq.score_for_round(
+                round_obj_i, results[:, 0], "AGB", hc_params
+            )[0].astype(np.int32)
 
         if error is None:
             # Calculate the handicap
@@ -78,6 +89,8 @@ def tables():
                 "tables.html",
                 rounds=all_rounds,
                 form=form,
+                roundnames=rounds_req,
+                results=results,
             )
         else:
             # If errors reload default with error message
@@ -93,6 +106,5 @@ def tables():
         "tables.html",
         form=form,
         rounds=all_rounds,
-        results=None,
         error=None,
     )

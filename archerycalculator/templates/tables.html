@@ -6,6 +6,8 @@
 
 {% block content %}
 
+  <p>This page can be used to generate handicap tables for up to 7 rounds using the Archery GB handicap scheme. Select 1 or more rounds and click generate to produce a handicap table of scores.</p>
+
   <datalist id="roundlist">
   {% for round in rounds %}
   <option>{{round['round_name']}}</option>
@@ -28,7 +30,12 @@
   </form>
 
   {% if error %}
-  <p>{{ error }}</p>
+    <p>{{ error }}</p>
+  {% endif %}
+
+  {% if results is defined %}
+    {% from "_formhelpers.html" import render_handicap_table %}
+    {{ render_handicap_table(roundnames, results) }}
   {% endif %}
 
 {% endblock %}
