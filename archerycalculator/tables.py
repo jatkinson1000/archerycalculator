@@ -180,6 +180,13 @@ def classification_tables():
 
         # Loop over all rounds to construct an object with scores for each category
         print(all_classes[0]["shortname"])
+        # grid of rounds * classes
+        results = np.zeros([len(all_rounds_objs), 9])
+        # Loop through and get scores for HCs - don't need loop as np functionality?
+        for i, round_obj_i in enumerate(all_rounds_objs):
+            results[i, :] = np.asarray(class_func.AGB_outdoor_classification_scores(round_obj_i, bowstyle, gender, age))
+        # Print out
+        # Worry about deleting rows next...
 
         if error is None:
             # Return the results
