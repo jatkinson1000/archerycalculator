@@ -25,12 +25,14 @@
 {% endmacro %}
 
 {% macro render_handicap_table(rounds, results) %}
-<table>
+<table class="hctable">
    <thead>
-      <th>Handicap</th>
-      {% for item in rounds %}
-        <th>{{ item }}</th>
-      {% endfor %}
+     <tr>
+       <th>Handicap</th>
+       {% for item in rounds %}
+         <th>{{ item }}</th>
+       {% endfor %}
+     </tr>
    </thead>
    <tbody>
       {% for row in results %}

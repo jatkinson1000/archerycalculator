@@ -17,8 +17,8 @@ from archerycalculator import TableForm
 bp = Blueprint("tables", __name__, url_prefix="/tables")
 
 
-@bp.route("/", methods=("GET", "POST"))
-def tables():
+@bp.route("/handicap", methods=("GET", "POST"))
+def handicap_tables():
 
     database = get_db()
 
@@ -86,7 +86,7 @@ def tables():
 
             # Return the results
             return render_template(
-                "tables.html",
+                "handicap_tables.html",
                 rounds=all_rounds,
                 form=form,
                 roundnames=rounds_req,
@@ -95,7 +95,7 @@ def tables():
         else:
             # If errors reload default with error message
             return render_template(
-                "tables.html",
+                "handicap_tables.html",
                 rounds=all_rounds,
                 form=form,
                 error=error,
@@ -103,7 +103,56 @@ def tables():
 
     # If first visit load the default form with no inputs
     return render_template(
-        "tables.html",
+        "handicap_tables.html",
+        form=form,
+        rounds=all_rounds,
+        error=None,
+    )
+
+
+@bp.route("/classification", methods=("GET", "POST"))
+def classification_tables():
+
+    database = get_db()
+
+    form = TableForm.TableForm(request.form)
+
+    all_rounds = database.execute("SELECT round_name FROM rounds").fetchall()
+
+    if request.method == "POST" and form.validate():
+        error = None
+
+        all_rounds_objs = rounds.read_json_to_round_dict(
+            [
+                "AGB_outdoor_imperial.json",
+                "AGB_outdoor_metric.json",
+                "AGB_indoor.json",
+                "WA_outdoor.json",
+                "WA_indoor.json",
+                "Custom.json",
+            ]
+        )
+
+        if error is None:
+            # Return the results
+            return render_template(
+                "classification_tables.html",
+                rounds=all_rounds,
+                form=form,
+                results=results,
+            )
+        else:
+            # If errors reload default with error message
+            return render_template(
+                "classification_tables.html",
+                rounds=all_rounds,
+                form=form,
+                error=error,
+            )
+
+    # If first visit load the default form with no inputs
+    return render_template(
+        "classification_tables.html",
         form=form,
         rounds=all_rounds,
         error=None,

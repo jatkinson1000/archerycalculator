@@ -34,6 +34,9 @@ hr {
 
 
 
+/* ----------------------- */
+/* NAVBAR */
+/* ----------------------- */
 nav h1 {
   flex: auto;
   padding: 1rem 1rem 0rem;
@@ -46,6 +49,7 @@ nav h1 a {
 
 nav ul  {
   display: flex;
+  flex-wrap: wrap;
   list-style-type: none;
   overflow: hidden;
   background-color: #3bf;
@@ -76,6 +80,10 @@ nav ul li.right {float: right;}
   nav ul li {float: none;}
 }
 
+
+/* ----------------------- */
+/* FOOTER */
+/* ----------------------- */
 footer {
   background: #3bf;
   color: white;
@@ -95,7 +103,9 @@ footer a:hover:not(.active) {
 
 
 
-
+/* ----------------------- */
+/* CONTENT */
+/* ----------------------- */
 .content {
   padding: 0 1rem 1rem;
 }
@@ -138,6 +148,9 @@ footer a:hover:not(.active) {
   resize: vertical;
 }
 
+/* ----------------------- */
+/* FORM INPUTS */
+/* ----------------------- */
 input.danger {
   color: #cc2f2e;
 }
@@ -156,29 +169,53 @@ input[type=submit]:hover {
   background-color: #4cf;
 }
 
+/* ----------------------- */
 /* TABLES */
-table tbody,table thead {
-  display: table;
-  text-align: right;
-}
+/* ----------------------- */
 
 table{
-    table-layout: fixed;
-    border-collapse: collapse;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
 th, td {
     border: None;
     overflow: hidden;
-    width: 100px;
     padding: 0;
-    text-align: left;
 }
-td:first-child {
+
+/* Handicap Table*/
+.hctable {
+  text-align: right;
+}
+
+.hctable th, .hctable td{
+    width: 100px;
+}
+
+.hctable th:first-child, .hctable td:first-child {
   font-weight: bold;
   text-align: center;
 }
 
-tbody tr:nth-child(odd){
+.hctable tbody tr:nth-child(odd){
   background-color: #eee;
+}
+
+/* Classification Table*/
+.classtable {
+  width: 100%;
+  text-align: center;
+}
+
+.classtable th, td{
+  border: 1px solid black;
+}
+
+.classtable tbody tr{
+  height: 100px;
+}
+
+.classtable th:nth-child(2), .classtable td:nth-child(2){
+ width: 20%;
 }
