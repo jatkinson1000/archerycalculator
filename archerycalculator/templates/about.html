@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}About{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<p>ArcheryCalculator is written and maintained by <a href="https://jackatkinson.net/" target="_blank">Jack Atkinson</a>, an archer, scientist, and software engineer. </p>
+
+<p>I have been interested in the mathematics and science of archery for a long time and worked as a volunteer to improve the scheme used by ArcheryGB released in 2023. I also (along with two other volunteers) redesigned the Archery GB classification scheme at the same time and was part of the volunteer duo that developed the <a href="https://www.jackatkinson.net/post/barebow_rose/" target="_blank">barebow Rose awards</a>.</p>
+
+<p>I am a firm believer in <a href="https://itsfoss.com/what-is-foss/" target="_blank">free open-source software</a> and all of the source code for this website can be found <a href="https://github.com/jatkinson1000/archerycalculator" target="_blank">on my github</a>. The brains behind the website can be also be found <a href="https://github.com/jatkinson1000/archeryutils" target="_blank">on github</a> and are available for anyone to use - indeed this code and its derivatives are used in Golden Records, Expert Archer, and MyTargets amongst others. If you would like to contribute to this project please get in touch or open a pull request.</p>
+
+<p>My philosophy is that this website should remain simple, advert-free, and free to use for the entire archery community. However, I have to pay hosting and server costs, and it takes a significant amount of time to develop. Therefore if you find this useful and can affort to please consider <a href="" target="_blank">buying me a coffee</a> or <a href="https://www.paypal.com/donate/?hosted_button_id=JEABJ3UJU4XD4" target="_blank">donating via paypal</a>.</p>
+
+<p>Alternatively please let me know if you appreciate this work if you see me around a competition or event. If you have problems please raise an issue on github. If you have any requests or suggestions for improvements please get in touch.</p>
+
+  {% if error %}
+  <p>{{ error }}</p>
+  {% endif %}
+{% endblock %}
