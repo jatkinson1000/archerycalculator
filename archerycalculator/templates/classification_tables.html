@@ -39,7 +39,7 @@
 
   {% if results is defined %}
     {% from "_formhelpers.html" import render_classification_table %}
-    {{ render_classification_table(roundnames, results) }}
+    {{ render_classification_table(classes, roundnames, results) }}
   {% endif %}
 
 {% endblock %}

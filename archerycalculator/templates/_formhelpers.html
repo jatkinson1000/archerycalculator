@@ -46,13 +46,13 @@
 </table>
 {% endmacro %}
 
-{% macro render_classification_table(rounds, results) %}
+{% macro render_classification_table(classes, rounds, results) %}
 <table class="classtable">
    <thead>
      <tr>
-       <th>Handicap</th>
-       {% for item in rounds %}
-         <th>{{ item }}</th>
+       <th>Round</th>
+       {% for item in classes %}
+         <th>{{ item['shortname'] }}</th>
        {% endfor %}
      </tr>
    </thead>
@@ -60,7 +60,7 @@
       {% for row in results %}
         <tr>
         {% for item in row %}
-          <td>{{ item|int }}</td>
+          <td>{{ item }}</td>
         {% endfor %}
         </tr>
       {% endfor %}
