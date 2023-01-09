@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Handicap and Classification Information{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<h3>Handicaps</h3>
+<p>
+In archery <b>a handicap is a measure of an archer's accuracy</b>.
+At it's most simple it is a number that describes the spread of arrows as they leave the bow.
+The smaller the handicap, the smaller the spread, resulting in a smaller group and a higher score.
+</p>
+<p>
+The handicap depends only on the accuracy of the archer, not the type of target being shot, distance, bowstyle, or any other factor.
+This means that for any given value of handicap we can trace the arrows from the bow to the target to predict a score.
+This score is what is provided in the handicap tables.
+For a longer introduction to the handicap system please see <a href="https://www.jackatkinson.net/post/archery_handicap/" target="_blank">this article</a>.
+</p>
+<p>
+Handicaps are quite powerful with a number of uses.
+The most popular is the ability to <b>compare performance on different targets, distances, and rounds</b>.
+For example, if you score 1055 on a Hereford and 545 on a WA720 it's not immediately clear which of these is better.
+However, by comparing the handicaps of 40 and 38 we can see that the lower handicap on the WA720 is the best.
+The <a href="/tables">tables page</a> on this website allows you to generate a handicap table for multiple rounds and compare the scores.
+</p>
+<p>
+Beyond comparing scores the main use of handicaps is to <b>track progress</b>.
+As you shoot a wide variety of rounds you can keep track of the handicap for each score and see it decrease as you improve.
+Your club records officer should keep track of your handicap following the official handicap procedures as set out in SAP 9 of the Archery GB Shooting Administrative Procedures.
+Archers have separate handicaps for indoor and outdoor shooting, though the two should be comparable.
+</p>
+<p>
+A lesser known use of the handicap system is to <b>inform training</b>.
+If you know your handicap on one distance and target you can estimate what scores you should get at other distances and target faces.
+You can also use it to predict your average group size at different distances (the <a href="/">calculator on this site</a> does this for you).
+Finally, by tracking your handicap at different distances you can highlight areas to focus your training and potential equipment issues as discussed <a href="https://www.jackatkinson.net/post/archery_handicap/">here</a>.
+</p>
+<p>
+This website provides the ability to <a href="/">calculate the handicap</a> for your scores using the ArcheryGB handicap scheme released in 2023.
+It also allows calculation using the old scheme (David Lane) and the Archery Australia schemes if you so wish.
+</p>
+
+<hr width="100%" align="center">
+
+<h3>Classifications</h3>
+<p>
+Archery GB provides a classification scheme as described in SAP7 of the Shooting Administrative Procedures.
+There are different schemes for different disciplines of archery, but each seeks to provide a progression scheme to reward archers performance as they improve. 
+</p>
+
+<h4>Target Outdoor</h4>
+<p>
+For outdoor target shooting there are three tiers: Archer, Bowman, and Master Bowman, each with 3 subdivisions.
+To achieve a classification requires reaching a certain level of performance in a number of areas: accuracy (i.e. score), consistency (i.e. number of arrows), distance shot, and competitive standard.
+The requirements for each tier of classification are summarised in the following table:
+</p>
+
+<table class="infoclasstable">
+  <thead>
+    <tr>
+      <th>Classification</th>
+      <th>Sub-tiers</th>
+      <th>From rounds totalling</th>
+      <th>Rounds</th>
+      <th>Type of event</th>
+      <th>Administered by</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        <td>Archer</td>
+        <td>Archer 3rd Class<br>Archer 2nd Class<br>Archer 1st Class</td>
+        <td>12 dozen arrows</td>
+        <td rowspan="2">Any round of appropriate distance</td>
+        <td>Any event</td>
+        <td rowspan="2">Clubs</td>
+    </tr>
+    <tr>
+        <td>Bowman</td>
+        <td>Bowman 3rd Class<br>Bowman 2nd Class<br>Bowman 1st Class</td>
+        <td>18 Dozen Arrows</td>
+        <!-- Merged above -->
+        <td>Any competitive event</td>
+        <!-- Merged above -->
+    </tr>
+    <tr>
+        <td>Master Bowman</td>
+        <td>Master Bowman<br>Grand Master Bowman<br>Elite Master Bowman</td>
+        <td>36 Dozen Arrows</td>
+        <td>Any appropriate WA1440, York/Hereford/Bristol or WA720 round</td>
+        <td>Any record status competition</td>
+        <td>Archery GB</td>
+    </tr>
+  </tbody>
+</table>
+<p>The distance requirements vary by age, gender, and tier, with appropriate rounds for each group being shown in the classification tables.</p>
+
+<p>
+The outdoor classification scheme provides a challenge to cover the entirety of any archer's career.
+With Archer 3rd class starting at 30 yards/metres in all categories the scheme is accessible to even the newest archers, whilst consistently achieving the scores required for Elite Master Bowman is a challenge, even to top international archers.
+</p>
+
+<hr width="50%" align="center">
+
+<h4>Target Indoor</h4>
+
+<p>
+For indoor target shooting there are 8 classification tiers ranging from A down to H.
+To achieve a classification requires reaching a certain level of accuracy (i.e. score) in 3 indoor rounds.
+The indoor classification scheme is administered by at a club level.
+</p>
+
+<hr width="50%" align="center">
+
+<h4>Field</h4>
+
+<p>
+For field archery there are 6 classifications ranging from 3rd through 1st Class, Bowman, Master Bowman, and Grand Master Bowman.
+To achieve a classification requires reaching a certain level of accuracy (i.e. score) in 3 rounds.
+The field classification scheme is administered by at a club level for Bowman and below, and by ArcheryGB for Master Bowman and above.
+The requirements for each classification are summarised in the table below.
+</p>
+<p>
+This website currently does not support field classifications though it does provide handicaps for field rounds and work is in progress to suppoprt classifications.
+</p>
+
+<table class="infoclasstable">
+  <thead>
+    <tr>
+      <th>Classifications</th>
+      <th>Number of rounds</th>
+      <th>Eligible rounds</th>
+      <th>Type of event</th>
+      <th>Administered by</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        <td>3rd Class<br>2nd Class<br>1st Class<br>Bowman</td>
+        <td>3 rounds</td>
+        <td>WA Field<br>WA Arrowhead<br>National Animal&ast;</td>
+        <td>Any competitive event</td>
+        <td>Clubs</td>
+    </tr>
+    <tr>
+        <td>Master Bowman<br>Grand Master Bowman</td>
+        <td>3 rounds at different venues&ast;</td>
+        <td>WA Field<br>WA Arrowhead</td>
+        <td>Any record status competition</td>
+        <td>Archery GB</td>
+    </tr>
+  </tbody>
+</table>
+&ast; National Animal Round cannot be used for Bowman classifications.
+<br>
+&ast; 2 scores from a single venue may be used for World Games, World Championships, Continental Championships, and the All British and Open.
+
+
+{% endblock %}

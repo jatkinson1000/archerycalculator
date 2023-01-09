@@ -25,18 +25,42 @@
 {% endmacro %}
 
 {% macro render_handicap_table(rounds, results) %}
-<table>
+<table class="hctable">
    <thead>
-      <th>Handicap</th>
-      {% for item in rounds %}
-        <th>{{ item }}</th>
-      {% endfor %}
+     <tr>
+       <th>Handicap</th>
+       {% for item in rounds %}
+         <th>{{ item }}</th>
+       {% endfor %}
+     </tr>
    </thead>
    <tbody>
       {% for row in results %}
         <tr>
         {% for item in row %}
-          <td>{{ item|int }}</td>
+          <td>{{ item|int if item != -9999 else '' }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+   </tbody>
+</table>
+{% endmacro %}
+
+{% macro render_classification_table(classes, rounds, results) %}
+<table class="classtable">
+   <thead>
+     <tr>
+       <th>Round</th>
+       {% for item in classes %}
+         <th>{{ item['shortname'] }}</th>
+       {% endfor %}
+     </tr>
+   </thead>
+   <tbody>
+      {% for row in results %}
+        <tr>
+        {% for item in row %}
+          <td>{{ item if item != '-9999' else '' }}</td>
         {% endfor %}
         </tr>
       {% endfor %}
