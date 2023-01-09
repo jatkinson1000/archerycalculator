@@ -60,7 +60,7 @@
       {% for row in results %}
         <tr>
         {% for item in row %}
-          <td>{{ item }}</td>
+          <td>{{ item if item != '-9999' else '' }}</td>
         {% endfor %}
         </tr>
       {% endfor %}
