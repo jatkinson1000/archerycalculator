@@ -45,7 +45,6 @@ def calculator():
         gender = request.form["gender"]
         age = request.form["age"]
         roundname = request.form["roundname"]
-        bowstyle = request.form["bowstyle"]
         score = request.form["score"]
        
         resultskeys = ["bowstyle", "gender", "age", "roundname", "score"]

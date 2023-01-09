@@ -38,6 +38,28 @@
       {% for row in results %}
         <tr>
         {% for item in row %}
+          <td>{{ item|int if item != -9999 else '' }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+   </tbody>
+</table>
+{% endmacro %}
+
+{% macro render_classification_table(rounds, results) %}
+<table class="classtable">
+   <thead>
+     <tr>
+       <th>Handicap</th>
+       {% for item in rounds %}
+         <th>{{ item }}</th>
+       {% endfor %}
+     </tr>
+   </thead>
+   <tbody>
+      {% for row in results %}
+        <tr>
+        {% for item in row %}
           <td>{{ item|int }}</td>
         {% endfor %}
         </tr>

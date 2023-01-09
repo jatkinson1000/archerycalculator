@@ -22,7 +22,7 @@ def handicap_tables():
 
     database = get_db()
 
-    form = TableForm.TableForm(request.form)
+    form = TableForm.HandicapTableForm(request.form)
 
     all_rounds = database.execute("SELECT round_name FROM rounds").fetchall()
 
@@ -79,6 +79,16 @@ def handicap_tables():
                 round_obj_i, results[:, 0], "AGB", hc_params
             )[0].astype(np.int32)
 
+        # Clean gaps where there are multiple HC for one score
+        # TODO: This assumes scores are running highest to lowest.
+        #  AA and AA2 will only work if hcs passed in reverse order (large to small)
+        # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
+        #  0, NaN, and None as the same thing. Consider finding better solution.
+        for irow, row in enumerate(results[:-1, 1:]):
+            for jscore, score in enumerate(row):
+                if results[irow, jscore+1] == results[irow+1, jscore+1]:
+                    results[irow, jscore+1] = -9999
+
         if error is None:
             # Calculate the handicap
             # Generate table for selected rounds
@@ -115,29 +125,69 @@ def classification_tables():
 
     database = get_db()
 
-    form = TableForm.TableForm(request.form)
-
+    all_bowstyles = database.execute(
+        "SELECT bowstyle,disciplines FROM bowstyles"
+    ).fetchall()
+    all_genders = database.execute("SELECT gender FROM genders").fetchall()
+    all_ages = database.execute("SELECT age_group FROM ages").fetchall()
     all_rounds = database.execute("SELECT round_name FROM rounds").fetchall()
+    all_classes = database.execute("SELECT shortname FROM classes").fetchall()
+
+    form = TableForm.ClassificationTableForm(request.form)
 
     if request.method == "POST" and form.validate():
         error = None
+
+        # Get form results and store for return
+        bowstyle = request.form["bowstyle"]
+        gender = request.form["gender"]
+        age = request.form["age"]
+       
+        results = {}
+
+        # Check the inputs are all valid
+        bowstylecheck = database.execute(
+            "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
+        ).fetchall()
+        if len(bowstylecheck) == 0:
+            error = "Invalid bowstyle. Please select from dropdown."
+        results["bowstyle"] = bowstyle
+
+        gendercheck = database.execute(
+            "SELECT id FROM genders WHERE gender IS (?)", [gender]
+        ).fetchall()
+        if len(gendercheck) == 0:
+            error = "Please select gender from dropdown options."
+        results["gender"] = gender
+
+        agecheck = database.execute(
+            "SELECT id FROM ages WHERE age_group IS (?)", [age]
+        ).fetchall()
+        if len(agecheck) == 0:
+            error = "Invalid age group. Please select from dropdown."
+        results["age"] = age
 
         all_rounds_objs = rounds.read_json_to_round_dict(
             [
                 "AGB_outdoor_imperial.json",
                 "AGB_outdoor_metric.json",
-                "AGB_indoor.json",
+                # "AGB_indoor.json",
                 "WA_outdoor.json",
-                "WA_indoor.json",
-                "Custom.json",
+                # "WA_indoor.json",
+                # "Custom.json",
             ]
         )
+
+        # Loop over all rounds to construct an object with scores for each category
+        print(all_classes[0]["shortname"])
 
         if error is None:
             # Return the results
             return render_template(
                 "classification_tables.html",
-                rounds=all_rounds,
+                bowstyles=all_bowstyles,
+                genders=all_genders,
+                ages=all_ages,
                 form=form,
                 results=results,
             )
@@ -145,7 +195,9 @@ def classification_tables():
             # If errors reload default with error message
             return render_template(
                 "classification_tables.html",
-                rounds=all_rounds,
+                bowstyles=all_bowstyles,
+                genders=all_genders,
+                ages=all_ages,
                 form=form,
                 error=error,
             )
@@ -154,6 +206,8 @@ def classification_tables():
     return render_template(
         "classification_tables.html",
         form=form,
-        rounds=all_rounds,
+        bowstyles=all_bowstyles,
+        genders=all_genders,
+        ages=all_ages,
         error=None,
     )
