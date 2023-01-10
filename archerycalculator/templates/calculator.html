@@ -6,6 +6,14 @@
 
 {% block content %}
 
+  <p>
+  This calculator can be used to calculate handicaps and classifications for scores.
+  <br>
+  Select your category and round, provide a score, and click 'Calculate' to get the results.
+  <br>
+  See the other pages for generating a full set of <a href="/tables/handicap">handicap</a> or <a href="/tables/classification">classification</a> tables.
+  </p>
+
   <datalist id="roundlist">
   {% for round in rounds %}
   <option>{{round}}</option>
@@ -43,15 +51,39 @@
 
     <hr width="100%" 
         align="center">
+    <span style="font-size: .8em;"> 
+        <p>
+            The following are 'advanced' options which should be left unchanged by the average user.
+            <br>
+            Adjusting these values may produce results that do not match the official Archery GB Handicap tables.
+        </p>
+
+        <span>
+            Select this option to return a fractional handicap corresponding to the exact score rather than the whole numbers from the official tables.
+        </span>
+        <br>
+        {{ render_textin_field(form.decimalHC) }}
     
-    <p>The following are 'advanced' options which should be left unchanged by the average user.
-    Adjusting these values may produce results that do not match the official Archery GB Handicap tables.</p>
-    {{ render_textin_field(form.decimalHC) }}
-      <p>Returns a fractional value of handicap corresponding to the score rather than the whole numbers from the official tables.</p>
-    {{ render_textin_field(form.diameter) }}
-      <p>The tables are generated using an average arrow diameter. Here you can specify the value to use.</p>
-    {{ render_textin_field(form.scheme) }}
-      <p>Use an alternative scheme for calculating the handicap (does not affect the classifications).</p>
+        <br>
+        <br>
+        
+        <span>
+            The tables are generated using an average arrow diameter. Here you can specify the value to use.
+            <br>
+            The maximum value allowed by World Archery is 9.3mm.
+        </span>
+        <br>
+        {{ render_textin_field(form.diameter) }}
+    
+        <br>
+        <br>
+
+        <span>
+            Use an alternative scheme for calculating the handicap (Note this does not affect the classifications).
+        </span>
+        <br>
+        {{ render_textin_field(form.scheme) }}
+    </span>
 
   </form>
 
