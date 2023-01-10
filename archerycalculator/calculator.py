@@ -4,7 +4,7 @@ from flask import (
     request,
 )
 
-from archerycalculator.db import get_db, query_db
+from archerycalculator.db import query_db, sql_to_dol
 
 from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
@@ -20,22 +20,27 @@ bp = Blueprint("calculator", __name__, url_prefix="/")
 @bp.route("/", methods=("GET", "POST"))
 def calculator():
 
-    database = get_db()
+    # Set form choices
+    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
+        "bowstyle"
+    ]
+    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+    roundnames = sql_to_dol(query_db("SELECT round_name FROM rounds"))["round_name"]
+    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
-    all_bowstyles = query_db(
-        "SELECT bowstyle,disciplines FROM bowstyles"
+    # Load form and set defaults
+    form = HCForm.HCForm(
+        request.form,
+        bowstyle=bowstylelist[1],
+        gender=genderlist[1],
+        age=agelist[1],
+        score=0,
     )
-    all_genders = query_db("SELECT gender FROM genders")
-    all_ages = query_db("SELECT age_group FROM ages")
-    all_rounds = query_db("SELECT round_name FROM rounds")
 
-    bowstyle = ""
-    gender = ""
-    age = ""
-    roundname = ""
-    score = 0
-
-    form = HCForm.HCForm(request.form)
+    # Set form choices
+    form.bowstyle.choices = bowstylelist
+    form.gender.choices = genderlist
+    form.age.choices = agelist
 
     if request.method == "POST" and form.validate():
         error = None
@@ -46,12 +51,12 @@ def calculator():
         age = request.form["age"]
         roundname = request.form["roundname"]
         score = request.form["score"]
-       
+
         resultskeys = ["bowstyle", "gender", "age", "roundname", "score"]
         results = dict(zip(resultskeys, [None] * len(resultskeys)))
 
         # advanced options
-        diameter = float(request.form["diameter"])*1.0e-3
+        diameter = float(request.form["diameter"]) * 1.0e-3
         scheme = request.form["scheme"]
         integer_precision = True
         if request.form.getlist("decimalHC"):
@@ -68,16 +73,12 @@ def calculator():
             error = "Invalid bowstyle. Please select from dropdown."
         results["bowstyle"] = bowstyle
 
-        gendercheck = query_db(
-            "SELECT id FROM genders WHERE gender IS (?)", [gender]
-        )
+        gendercheck = query_db("SELECT id FROM genders WHERE gender IS (?)", [gender])
         if len(gendercheck) == 0:
             error = "Please select gender from dropdown options."
         results["gender"] = gender
 
-        agecheck = query_db(
-            "SELECT id FROM ages WHERE age_group IS (?)", [age]
-        )
+        agecheck = query_db("SELECT id FROM ages WHERE age_group IS (?)", [age])
         if len(agecheck) == 0:
             error = "Invalid age group. Please select from dropdown."
         results["age"] = age
@@ -101,9 +102,10 @@ def calculator():
         )
         # Get the appropriate round from the database
         round_codename = query_db(
-                "SELECT code_name FROM rounds WHERE round_name IS (?)",
-                [roundname], one=True
-                )["code_name"]
+            "SELECT code_name FROM rounds WHERE round_name IS (?)",
+            [roundname],
+            one=True,
+        )["code_name"]
         round_obj = all_rounds_objs[round_codename]
 
         # Generate the handicap params
@@ -124,16 +126,26 @@ def calculator():
         if error is None:
             # Calculate the handicap
             hc_from_score = hc_func.handicap_from_score(
-                float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=True
+                float(score),
+                round_obj,
+                scheme,
+                hc_params,
+                arw_d=diameter,
+                int_prec=True,
             )
             results["handicap"] = hc_from_score
 
             if not integer_precision:
                 decimal_hc_from_score = hc_func.handicap_from_score(
-                    float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=integer_precision
+                    float(score),
+                    round_obj,
+                    scheme,
+                    hc_params,
+                    arw_d=diameter,
+                    int_prec=integer_precision,
                 )
                 results["decimal_handicap"] = decimal_hc_from_score
-            
+
             # Calculate the classification
             class_from_score = class_func.calculate_AGB_outdoor_classification(
                 round_codename,
@@ -144,7 +156,8 @@ def calculator():
             )
             class_from_score = query_db(
                 "SELECT longname FROM classes WHERE shortname IS (?)",
-                [class_from_score], one=True
+                [class_from_score],
+                one=True,
             )["longname"]
             results["classification"] = class_from_score
 
@@ -159,10 +172,7 @@ def calculator():
             return render_template(
                 "calculator.html",
                 form=form,
-                bowstyles=all_bowstyles,
-                genders=all_genders,
-                ages=all_ages,
-                rounds=all_rounds,
+                rounds=roundnames,
                 results=results,
                 sig_t=2.0 * RAD2DEG * sig_t,
                 sig_r_18=2.0 * 100.0 * sig_r_18,
@@ -174,10 +184,7 @@ def calculator():
             return render_template(
                 "calculator.html",
                 form=form,
-                bowstyles=all_bowstyles,
-                genders=all_genders,
-                ages=all_ages,
-                rounds=all_rounds,
+                rounds=roundnames,
                 results=None,
                 error=error,
             )
@@ -186,10 +193,7 @@ def calculator():
     return render_template(
         "calculator.html",
         form=form,
-        bowstyles=all_bowstyles,
-        genders=all_genders,
-        ages=all_ages,
-        rounds=all_rounds,
+        rounds=roundnames,
         results=None,
         error=None,
     )

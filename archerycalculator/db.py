@@ -44,6 +44,33 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
+def sql_to_lod(sql_result):
+    """
+    Converts the results of fetch one or fetch all to a list of dicts
+    """
+    try:
+        unpacked = [{k: item[k] for k in item.keys()} for item in sql_result]
+        return unpacked
+    except Exception as e:
+        # print(f"Failed to convert with error:{e}\n return empty list.")
+        return []
+
+
+def sql_to_dol(sql_result):
+    """
+    Converts the results of fetch one or fetch all to a single dict of lists
+    """
+    try:
+        # unpacked = {k: [d[k] for d in sql_result] for k in sql_result[0].keys()}
+        unpacked = {
+            k: [d[k] for d in sql_result if k in d.keys()] for k in sql_result[0].keys()
+        }
+        return unpacked
+    except Exception as e:
+        # print(f"Failed to convert with error:{e}\n return empty dict.")
+        return {}
+
+
 # define command line argument 'init-db' to run init_db function at startup
 @click.command("init-db")
 def init_db_command():
