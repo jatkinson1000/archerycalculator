@@ -11,7 +11,7 @@ from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.classifications import classifications as class_func
 
-from archerycalculator import TableForm
+from archerycalculator import TableForm, utils
 
 bp = Blueprint("tables", __name__, url_prefix="/tables")
 
@@ -181,7 +181,7 @@ def classification_tables():
         )
 
         if discipline in ["outdoor"]:
-            use_rounds = sql_to_dol(query_db("SELECT round_name, code_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"))
+            use_rounds = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"))
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
@@ -192,7 +192,17 @@ def classification_tables():
         elif discipline in ["indoor"]:
             # TODO: This is a bodge - put indoor classes in database properly and fetch above!
             classlist = ["A", "B", "C", "D", "E", "F", "G", "H", "UC"]
-            use_rounds = sql_to_dol(query_db("SELECT round_name, code_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"))
+
+            use_rounds = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"))
+            # Filter out compound rounds for non-recurve and vice versa
+            # TODO: This is pretty horrible... is there a better way?
+            roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+            noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
+            codenames = [key for key in list(roundsdicts.keys()) if roundsdicts[key] in noncompoundroundnames]
+            if bowstyle.lower() in ["compound"]:
+                codenames = utils.get_compound_codename(codenames)
+            use_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
+
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(

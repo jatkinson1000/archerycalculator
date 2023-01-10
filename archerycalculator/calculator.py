@@ -11,7 +11,7 @@ from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
 
-from archerycalculator import HCForm
+from archerycalculator import HCForm, utils
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
 
@@ -25,7 +25,8 @@ def calculator():
         "bowstyle"
     ]
     genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-    roundnames = sql_to_dol(query_db("SELECT round_name FROM rounds"))["round_name"]
+    roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
+    roundnames = utils.indoor_display_filter(dict(zip(roundnames["code_name"], roundnames["round_name"])))
     agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
     # Load form and set defaults
@@ -107,6 +108,11 @@ def calculator():
             )
         round_codename = round_db_info["code_name"]
         round_location = round_db_info["location"]
+        round_body = round_db_info["body"]
+
+        # Check if we need compound scoring
+        if bowstyle.lower() in ["compound"]:
+            round_codename = utils.get_compound_codename(round_codename)
         round_obj = all_rounds_objs[round_codename]
 
         # Generate the handicap params
@@ -148,7 +154,7 @@ def calculator():
                 results["decimal_handicap"] = decimal_hc_from_score
 
             # Calculate the classification
-            if round_location in ['outdoor']:
+            if round_location in ['outdoor'] and round_body in ["AGB", "WA"]:
                 class_from_score = class_func.calculate_AGB_outdoor_classification(
                     round_codename,
                     float(score),
@@ -162,7 +168,7 @@ def calculator():
                     one=True,
                 )["longname"]
                 results["classification"] = class_from_score
-            elif round_location in ['indoor']:
+            elif round_location in ['indoor'] and round_body in ["AGB", "WA"]:
                 class_from_score = class_func.calculate_AGB_indoor_classification(
                     round_codename,
                     float(score),
