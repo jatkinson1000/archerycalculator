@@ -93,18 +93,20 @@ def calculator():
             [
                 "AGB_outdoor_imperial.json",
                 "AGB_outdoor_metric.json",
-                # "AGB_indoor.json",
+                "AGB_indoor.json",
                 "WA_outdoor.json",
-                # "WA_indoor.json",
-                # "Custom.json",
+                "WA_indoor.json",
+                "Custom.json",
             ]
         )
         # Get the appropriate round from the database
-        round_codename = query_db(
-            "SELECT code_name FROM rounds WHERE round_name IS (?)",
+        round_db_info = query_db(
+            "SELECT * FROM rounds WHERE round_name IS (?)",
             [roundname],
             one=True,
-        )["code_name"]
+            )
+        round_codename = round_db_info["code_name"]
+        round_location = round_db_info["location"]
         round_obj = all_rounds_objs[round_codename]
 
         # Generate the handicap params
@@ -146,19 +148,31 @@ def calculator():
                 results["decimal_handicap"] = decimal_hc_from_score
 
             # Calculate the classification
-            class_from_score = class_func.calculate_AGB_outdoor_classification(
-                round_codename,
-                float(score),
-                bowstyle.lower(),
-                gender.lower(),
-                age.lower(),
-            )
-            class_from_score = query_db(
-                "SELECT longname FROM classes WHERE shortname IS (?)",
-                [class_from_score],
-                one=True,
-            )["longname"]
-            results["classification"] = class_from_score
+            if round_location in ['outdoor']:
+                class_from_score = class_func.calculate_AGB_outdoor_classification(
+                    round_codename,
+                    float(score),
+                    bowstyle.lower(),
+                    gender.lower(),
+                    age.lower(),
+                )
+                class_from_score = query_db(
+                    "SELECT longname FROM classes WHERE shortname IS (?)",
+                    [class_from_score],
+                    one=True,
+                )["longname"]
+                results["classification"] = class_from_score
+            elif round_location in ['indoor']:
+                class_from_score = class_func.calculate_AGB_indoor_classification(
+                    round_codename,
+                    float(score),
+                    bowstyle.lower(),
+                    gender.lower(),
+                    age.lower(),
+                        )
+                results["classification"] = class_from_score
+            else:
+                results["classification"] = "not currently available for this round"
 
             # Other stats
             RAD2DEG = 57.295779513

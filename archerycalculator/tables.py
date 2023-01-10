@@ -146,6 +146,7 @@ def classification_tables():
         bowstyle = request.form["bowstyle"]
         gender = request.form["gender"]
         age = request.form["age"]
+        discipline = request.form["discipline"]
 
         results = {}
 
@@ -167,30 +168,55 @@ def classification_tables():
             error = "Invalid age group. Please select from dropdown."
         results["age"] = age
 
+
         all_rounds = rounds.read_json_to_round_dict(
             [
                 "AGB_outdoor_imperial.json",
                 "AGB_outdoor_metric.json",
-                # "AGB_indoor.json",
                 "WA_outdoor.json",
-                # "WA_indoor.json",
-                # "Custom.json",
+                "AGB_indoor.json",
+                "WA_indoor.json",
+                "Custom.json",
             ]
         )
 
-        results = np.zeros([len(all_rounds), len(classlist) - 1])
-        # Loop through and get scores
-        for i, round_i in enumerate(all_rounds):
-            results[i, :] = np.asarray(
-                class_func.AGB_outdoor_classification_scores(
-                    round_i, bowstyle, gender, age
+        if discipline in ["outdoor"]:
+            use_rounds = sql_to_dol(query_db("SELECT round_name, code_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"))
+            results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
+            for i, round_i in enumerate(use_rounds["code_name"]):
+                results[i, :] = np.asarray(
+                    class_func.AGB_outdoor_classification_scores(
+                        round_i, bowstyle, gender, age
+                    )
                 )
-            )
+        elif discipline in ["indoor"]:
+            # TODO: This is a bodge - put indoor classes in database properly and fetch above!
+            classlist = ["A", "B", "C", "D", "E", "F", "G", "H", "UC"]
+            use_rounds = sql_to_dol(query_db("SELECT round_name, code_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"))
+            results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
+            for i, round_i in enumerate(use_rounds["code_name"]):
+                results[i, :] = np.asarray(
+                    class_func.AGB_indoor_classification_scores(
+                        round_i, bowstyle, gender, age
+                    )
+                )
+        else:
+            #Should never get here... placeholder for field...
+            # use_rounds = sql_to_dol(query_db("SELECT code_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA')"))
+            # results = np.zeros([len(use_rounds["codename"]), len(classlist) - 1])
+            # for i, round_i in enumerate(use_rounds["codename"]):
+            #     results[i, :] = np.asarray(
+            #         class_func.AGB_field_classification_scores(
+            #             round_i, bowstyle, gender, age
+            #         )
+
+            pass
+
 
         # Add roundnames on to the end then flip for printing
         roundnames = [
-            round_i["round_name"]
-            for round_i in query_db("SELECT round_name FROM rounds")
+            round_i
+            for round_i in use_rounds["round_name"]
         ]
         results = np.flip(
             np.concatenate(
