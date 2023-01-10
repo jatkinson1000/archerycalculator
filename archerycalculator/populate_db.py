@@ -14,10 +14,10 @@ rounds = rounds.read_json_to_round_dict(
     [
         "AGB_outdoor_imperial.json",
         "AGB_outdoor_metric.json",
-        # "AGB_indoor.json",
+        "AGB_indoor.json",
         "WA_outdoor.json",
-        # "WA_indoor.json",
-        # "Custom.json",
+        "WA_indoor.json",
+        "Custom.json",
     ]
 )
 
@@ -49,8 +49,8 @@ def load_ages(db):
 def load_rounds(db):
     for item in rounds:
         db.execute(
-            "INSERT INTO rounds (round_name,code_name,gov_body) VALUES (?,?,?);",
-            (rounds[item].name, item, "AGB"),
+            "INSERT INTO rounds (round_name,code_name,body,location) VALUES (?,?,?,?);",
+            (rounds[item].name, item, rounds[item].body, rounds[item].location),
         )
     db.commit()
 
