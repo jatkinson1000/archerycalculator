@@ -34,7 +34,6 @@ def calculator():
         bowstyle=bowstylelist[1],
         gender=genderlist[1],
         age=agelist[1],
-        score=0,
     )
 
     # Set form choices
@@ -113,8 +112,8 @@ def calculator():
 
         # Check score against maximum score and return error if inappropriate
         max_score = round_obj.max_score()
-        if int(score) < 0:
-            error = "A score less than 0 is not valid."
+        if int(score) <= 0:
+            error = "A score of 0 or less is not valid."
         elif int(score) > max_score:
             error = (
                 f"{score} is larger than the maximum possible "

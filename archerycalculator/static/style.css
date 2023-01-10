@@ -1,5 +1,6 @@
 html {
   font-family: sans-serif;
+  font-size: min(calc(10px + 0.8vw), 1em);
   background: #eee;
   padding: 1rem;
 }
@@ -180,6 +181,7 @@ table{
 
 th, td {
     border: None;
+    overflow-wrap: break-word;
     overflow: hidden;
     padding: 0;
 }
@@ -206,7 +208,7 @@ th, td {
 /* Classification Table*/
 .classtable {
   text-align: center;
-  font-size: min(calc(6px + 0.8vw), 1em);
+  font-size: min(calc(5px + 0.8vw), 1em);
 }
 
 .classtable th:first-child, .classtable td:first-child {
@@ -226,6 +228,7 @@ th, td {
 .infoclasstable {
   width: 100%;
   text-align: center;
+  font-size: min(calc(6px + 0.8vw), 1em);
 }
 
 .infoclasstable th, .infoclasstable td{
