@@ -34,6 +34,9 @@ hr {
 
 
 
+/* ----------------------- */
+/* NAVBAR */
+/* ----------------------- */
 nav h1 {
   flex: auto;
   padding: 1rem 1rem 0rem;
@@ -41,10 +44,12 @@ nav h1 {
 
 nav h1 a {
   text-decoration: none;
+  color: #3bf;
 }
 
 nav ul  {
   display: flex;
+  flex-wrap: wrap;
   list-style-type: none;
   overflow: hidden;
   background-color: #3bf;
@@ -75,6 +80,10 @@ nav ul li.right {float: right;}
   nav ul li {float: none;}
 }
 
+
+/* ----------------------- */
+/* FOOTER */
+/* ----------------------- */
 footer {
   background: #3bf;
   color: white;
@@ -94,7 +103,9 @@ footer a:hover:not(.active) {
 
 
 
-
+/* ----------------------- */
+/* CONTENT */
+/* ----------------------- */
 .content {
   padding: 0 1rem 1rem;
 }
@@ -125,7 +136,6 @@ footer a:hover:not(.active) {
 }
 
 .content label {
-  font-weight: bold;
   margin-bottom: 0.5em;
 }
 
@@ -138,6 +148,9 @@ footer a:hover:not(.active) {
   resize: vertical;
 }
 
+/* ----------------------- */
+/* FORM INPUTS */
+/* ----------------------- */
 input.danger {
   color: #cc2f2e;
 }
@@ -154,4 +167,73 @@ input[type=submit] {
 
 input[type=submit]:hover {
   background-color: #4cf;
+}
+
+/* ----------------------- */
+/* TABLES */
+/* ----------------------- */
+
+table{
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+th, td {
+    border: None;
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Handicap Table*/
+.hctable {
+  text-align: right;
+}
+
+.hctable th, .hctable td{
+    width: 100px;
+}
+
+.hctable th:first-child, .hctable td:first-child {
+  font-weight: bold;
+  text-align: center;
+}
+
+.hctable tbody tr:nth-child(odd){
+  background-color: #eee;
+}
+
+/* Classification Table*/
+.classtable {
+  text-align: center;
+}
+
+.classtable th:first-child, .classtable td:first-child {
+  font-weight: bold;
+  text-align: right;
+}
+
+.classtable tbody tr{
+  height: 3em;
+}
+
+.classtable tbody tr:nth-child(odd){
+  background-color: #eee;
+}
+
+/* Info Page Classification Table*/
+.infoclasstable {
+  width: 100%;
+  text-align: center;
+}
+
+.infoclasstable th, .infoclasstable td{
+  border: 1px solid black;
+}
+
+.infoclasstable tbody tr{
+  height: 100px;
+}
+
+.infoclasstable th:nth-child(2), .infoclasstable td:nth-child(2){
+ width: 20%;
 }

@@ -4,7 +4,7 @@ from flask import (
     request,
 )
 
-from archerycalculator.db import get_db
+from archerycalculator.db import get_db, query_db
 
 from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
@@ -22,12 +22,12 @@ def calculator():
 
     database = get_db()
 
-    all_bowstyles = database.execute(
+    all_bowstyles = query_db(
         "SELECT bowstyle,disciplines FROM bowstyles"
-    ).fetchall()
-    all_genders = database.execute("SELECT gender FROM genders").fetchall()
-    all_ages = database.execute("SELECT age_group FROM ages").fetchall()
-    all_rounds = database.execute("SELECT round_name FROM rounds").fetchall()
+    )
+    all_genders = query_db("SELECT gender FROM genders")
+    all_ages = query_db("SELECT age_group FROM ages")
+    all_rounds = query_db("SELECT round_name FROM rounds")
 
     bowstyle = ""
     gender = ""
@@ -39,41 +39,52 @@ def calculator():
 
     if request.method == "POST" and form.validate():
         error = None
+
+        # Get essential form results
         bowstyle = request.form["bowstyle"]
         gender = request.form["gender"]
         age = request.form["age"]
         roundname = request.form["roundname"]
-        bowstyle = request.form["bowstyle"]
         score = request.form["score"]
-
+       
         resultskeys = ["bowstyle", "gender", "age", "roundname", "score"]
         results = dict(zip(resultskeys, [None] * len(resultskeys)))
 
+        # advanced options
+        diameter = float(request.form["diameter"])*1.0e-3
+        scheme = request.form["scheme"]
+        integer_precision = True
+        if request.form.getlist("decimalHC"):
+            integer_precision = False
+            results["decimalHC"] = True
+        if diameter == 0.0:
+            diameter = None
+
         # Check the inputs are all valid
-        bowstylecheck = database.execute(
+        bowstylecheck = query_db(
             "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
-        ).fetchall()
+        )
         if len(bowstylecheck) == 0:
             error = "Invalid bowstyle. Please select from dropdown."
         results["bowstyle"] = bowstyle
 
-        gendercheck = database.execute(
+        gendercheck = query_db(
             "SELECT id FROM genders WHERE gender IS (?)", [gender]
-        ).fetchall()
+        )
         if len(gendercheck) == 0:
             error = "Please select gender from dropdown options."
         results["gender"] = gender
 
-        agecheck = database.execute(
+        agecheck = query_db(
             "SELECT id FROM ages WHERE age_group IS (?)", [age]
-        ).fetchall()
+        )
         if len(agecheck) == 0:
             error = "Invalid age group. Please select from dropdown."
         results["age"] = age
 
-        roundcheck = database.execute(
+        roundcheck = query_db(
             "SELECT id FROM rounds WHERE round_name IS (?)", [roundname]
-        ).fetchall()
+        )
         if len(roundcheck) == 0:
             error = "Invalid round name. Please select from dropdown."
         results["roundname"] = roundname
@@ -89,14 +100,14 @@ def calculator():
             ]
         )
         # Get the appropriate round from the database
-        round_codename = database.execute(
-            "SELECT code_name FROM rounds WHERE round_name IS (?)", [roundname]
-        ).fetchone()["code_name"]
+        round_codename = query_db(
+                "SELECT code_name FROM rounds WHERE round_name IS (?)",
+                [roundname], one=True
+                )["code_name"]
         round_obj = all_rounds_objs[round_codename]
 
         # Generate the handicap params
         hc_params = hc_eq.HcParams()
-        scheme = "AGB"
 
         # Check score against maximum score and return error if inappropriate
         max_score = round_obj.max_score()
@@ -113,10 +124,16 @@ def calculator():
         if error is None:
             # Calculate the handicap
             hc_from_score = hc_func.handicap_from_score(
-                float(score), round_obj, scheme, hc_params, int_prec=True
+                float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=True
             )
             results["handicap"] = hc_from_score
 
+            if not integer_precision:
+                decimal_hc_from_score = hc_func.handicap_from_score(
+                    float(score), round_obj, scheme, hc_params, arw_d=diameter, int_prec=integer_precision
+                )
+                results["decimal_handicap"] = decimal_hc_from_score
+            
             # Calculate the classification
             class_from_score = class_func.calculate_AGB_outdoor_classification(
                 round_codename,
@@ -125,10 +142,10 @@ def calculator():
                 gender.lower(),
                 age.lower(),
             )
-            class_from_score = database.execute(
+            class_from_score = query_db(
                 "SELECT longname FROM classes WHERE shortname IS (?)",
-                [class_from_score],
-            ).fetchone()["longname"]
+                [class_from_score], one=True
+            )["longname"]
             results["classification"] = class_from_score
 
             # Other stats
@@ -140,7 +157,7 @@ def calculator():
 
             # Perform calculations and return the results
             return render_template(
-                "calculate.html",
+                "calculator.html",
                 form=form,
                 bowstyles=all_bowstyles,
                 genders=all_genders,
@@ -155,22 +172,24 @@ def calculator():
         else:
             # If errors reload default with error message
             return render_template(
-                "home.html",
+                "calculator.html",
                 form=form,
                 bowstyles=all_bowstyles,
                 genders=all_genders,
                 ages=all_ages,
                 rounds=all_rounds,
+                results=None,
                 error=error,
             )
 
     # If first visit load the default form with no inputs
     return render_template(
-        "home.html",
+        "calculator.html",
         form=form,
         bowstyles=all_bowstyles,
         genders=all_genders,
         ages=all_ages,
         rounds=all_rounds,
+        results=None,
         error=None,
     )

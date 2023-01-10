@@ -37,6 +37,13 @@ def init_db():
     populate_db.load_classes(db)
 
 
+def query_db(query, args=(), one=False):
+    cur = get_db().execute(query, args)
+    rv = cur.fetchall()
+    cur.close()
+    return (rv[0] if rv else None) if one else rv
+
+
 # define command line argument 'init-db' to run init_db function at startup
 @click.command("init-db")
 def init_db_command():
