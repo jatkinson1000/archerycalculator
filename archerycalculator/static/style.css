@@ -187,10 +187,11 @@ th, td {
 /* Handicap Table*/
 .hctable {
   text-align: right;
+  font-size: min(calc(6px + 0.8vw), 1em);
 }
 
 .hctable th, .hctable td{
-    width: 100px;
+    width: 10vw;
 }
 
 .hctable th:first-child, .hctable td:first-child {
@@ -205,6 +206,7 @@ th, td {
 /* Classification Table*/
 .classtable {
   text-align: center;
+  font-size: min(calc(6px + 0.8vw), 1em);
 }
 
 .classtable th:first-child, .classtable td:first-child {
