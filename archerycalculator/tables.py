@@ -11,7 +11,7 @@ from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.classifications import classifications as class_func
 
-from archerycalculator import TableForm
+from archerycalculator import TableForm, utils
 
 bp = Blueprint("tables", __name__, url_prefix="/tables")
 
@@ -21,7 +21,10 @@ def handicap_tables():
 
     form = TableForm.HandicapTableForm(request.form)
 
-    all_rounds = sql_to_dol(query_db("SELECT round_name FROM rounds"))["round_name"]
+    roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
+    all_rounds = utils.indoor_display_filter(
+        dict(zip(roundnames["code_name"], roundnames["round_name"]))
+    )
 
     if request.method == "POST" and form.validate():
         error = None
@@ -39,37 +42,35 @@ def handicap_tables():
 
         # Get form results
         rounds_req = []
-        rounds_req.append(request.form["round1"])
-        rounds_req.append(request.form["round2"])
-        rounds_req.append(request.form["round3"])
-        rounds_req.append(request.form["round4"])
-        rounds_req.append(request.form["round5"])
-        rounds_req.append(request.form["round6"])
-        rounds_req.append(request.form["round7"])
+        rounds_comp = []
+        for i in range(7):
+            if request.form[f"round{i+1}"]:
+                rounds_req.append(request.form[f"round{i+1}"])
+                if request.form.getlist(f"round{i+1}_compound"):
+                    rounds_comp.append(True)
+                else:
+                    rounds_comp.append(False)
 
         allowance_table = False
         if request.form.getlist("allowance"):
             allowance_table = True
 
-        rounds_req = [i for i in rounds_req if i]
         round_objs = []
-        for round_i in rounds_req:
-            roundcheck = query_db(
-                "SELECT id FROM rounds WHERE round_name IS (?)", [round_i]
-            )
-            if len(roundcheck) == 0:
+        for (round_i, comp_i) in zip(rounds_req, rounds_comp):
+            round_codename = query_db(
+                "SELECT code_name FROM rounds WHERE round_name IS (?)",
+                [round_i],
+                one=True,
+            )["code_name"]
+            if len(round_codename) == 0:
                 error = f"Invalid round name '{round_i}'. Please select from dropdown."
 
+            # Check if we need compound scoring
+            if comp_i:
+                round_codename = utils.get_compound_codename(round_codename)
+
             # Get the appropriate rounds from the database
-            round_objs.append(
-                all_rounds_objs[
-                    query_db(
-                        "SELECT code_name FROM rounds WHERE round_name IS (?)",
-                        [round_i],
-                        one=True,
-                    )["code_name"]
-                ]
-            )
+            round_objs.append(all_rounds_objs[round_codename])
 
         # Generate the handicap params
         hc_params = hc_eq.HcParams()
@@ -168,20 +169,12 @@ def classification_tables():
             error = "Invalid age group. Please select from dropdown."
         results["age"] = age
 
-
-        all_rounds = rounds.read_json_to_round_dict(
-            [
-                "AGB_outdoor_imperial.json",
-                "AGB_outdoor_metric.json",
-                "WA_outdoor.json",
-                "AGB_indoor.json",
-                "WA_indoor.json",
-                "Custom.json",
-            ]
-        )
-
         if discipline in ["outdoor"]:
-            use_rounds = sql_to_dol(query_db("SELECT round_name, code_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"))
+            use_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
+                )
+            )
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
@@ -192,7 +185,25 @@ def classification_tables():
         elif discipline in ["indoor"]:
             # TODO: This is a bodge - put indoor classes in database properly and fetch above!
             classlist = ["A", "B", "C", "D", "E", "F", "G", "H", "UC"]
-            use_rounds = sql_to_dol(query_db("SELECT round_name, code_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"))
+
+            use_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"
+                )
+            )
+            # Filter out compound rounds for non-recurve and vice versa
+            # TODO: This is pretty horrible... is there a better way?
+            roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+            noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
+            codenames = [
+                key
+                for key in list(roundsdicts.keys())
+                if roundsdicts[key] in noncompoundroundnames
+            ]
+            if bowstyle.lower() in ["compound"]:
+                codenames = utils.get_compound_codename(codenames)
+            use_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
+
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
@@ -201,7 +212,7 @@ def classification_tables():
                     )
                 )
         else:
-            #Should never get here... placeholder for field...
+            # Should never get here... placeholder for field...
             # use_rounds = sql_to_dol(query_db("SELECT code_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA')"))
             # results = np.zeros([len(use_rounds["codename"]), len(classlist) - 1])
             # for i, round_i in enumerate(use_rounds["codename"]):
@@ -212,12 +223,8 @@ def classification_tables():
 
             pass
 
-
         # Add roundnames on to the end then flip for printing
-        roundnames = [
-            round_i
-            for round_i in use_rounds["round_name"]
-        ]
+        roundnames = [round_i for round_i in use_rounds["round_name"]]
         results = np.flip(
             np.concatenate(
                 (results.astype(int), np.asarray(roundnames)[:, None]), axis=1
