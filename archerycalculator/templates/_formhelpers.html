@@ -21,7 +21,7 @@
     {% endfor %}
     </ul>
   {% endif %}
-  </dd>
+  &nbsp;
 {% endmacro %}
 
 {% macro render_handicap_table(rounds, results) %}
@@ -52,7 +52,7 @@
      <tr>
        <th>Round</th>
        {% for item in classes %}
-         <th>{{ item['shortname'] }}</th>
+         <th>{{ item }}</th>
        {% endfor %}
      </tr>
    </thead>

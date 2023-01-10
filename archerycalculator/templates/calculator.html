@@ -6,35 +6,17 @@
 
 {% block content %}
 
-  <datalist id="bowstylelist">
-  {% for bowstyle in bowstyles %}
-  <option>{{bowstyle['bowstyle']}}</option>
-  {% endfor %}
-  </datalist>
-
   <datalist id="roundlist">
   {% for round in rounds %}
-  <option>{{round['round_name']}}</option>
-  {% endfor %}
-  </datalist>
-
-  <datalist id="genderlist">
-  {% for gender in genders %}
-  <option>{{gender['gender']}}</option>
-  {% endfor %}
-  </datalist>
-
-  <datalist id="agelist">
-  {% for age_group in ages %}
-  <option>{{age_group['age_group']}}</option>
+  <option>{{round}}</option>
   {% endfor %}
   </datalist>
 
   {% from "_formhelpers.html" import render_textin_field %}
   <form method=post>
-    {{ render_textin_field(form.bowstyle, list="bowstylelist") }}
-    {{ render_textin_field(form.gender, list="genderlist") }}
-    {{ render_textin_field(form.age, list="agelist") }}
+    {{ render_textin_field(form.bowstyle) }}
+    {{ render_textin_field(form.gender) }}
+    {{ render_textin_field(form.age) }}
     {{ render_textin_field(form.roundname, list="roundlist") }}
     {{ render_textin_field(form.score) }}
     <input type=submit value=Calculate>

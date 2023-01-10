@@ -1,4 +1,4 @@
-from wtforms import Form, validators, SearchField
+from wtforms import Form, validators, SearchField, SelectField
 
 
 class HandicapTableForm(Form):
@@ -12,8 +12,8 @@ class HandicapTableForm(Form):
 
 
 class ClassificationTableForm(Form):
-    bowstyle = SearchField("Bowstyle", [validators.InputRequired("Please provide.")])
-    gender = SearchField(
+    bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
+    gender = SelectField(
         "Gender under AGB", [validators.InputRequired("Please provide.")]
     )
-    age = SearchField("Age category", [validators.InputRequired("Please provide.")])
+    age = SelectField("Age category", [validators.InputRequired("Please provide.")])
