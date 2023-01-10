@@ -1,4 +1,3 @@
-
 import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
@@ -8,6 +7,7 @@ from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.classifications import classifications as class_func
 
 from archerycalculator import TableForm
+
 
 def indoor_display_filter(rounddict):
     """
@@ -55,19 +55,20 @@ def get_compound_codename(round_codenames):
         round_codenames = [round_codenames]
         notlistflag = True
 
-    convert_dict = {"bray_i": "bray_i_compound",
-                    "bray_i_triple": "bray_i_compound_triple",
-                    "bray_ii": "bray_ii_compound",
-                    "bray_ii_triple": "bray_ii_compound_triple",
-                    "stafford": "stafford_compound",
-                    "portsmouth": "portsmouth_compound",
-                    "portsmouth_triple": "portsmouth_compound_triple",
-                    "vegas": "vegas_compound",
-                    "wa18": "wa18_compound",
-                    "wa18_triple": "wa18_compound_triple",
-                    "wa25": "wa25_compound",
-                    "wa25_triple": "wa25_compound_triple",
-                    }
+    convert_dict = {
+        "bray_i": "bray_i_compound",
+        "bray_i_triple": "bray_i_compound_triple",
+        "bray_ii": "bray_ii_compound",
+        "bray_ii_triple": "bray_ii_compound_triple",
+        "stafford": "stafford_compound",
+        "portsmouth": "portsmouth_compound",
+        "portsmouth_triple": "portsmouth_compound_triple",
+        "vegas": "vegas_compound",
+        "wa18": "wa18_compound",
+        "wa18_triple": "wa18_compound_triple",
+        "wa25": "wa25_compound",
+        "wa25_triple": "wa25_compound_triple",
+    }
 
     for i, codename in enumerate(round_codenames):
         if codename in convert_dict:

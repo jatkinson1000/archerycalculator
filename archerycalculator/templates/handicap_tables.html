@@ -17,16 +17,16 @@
   {% endfor %}
   </datalist>
 
-  {% from "_formhelpers.html" import render_textin_field %}
+  {% from "_formhelpers.html" import render_field_with_box, render_textin_field, render_box %}
   <form method=post>
-      {{ render_textin_field(form.round1, list="roundlist") }}
-      {{ render_textin_field(form.round2, list="roundlist") }}
-      {{ render_textin_field(form.round3, list="roundlist") }}
-      {{ render_textin_field(form.round4, list="roundlist") }}
-      {{ render_textin_field(form.round5, list="roundlist") }}
-      {{ render_textin_field(form.round6, list="roundlist") }}
-      {{ render_textin_field(form.round7, list="roundlist") }}
-      {{ render_textin_field(form.allowance) }}
+      {{ render_field_with_box(form.round1, form.round1_compound, list="roundlist") }}
+      {{ render_field_with_box(form.round2, form.round2_compound, list="roundlist") }}
+      {{ render_field_with_box(form.round3, form.round3_compound, list="roundlist") }}
+      {{ render_field_with_box(form.round4, form.round4_compound, list="roundlist") }}
+      {{ render_field_with_box(form.round5, form.round5_compound, list="roundlist") }}
+      {{ render_field_with_box(form.round6, form.round6_compound, list="roundlist") }}
+      {{ render_field_with_box(form.round7, form.round7_compound, list="roundlist") }}
+      {{ render_box(form.allowance) }}
     <input type=submit value=Generate>
 
   </form>
