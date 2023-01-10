@@ -72,9 +72,7 @@ def get_compound_codename(round_codenames):
     for i, codename in enumerate(round_codenames):
         if codename in convert_dict:
             round_codenames[i] = convert_dict[codename]
-    print(round_codenames)
     if notlistflag:
-        print(round_codenames[:])
         return round_codenames[0]
     else:
         return round_codenames
