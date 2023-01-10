@@ -1,4 +1,4 @@
-from wtforms import Form, validators, SearchField, SelectField
+from wtforms import Form, validators, SearchField, SelectField, BooleanField
 
 
 class HandicapTableForm(Form):
@@ -9,6 +9,7 @@ class HandicapTableForm(Form):
     round5 = SearchField("Round5")
     round6 = SearchField("Round6")
     round7 = SearchField("Round7")
+    allowance = BooleanField(label="Create Allowance Table", false_values=(False, ""))
 
 
 class ClassificationTableForm(Form):

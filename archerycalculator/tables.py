@@ -37,7 +37,7 @@ def handicap_tables():
             ]
         )
 
-        # Get essential form results
+        # Get form results
         rounds_req = []
         rounds_req.append(request.form["round1"])
         rounds_req.append(request.form["round2"])
@@ -46,6 +46,10 @@ def handicap_tables():
         rounds_req.append(request.form["round5"])
         rounds_req.append(request.form["round6"])
         rounds_req.append(request.form["round7"])
+
+        allowance_table = False
+        if request.form.getlist("allowance"):
+            allowance_table = True
 
         rounds_req = [i for i in rounds_req if i]
         round_objs = []
@@ -77,15 +81,18 @@ def handicap_tables():
                 round_obj_i, results[:, 0], "AGB", hc_params
             )[0].astype(np.int32)
 
-        # Clean gaps where there are multiple HC for one score
-        # TODO: This assumes scores are running highest to lowest.
-        #  AA and AA2 will only work if hcs passed in reverse order (large to small)
-        # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
-        #  0, NaN, and None as the same thing. Consider finding better solution.
-        for irow, row in enumerate(results[:-1, 1:]):
-            for jscore, score in enumerate(row):
-                if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
-                    results[irow, jscore + 1] = -9999
+        if allowance_table:
+            results[:, 1:] = 1440 - results[:, 1:]
+        else:
+            # Clean gaps where there are multiple HC for one score
+            # TODO: This assumes scores are running highest to lowest.
+            #  AA and AA2 will only work if hcs passed in reverse order (large to small)
+            # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
+            #  0, NaN, and None as the same thing. Consider finding better solution.
+            for irow, row in enumerate(results[:-1, 1:]):
+                for jscore, score in enumerate(row):
+                    if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
+                        results[irow, jscore + 1] = -9999
 
         if error is None:
             # Return the results
