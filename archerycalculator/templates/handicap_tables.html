@@ -16,7 +16,6 @@
 
   {% from "_formhelpers.html" import render_textin_field %}
   <form method=post>
-    <dl>
       {{ render_textin_field(form.round1, list="roundlist") }}
       {{ render_textin_field(form.round2, list="roundlist") }}
       {{ render_textin_field(form.round3, list="roundlist") }}
@@ -24,7 +23,6 @@
       {{ render_textin_field(form.round5, list="roundlist") }}
       {{ render_textin_field(form.round6, list="roundlist") }}
       {{ render_textin_field(form.round7, list="roundlist") }}
-    </dl>
     <input type=submit value=Generate>
 
   </form>
