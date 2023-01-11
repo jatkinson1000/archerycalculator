@@ -1,12 +1,69 @@
-import numpy as np
+def check_blacklist(roundlist, age, gender, bowstyle):
+    """
+    Filter indoor rounds to remove any with compound scoring for the purposes of
+    display
 
-from archerycalculator.db import query_db, sql_to_dol
+    Parameters
+    ----------
+    roundlist : list
+        list of archeryutils round codenames
 
-from archeryutils import rounds
-from archeryutils.handicaps import handicap_equations as hc_eq
-from archeryutils.classifications import classifications as class_func
+    Returns
+    -------
+    list
+        filtered version of the input list
 
-from archerycalculator import TableForm
+    References
+    ----------
+    """
+
+    blacklist = []
+
+    blacklist.append("wa1440_90_small")
+    blacklist.append("wa1440_70_small")
+    blacklist.append("wa1440_60_small")
+
+    # Gender
+    if gender.lower() in ["male"]:
+        blacklist.append("hereford")
+        blacklist.append("long_metric_ladies")
+        blacklist.append("wa1440_60")
+        if age.lower().replace(" ", "") in ["50+"]:
+            blacklist.append("metric_i")
+        else:
+            blacklist.append("wa1440_70")
+
+    if gender.lower() in ["female"]:
+        blacklist.append("bristol_i")
+        blacklist.append("long_metric_i")
+        if age.lower().replace(" ", "") in ["50+"]:
+            blacklist.append("metric_ii")
+        else:
+            blacklist.append("wa1440_60")
+
+    # Age
+    if age.lower().replace(" ", "") in ["adult", "50+"]:
+        blacklist.append("short_metric_i")
+    else:
+        blacklist.append("short_metric")
+
+    # Bowstyle
+    if bowstyle.lower() in ["compound"]:
+        blacklist.append("metric_80_50")
+    else:
+        blacklist.append("wa720_50_c")
+
+    if bowstyle.lower() in ["barebow"]:
+        blacklist.append("metric_122_50")
+    else:
+        blacklist.append("wa720_50_b")
+
+    saferounds = []
+    for roundname in roundlist:
+        if roundname not in blacklist:
+            saferounds.append(roundname)
+
+    return saferounds
 
 
 def indoor_display_filter(rounddict):
