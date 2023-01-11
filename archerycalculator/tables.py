@@ -36,6 +36,8 @@ def handicap_tables():
                 "AGB_indoor.json",
                 "WA_outdoor.json",
                 "WA_indoor.json",
+                "WA_field.json",
+                "IFAA_field.json",
                 "Custom.json",
             ]
         )
@@ -175,6 +177,19 @@ def classification_tables():
                     "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
                 )
             )
+
+            # Perform filtering based upon category to make more aesthetic and avoid duplicates
+            roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+            filtered_names = utils.check_blacklist(
+                use_rounds["code_name"], age, gender, bowstyle
+            )
+            round_names = [
+                roundsdicts[key]
+                for key in list(roundsdicts.keys())
+                if key in filtered_names
+            ]
+            use_rounds = {"code_name": filtered_names, "round_name": round_names}
+
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(

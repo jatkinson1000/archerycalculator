@@ -17,6 +17,10 @@ rounds = rounds.read_json_to_round_dict(
         "AGB_indoor.json",
         "WA_outdoor.json",
         "WA_indoor.json",
+        "AGB_VI.json",
+        "WA_VI.json",
+        "WA_field.json",
+        "IFAA_field.json",
         "Custom.json",
     ]
 )
