@@ -99,6 +99,10 @@ def calculator():
                 "AGB_indoor.json",
                 "WA_outdoor.json",
                 "WA_indoor.json",
+                "WA_field.json",
+                "IFAA_field.json",
+                "AGB_VI.json",
+                "WA_VI.json",
                 "Custom.json",
             ]
         )
@@ -180,7 +184,7 @@ def calculator():
                 )
                 results["classification"] = class_from_score
             else:
-                results["classification"] = "not currently available for this round"
+                results["classification"] = "not currently available"
 
             # Other stats
             RAD2DEG = 57.295779513
