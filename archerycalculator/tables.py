@@ -59,13 +59,22 @@ def handicap_tables():
 
         round_objs = []
         for (round_i, comp_i) in zip(rounds_req, rounds_comp):
-            round_codename = query_db(
+            round_query = query_db(
                 "SELECT code_name FROM rounds WHERE round_name IS (?)",
                 [round_i],
                 one=True,
-            )["code_name"]
-            if len(round_codename) == 0:
-                error = f"Invalid round name '{round_i}'. Please select from dropdown."
+            )
+            if round_query is None:
+                error = f"Invalid round name '{round_i}'. Please start typing and select from dropdown."
+                # If errors reload default with error message
+                return render_template(
+                    "handicap_tables.html",
+                    rounds=all_rounds,
+                    form=form,
+                    error=error,
+                )
+            else:
+                round_codename = round_query["code_name"]
 
             # Check if we need compound scoring
             if comp_i:
@@ -97,23 +106,14 @@ def handicap_tables():
                     if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
                         results[irow, jscore + 1] = -9999
 
-        if error is None:
-            # Return the results
-            return render_template(
-                "handicap_tables.html",
-                rounds=all_rounds,
-                form=form,
-                roundnames=rounds_req,
-                results=results,
-            )
-        else:
-            # If errors reload default with error message
-            return render_template(
-                "handicap_tables.html",
-                rounds=all_rounds,
-                form=form,
-                error=error,
-            )
+        # Return the results
+        return render_template(
+            "handicap_tables.html",
+            rounds=all_rounds,
+            form=form,
+            roundnames=rounds_req,
+            results=results,
+        )
 
     # If first visit load the default form with no inputs
     return render_template(

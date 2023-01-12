@@ -44,8 +44,8 @@ def calculator():
     form.gender.choices = genderlist
     form.age.choices = agelist
 
+    error = None
     if request.method == "POST" and form.validate():
-        error = None
 
         # Get essential form results
         bowstyle = request.form["bowstyle"]
@@ -68,6 +68,7 @@ def calculator():
             diameter = None
 
         # Check the inputs are all valid
+        # No longer need to check dropdowns, but leave in case
         bowstylecheck = query_db(
             "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
         )
@@ -86,139 +87,134 @@ def calculator():
         results["age"] = age
 
         roundcheck = query_db(
-            "SELECT id FROM rounds WHERE round_name IS (?)", [roundname]
+            "SELECT * FROM rounds WHERE round_name IS (?)", [roundname], one=True
         )
-        if len(roundcheck) == 0:
-            error = "Invalid round name. Please select from dropdown."
+        if roundcheck is None:
+            error = f"Invalid round name '{roundname}'. Please start typing and select from dropdown."
         results["roundname"] = roundname
 
-        all_rounds_objs = rounds.read_json_to_round_dict(
-            [
-                "AGB_outdoor_imperial.json",
-                "AGB_outdoor_metric.json",
-                "AGB_indoor.json",
-                "WA_outdoor.json",
-                "WA_indoor.json",
-                "WA_field.json",
-                "IFAA_field.json",
-                "AGB_VI.json",
-                "WA_VI.json",
-                "Custom.json",
-            ]
-        )
-        # Get the appropriate round from the database
-        round_db_info = query_db(
-            "SELECT * FROM rounds WHERE round_name IS (?)",
-            [roundname],
-            one=True,
-        )
-        round_codename = round_db_info["code_name"]
-        round_location = round_db_info["location"]
-        round_body = round_db_info["body"]
-
-        # Check if we need compound scoring
-        if bowstyle.lower() in ["compound"]:
-            round_codename = utils.get_compound_codename(round_codename)
-        round_obj = all_rounds_objs[round_codename]
-
-        # Generate the handicap params
-        hc_params = hc_eq.HcParams()
-
-        # Check score against maximum score and return error if inappropriate
-        max_score = round_obj.max_score()
-        if int(score) <= 0:
-            error = "A score of 0 or less is not valid."
-        elif int(score) > max_score:
-            error = (
-                f"{score} is larger than the maximum possible "
-                f"score of {int(max_score)} for a {roundname}."
-            )
-        results["score"] = score
-        results["maxscore"] = int(max_score)
 
         if error is None:
-            # Calculate the handicap
-            hc_from_score = hc_func.handicap_from_score(
-                float(score),
-                round_obj,
-                scheme,
-                hc_params,
-                arw_d=diameter,
-                int_prec=True,
-            )
-            results["handicap"] = hc_from_score
 
-            if not integer_precision:
-                decimal_hc_from_score = hc_func.handicap_from_score(
+            all_rounds_objs = rounds.read_json_to_round_dict(
+                [
+                    "AGB_outdoor_imperial.json",
+                    "AGB_outdoor_metric.json",
+                    "AGB_indoor.json",
+                    "WA_outdoor.json",
+                    "WA_indoor.json",
+                    "WA_field.json",
+                    "IFAA_field.json",
+                    "AGB_VI.json",
+                    "WA_VI.json",
+                    "Custom.json",
+                ]
+            )
+            # Get the appropriate round from the database
+            round_db_info = query_db(
+                "SELECT * FROM rounds WHERE round_name IS (?)",
+                [roundname],
+                one=True,
+            )
+            round_codename = round_db_info["code_name"]
+            round_location = round_db_info["location"]
+            round_body = round_db_info["body"]
+
+            # Check if we need compound scoring
+            if bowstyle.lower() in ["compound"]:
+                round_codename = utils.get_compound_codename(round_codename)
+            round_obj = all_rounds_objs[round_codename]
+
+            # Generate the handicap params
+            hc_params = hc_eq.HcParams()
+
+            # Check score against maximum score and return error if inappropriate
+            max_score = round_obj.max_score()
+            if int(score) <= 0:
+                error = "A score of 0 or less is not valid."
+            elif int(score) > max_score:
+                error = (
+                    f"{score} is larger than the maximum possible "
+                    f"score of {int(max_score)} for a {roundname}."
+                )
+            results["score"] = score
+            results["maxscore"] = int(max_score)
+            
+            if error is None:
+                # Calculate the handicap
+                hc_from_score = hc_func.handicap_from_score(
                     float(score),
                     round_obj,
                     scheme,
                     hc_params,
                     arw_d=diameter,
-                    int_prec=integer_precision,
+                    int_prec=True,
                 )
-                results["decimal_handicap"] = decimal_hc_from_score
+                results["handicap"] = hc_from_score
 
-            # Calculate the classification
-            if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
-                class_from_score = class_func.calculate_AGB_outdoor_classification(
-                    round_codename,
-                    float(score),
-                    bowstyle.lower(),
-                    gender.lower(),
-                    age.lower(),
-                )
-                class_from_score = query_db(
-                    "SELECT longname FROM classes WHERE shortname IS (?)",
-                    [class_from_score],
-                    one=True,
-                )["longname"]
-                results["classification"] = class_from_score
-            elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
-                class_from_score = class_func.calculate_AGB_indoor_classification(
-                    round_codename,
-                    float(score),
-                    bowstyle.lower(),
-                    gender.lower(),
-                    age.lower(),
-                )
-                results["classification"] = class_from_score
-            else:
-                results["classification"] = "not currently available"
+                if not integer_precision:
+                    decimal_hc_from_score = hc_func.handicap_from_score(
+                        float(score),
+                        round_obj,
+                        scheme,
+                        hc_params,
+                        arw_d=diameter,
+                        int_prec=integer_precision,
+                    )
+                    results["decimal_handicap"] = decimal_hc_from_score
 
-            # Other stats
-            RAD2DEG = 57.295779513
-            sig_t = hc_eq.sigma_t(hc_from_score, scheme, 0.0, hc_params)
-            sig_r_18 = hc_eq.sigma_r(hc_from_score, scheme, 18.0, hc_params)
-            sig_r_50 = hc_eq.sigma_r(hc_from_score, scheme, 50.0, hc_params)
-            sig_r_70 = hc_eq.sigma_r(hc_from_score, scheme, 70.0, hc_params)
+                # Calculate the classification
+                if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
+                    class_from_score = class_func.calculate_AGB_outdoor_classification(
+                        round_codename,
+                        float(score),
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age.lower(),
+                    )
+                    class_from_score = query_db(
+                        "SELECT longname FROM classes WHERE shortname IS (?)",
+                        [class_from_score],
+                        one=True,
+                    )["longname"]
+                    results["classification"] = class_from_score
+                elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
+                    class_from_score = class_func.calculate_AGB_indoor_classification(
+                        round_codename,
+                        float(score),
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age.lower(),
+                    )
+                    results["classification"] = class_from_score
+                else:
+                    results["classification"] = "not currently available"
 
-            # Perform calculations and return the results
-            return render_template(
-                "calculator.html",
-                form=form,
-                rounds=roundnames,
-                results=results,
-                sig_t=2.0 * RAD2DEG * sig_t,
-                sig_r_18=2.0 * 100.0 * sig_r_18,
-                sig_r_50=2.0 * 100.0 * sig_r_50,
-                sig_r_70=2.0 * 100.0 * sig_r_70,
-            )
-        else:
-            # If errors reload default with error message
-            return render_template(
-                "calculator.html",
-                form=form,
-                rounds=roundnames,
-                results=None,
-                error=error,
-            )
+                # Other stats
+                RAD2DEG = 57.295779513
+                sig_t = hc_eq.sigma_t(hc_from_score, scheme, 0.0, hc_params)
+                sig_r_18 = hc_eq.sigma_r(hc_from_score, scheme, 18.0, hc_params)
+                sig_r_50 = hc_eq.sigma_r(hc_from_score, scheme, 50.0, hc_params)
+                sig_r_70 = hc_eq.sigma_r(hc_from_score, scheme, 70.0, hc_params)
 
+                # Perform calculations and return the results
+                return render_template(
+                    "calculator.html",
+                    form=form,
+                    rounds=roundnames,
+                    results=results,
+                    sig_t=2.0 * RAD2DEG * sig_t,
+                    sig_r_18=2.0 * 100.0 * sig_r_18,
+                    sig_r_50=2.0 * 100.0 * sig_r_50,
+                    sig_r_70=2.0 * 100.0 * sig_r_70,
+                    )
+
+    # If errors reload page with error reports
     # If first visit load the default form with no inputs
     return render_template(
         "calculator.html",
         form=form,
         rounds=roundnames,
         results=None,
-        error=None,
+        error=error,
     )
