@@ -1,10 +1,23 @@
 <!doctype html>
 
 <head>
+    <!-- <title>Archery Handicap and Classification Calculator archerycalculator.co.uk</title> -->
     <script src="https://kit.fontawesome.com/5e18878647.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name=description content="The best archery handicap and classification calculator available.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WW52R2Y5K4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-WW52R2Y5K4');
+</script>
+
 
 <body>
 <title>{% block title %}{% endblock %}ArcheryCalculator.co.uk</title>
