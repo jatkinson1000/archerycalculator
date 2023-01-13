@@ -59,7 +59,7 @@ nav ul  {
   padding: 0;
 }
 
-nav ul li a {
+nav ul li a, .menulabel {
   display: block;
   color: white;
   text-align: center;
@@ -67,19 +67,92 @@ nav ul li a {
   text-decoration: none;
 }
 
-nav ul li a:hover:not(.active) {
+nav ul li a:hover, .menulabel:hover {
   background-color: white;
   color: #3bf;
 }
 
-nav ul li a.active {background-color: #04AA6D;}
+/*nav ul li a.active {background-color: #04AA6D;}*/
 
 nav ul li.right {float: right;}
 
-@media screen and (max-width: 600px) {
-  nav ul li.right, 
-  nav ul li {float: none;}
+/*Dropdown menu*/
+.menulabel{
+  position:relative;
+  display:block;
+  cursor:pointer;
 }
+
+.menulabel:after{
+  content:"";
+  position:absolute;
+  display:block;
+  top:43%;
+  right:5%;
+  width:0;
+  height:0;
+  border-top:4px solid #fff;
+  border-bottom:0 solid #fff;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  }
+
+.menulabel:hover:after{
+  content:"";
+  position:absolute;
+  display:block;
+  top:43%;
+  right:5%;
+  width:0;
+  height:0;
+  border-top:4px solid #3bf;
+  border-bottom:0 solid #3bf;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  }
+
+.menucheck:checked ~ .menulabel:after{
+  border-top:0 solid #3bf;
+  border-bottom:4px solid #3bf;
+}
+
+.menucheck:checked ~ .menulabel {
+  background-color: white;
+  color: #3bf;
+}
+
+.menucheck{display:none}
+
+.submenu{
+  display: none;
+  flex-wrap: wrap;
+  list-style-type: none;
+}
+
+.menucheck:checked ~ .submenu {
+  transition:max-height 0.5s ease-in;
+  display: flex;
+  flex-flow: column wrap;
+  list-style-type: none;
+  overflow: hidden;
+  background-color: #3bf;
+  font-weight: bold;
+  transition:max-height 0.5s ease-out;
+  position:absolute;
+}
+
+.submenu li a {
+  color: white;
+  text-align: center;
+  padding: 1rem 1rem;
+  text-decoration: none;
+}
+
+.submenu li a:hover {
+  background-color: white;
+  color: #3bf;
+}
+
 
 
 /* ----------------------- */
