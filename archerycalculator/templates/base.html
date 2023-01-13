@@ -26,10 +26,28 @@
     <h1><a href="/">ArcheryCalculator.co.uk</a></h1>
   <ul>
     <li><a href="{{ '/' }}">Calculator</a></li>
-    <li><a href="{{ '/tables/handicap' }}">Handicaps</a></li>
-    <li><a href="{{ '/tables/classification' }}">Classifications</a></li>
+
+    <li>
+    <input id="check00" type="checkbox" name="menu" class="menucheck"/>
+    <label class="menulabel" for="check00">Tables</label>
+        <ul class="submenu">
+            <li><a href="{{ '/tables/handicap' }}">Handicaps</a></li>
+            <li><a href="{{ '/tables/classification' }}">Classifications</a></li>
+        </ul>
+    </li>
+    
     <li><a href="{{ '/rounds' }}">Rounds</a></li>
-    <li><a href="{{ '/extras/groups' }}">Extras</a></li>
+
+    <li>
+    <input id="check01" type="checkbox" name="menu" class="menucheck"/>
+    <!--<label for="check01"><a href="{{ '/extras/groups' }}">Extras</a></label> -->
+    <label class="menulabel" for="check01">Extras</label>
+        <ul class="submenu">
+            <li><a href="{{ '/extras/groups' }}">Group Sizes</a></li>
+            <li><a href="{{ '/extras/groups' }}">Extras</a></li>
+        </ul>
+    </li>
+    
     <li><a href="{{ '/info' }}">Information</a></li>
     <li><a href="{{ '/about' }}">About</a></li>
   </ul>
