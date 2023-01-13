@@ -49,6 +49,17 @@
   &nbsp;
 {% endmacro %}
 
+{% macro render_field_with_unit(mainfield, unitfield) %}
+<span>{{ mainfield(**kwargs)|safe }} {{ unitfield()|safe }}</span>
+  {% if mainfield.errors %}
+    <ul class=errors>
+    {% for error in mainfield.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
+
 {% macro render_handicap_table(rounds, results) %}
 <table class="hctable">
    <thead>

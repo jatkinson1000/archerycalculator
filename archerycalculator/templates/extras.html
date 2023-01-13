@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Archery Handicap and Classification Calculator{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+  <p>
+  Enter your average group size at a known distance to get an estimation of group size at other distances.
+  </p>
+
+  {% from "_formhelpers.html" import render_field_with_unit %}
+  <form method=post>
+    Group size (diameter):
+    {{ render_field_with_unit(form.known_group_size, form.known_group_unit) }}
+    at a distance of:
+    {{ render_field_with_unit(form.known_dist, form.known_dist_unit) }}
+    <input type=submit value=Calculate>
+
+  {% if error %}
+  <p style="color: red;">{{ error }}</p>
+  {% endif %}
+  </form>
+
+    {% if results is not none %}
+    If you shoot groups of {{ '%0.2f'|format(request.form["known_group_size"]|float) }} {{ request.form["known_group_unit"] }}
+    at {{ '%0.1f'|format(request.form["known_dist"]|float) }} {{ request.form["known_dist_unit"] }}, you can expect groups of:
+      <ul>
+      {% for item in results %}
+      <li>{{ '%0.2f'|format(results[item][0]) }} {{ group_unit }} at {{ '%0.1f'|format(item) }} {{ dist_unit }} - <i class="{{ results[item][1] }}"></i> </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+{% endblock %}

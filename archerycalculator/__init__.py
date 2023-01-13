@@ -59,6 +59,10 @@ def create_app(test_config=None):
 
     app.register_blueprint(about.bp)
 
+    from archerycalculator import extras
+
+    app.register_blueprint(extras.bp)
+    
     db.init_app(app)
 
     return app
