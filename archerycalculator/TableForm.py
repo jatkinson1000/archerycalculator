@@ -39,7 +39,4 @@ class ClassificationTableForm(Form):
         "Gender under AGB", [validators.InputRequired("Please provide.")]
     )
     age = SelectField("Age category", [validators.InputRequired("Please provide.")])
-    discipline = SelectField(
-        "Discipline",
-        choices=[("outdoor", "Target Outdoor"), ("indoor", "Target Indoor")],
-    )
+    discipline = SelectField("Discipline")

@@ -142,6 +142,12 @@ def classification_tables():
     form.gender.choices = genderlist
     form.age.choices = agelist
 
+    form.discipline.choices = [
+        ("outdoor", "Target Outdoor"),
+        ("indoor", "Target Indoor"),
+        ("field", "Field"),
+    ]
+
     if request.method == "POST" and form.validate():
         error = None
 
@@ -177,6 +183,9 @@ def classification_tables():
                     "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
                 )
             )
+
+            if bowstyle.lower() in ["traditional", "flatbow"]:
+                bowstyle = "barebow"
 
             # Perform filtering based upon category to make more aesthetic and avoid duplicates
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
@@ -226,6 +235,28 @@ def classification_tables():
                         round_i, bowstyle, gender, age
                     )
                 )
+        elif discipline in ["field"]:
+            # TODO: This is a bodge - put field classes in database properly and fetch above!
+            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
+
+            if bowstyle.lower() in ["recurve", "compound"]:
+                use_rounds = {
+                    "code_name": ["wa_field_24_red"],
+                    "round_name": ["WA Field 24 Red"],
+                }
+            elif bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
+                use_rounds = {
+                    "code_name": ["wa_field_24_blue"],
+                    "round_name": ["WA Field 24 Blue"],
+                }
+
+            results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
+            for i, round_i in enumerate(use_rounds["code_name"]):
+                results[i, :] = np.asarray(
+                    class_func.AGB_field_classification_scores(
+                        round_i, bowstyle, gender, age
+                    )
+                )
         else:
             # Should never get here... placeholder for field...
             # use_rounds = sql_to_dol(query_db("SELECT code_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA')"))
@@ -235,7 +266,6 @@ def classification_tables():
             #         class_func.AGB_field_classification_scores(
             #             round_i, bowstyle, gender, age
             #         )
-
             pass
 
         # Add roundnames on to the end then flip for printing
