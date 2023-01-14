@@ -27,10 +27,17 @@ rounds = rounds.read_json_to_round_dict(
 
 
 def load_bowstyles(db):
+    # AGB Target bowstyles from file
     for item in bowstyles:
         db.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item["bowstyle"], "TF"),
+        )
+    # Additional AGB field bowstyles
+    for item in ["Traditional", "Flatbow"]:
+        db.execute(
+            "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
+            (item, "TF"),
         )
     db.commit()
 
