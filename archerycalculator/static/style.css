@@ -129,7 +129,7 @@ nav ul li.right {float: right;}
   list-style-type: none;
 }
 
-.menucheck:checked ~ .submenu {
+.menucheck:checked ~ .submenu, .menulabel:hover ~ .submenu, .submenu:hover {
   transition:max-height 0.5s ease-in;
   display: flex;
   flex-flow: column wrap;
