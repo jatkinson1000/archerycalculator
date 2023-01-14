@@ -43,18 +43,23 @@
       </p>
       {% endif %}
       <p>
-      Your <b>classification</b> for a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.
+        Your <b>classification</b> for a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.
+        {% if warning %}
+        <br><span style="color: red;">{{ warning }}</span>
+        {% endif %}
       </p>
       <p>
-      The maximum possible score on a {{ results["roundname"] }} is {{ results["maxscore"] }}
+      The <b>maximum</b> possible score on a {{ results["roundname"] }} is <b>{{ results["maxscore"] }}</b>.
       </p>
+      <p>
       This handicap represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees at the bow and
          typical group sizes of:
-         <ul>
-             <li>{{ '%0.2f'|format(sig_r_18) }}cm at 18m</li>
-             <li>{{ '%0.2f'|format(sig_r_50) }}cm at 50m</li>
-             <li>{{ '%0.2f'|format(sig_r_70) }}cm at 70m</li>
+         <ul style="margin-top: auto;">
+             <li>{{ '%0.1f'|format(sig_r_18) }}cm at 18m</li>
+             <li>{{ '%0.1f'|format(sig_r_50) }}cm at 50m</li>
+             <li>{{ '%0.1f'|format(sig_r_70) }}cm at 70m</li>
          </ul>
+      </p>
     {% endif %}
 
     <hr width="100%" 

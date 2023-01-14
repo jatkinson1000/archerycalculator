@@ -45,6 +45,7 @@ def calculator():
     form.age.choices = agelist
 
     error = None
+    warning = None
     if request.method == "POST" and form.validate():
 
         # Get essential form results
@@ -93,7 +94,6 @@ def calculator():
             error = f"Invalid round name '{roundname}'. Please start typing and select from dropdown."
         results["roundname"] = roundname
 
-
         if error is None:
 
             all_rounds_objs = rounds.read_json_to_round_dict(
@@ -139,7 +139,7 @@ def calculator():
                 )
             results["score"] = score
             results["maxscore"] = int(max_score)
-            
+
             if error is None:
                 # Calculate the handicap
                 hc_from_score = hc_func.handicap_from_score(
@@ -165,6 +165,11 @@ def calculator():
 
                 # Calculate the classification
                 if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
+                    # TODO: Consider re-assigning bowstyle here for cleaner code,
+                    #   rather than in archeryutils?
+                    if bowstyle.lower() in ["traditional", "flatbow"]:
+                        warning = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
+
                     class_from_score = class_func.calculate_AGB_outdoor_classification(
                         round_codename,
                         float(score),
@@ -178,8 +183,24 @@ def calculator():
                         one=True,
                     )["longname"]
                     results["classification"] = class_from_score
+
                 elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
+                    # TODO: Consider re-assigning bowstyle here for cleaner code,
+                    #   rather than in archeryutils?
+                    if bowstyle.lower() not in ["compound", "recurve"]:
+                        warning = f"Note: Treating {bowstyle} as Recurve for the purposes of classifications."
+
                     class_from_score = class_func.calculate_AGB_indoor_classification(
+                        round_codename,
+                        float(score),
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age.lower(),
+                    )
+                    results["classification"] = class_from_score
+
+                elif round_location in ["field"] and round_body in ["AGB", "WA"]:
+                    class_from_score = class_func.calculate_AGB_field_classification(
                         round_codename,
                         float(score),
                         bowstyle.lower(),
@@ -207,7 +228,8 @@ def calculator():
                     sig_r_18=2.0 * 100.0 * sig_r_18,
                     sig_r_50=2.0 * 100.0 * sig_r_50,
                     sig_r_70=2.0 * 100.0 * sig_r_70,
-                    )
+                    warning=warning,
+                )
 
     # If errors reload page with error reports
     # If first visit load the default form with no inputs
@@ -217,4 +239,5 @@ def calculator():
         rounds=roundnames,
         results=None,
         error=error,
+        warning=warning,
     )
