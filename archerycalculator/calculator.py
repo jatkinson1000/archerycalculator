@@ -45,7 +45,9 @@ def calculator():
     form.age.choices = agelist
 
     error = None
-    warning = None
+    warning_bowstyle = None
+    warning_handicap_round = None
+    warning_handicap_system = None
     if request.method == "POST" and form.validate():
 
         # Get essential form results
@@ -168,7 +170,7 @@ def calculator():
                     # TODO: Consider re-assigning bowstyle here for cleaner code,
                     #   rather than in archeryutils?
                     if bowstyle.lower() in ["traditional", "flatbow"]:
-                        warning = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
+                        warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
                     class_from_score = class_func.calculate_AGB_outdoor_classification(
                         round_codename,
@@ -188,7 +190,7 @@ def calculator():
                     # TODO: Consider re-assigning bowstyle here for cleaner code,
                     #   rather than in archeryutils?
                     if bowstyle.lower() not in ["compound", "recurve"]:
-                        warning = f"Note: Treating {bowstyle} as Recurve for the purposes of classifications."
+                        warning_bowstyle = f"Note: Treating {bowstyle} as Recurve for the purposes of classifications."
 
                     class_from_score = class_func.calculate_AGB_indoor_classification(
                         round_codename,
@@ -198,6 +200,7 @@ def calculator():
                         age.lower(),
                     )
                     results["classification"] = class_from_score
+                    warning_handicap_system = "Note: This handicap uses the new scheme that will come into effect for indoor rounds from July 2023. To use the 'old' scheme for 2022/2023 please select 'Old Archery GB' in the advanced options below."
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
                     class_from_score = class_func.calculate_AGB_field_classification(
@@ -208,8 +211,10 @@ def calculator():
                         age.lower(),
                     )
                     results["classification"] = class_from_score
+                    warning_handicap_round = "Note: This round is not officially recognised by Archery GB for the purposes of handicapping."
                 else:
                     results["classification"] = "not currently available"
+                    warning_handicap_round = "Note: This round is not officially recognised by Archery GB for the purposes of handicapping."
 
                 # Other stats
                 RAD2DEG = 57.295779513
@@ -228,7 +233,9 @@ def calculator():
                     sig_r_18=2.0 * 100.0 * sig_r_18,
                     sig_r_50=2.0 * 100.0 * sig_r_50,
                     sig_r_70=2.0 * 100.0 * sig_r_70,
-                    warning=warning,
+                    warning_bowstyle=warning_bowstyle,
+                    warning_handicap_round=warning_handicap_round,
+                    warning_handicap_system=warning_handicap_system,
                 )
 
     # If errors reload page with error reports
@@ -239,5 +246,4 @@ def calculator():
         rounds=roundnames,
         results=None,
         error=error,
-        warning=warning,
     )

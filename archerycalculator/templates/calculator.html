@@ -36,6 +36,12 @@
     {% if results %}
       <p>
       The <b>handicap</b> for a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ '%0.0f'|format(results["handicap"]) }}</b>.
+        {% if warning_handicap_round %}
+        <br><span style="color: red; font-size: 0.8em">{{ warning_handicap_round }}</span>
+        {% endif %}
+        {% if warning_handicap_system %}
+        <br><span style="color: red; font-size: 0.8em">{{ warning_handicap_system }}</span>
+        {% endif %}
       </p>
       {% if results["decimal_handicap"] %}
       <p>
@@ -44,8 +50,8 @@
       {% endif %}
       <p>
         Your <b>classification</b> for a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.
-        {% if warning %}
-        <br><span style="color: red;">{{ warning }}</span>
+        {% if warning_bowstyle %}
+        <br><span style="color: red; font-size: 0.8em">{{ warning_bowstyle }}</span>
         {% endif %}
       </p>
       <p>
@@ -53,7 +59,7 @@
       </p>
       <p>
       This handicap represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees at the bow and
-         typical group sizes of:
+         typical group font-sizes of:
          <ul style="margin-top: auto;">
              <li>{{ '%0.1f'|format(sig_r_18) }}cm at 18m</li>
              <li>{{ '%0.1f'|format(sig_r_50) }}cm at 50m</li>
