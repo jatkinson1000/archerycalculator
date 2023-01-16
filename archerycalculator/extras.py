@@ -207,52 +207,55 @@ def roundcomparison():
                 [roundname],
                 one=True,
             )
-            round_codename = round_db_info["code_name"]
+            if round_db_info is None:
+                error = f"Invalid round name '{roundname}'. Please start typing and select from dropdown."
+            else:
+                round_codename = round_db_info["code_name"]
 
-            # Check if we need compound scoring
-            if compound:
-                round_codename = utils.get_compound_codename(round_codename)
-            round_obj = all_rounds_objs[round_codename]
+                # Check if we need compound scoring
+                if compound:
+                    round_codename = utils.get_compound_codename(round_codename)
+                round_obj = all_rounds_objs[round_codename]
 
-            # Check score against maximum score and return error if inappropriate
-            max_score = round_obj.max_score()
-            if int(score) <= 0:
-                error = "A score of 0 or less is not valid."
-            elif int(score) > max_score:
-                error = (
-                    f"{score} is larger than the maximum possible "
-                    f"score of {int(max_score)} for a {roundname}."
-                )
-
-            # Generate the handicap params
-            hc_params = hc_eq.HcParams()
-
-            if error is None:
-                # Calculate the handicap
-                hc_from_score = hc_func.handicap_from_score(
-                    float(score),
-                    round_obj,
-                    "AGB",
-                    hc_params,
-                    int_prec=False,
-                )
-
-                results={}
-                for item in use_rounds:
-                    results_i = np.zeros(len(use_rounds[item]["code_name"]))
-                    for i, round_i in enumerate(use_rounds[item]["code_name"]):
-                        results_i[i] = hc_eq.score_for_round(
-                                all_rounds_objs[round_i], hc_from_score, "AGB", hc_params
-                            )[0]
-                    results[item] = dict(zip(use_rounds[item]["round_name"], results_i))
-
-                # Return the results
-                return render_template(
-                    "roundscomparison.html",
-                    form=form,
-                    rounds=roundnames,
-                    results=results,
+                # Check score against maximum score and return error if inappropriate
+                max_score = round_obj.max_score()
+                if int(score) <= 0:
+                    error = "A score of 0 or less is not valid."
+                elif int(score) > max_score:
+                    error = (
+                        f"{score} is larger than the maximum possible "
+                        f"score of {int(max_score)} for a {roundname}."
                     )
+
+                # Generate the handicap params
+                hc_params = hc_eq.HcParams()
+
+                if error is None:
+                    # Calculate the handicap
+                    hc_from_score = hc_func.handicap_from_score(
+                        float(score),
+                        round_obj,
+                        "AGB",
+                        hc_params,
+                        int_prec=False,
+                    )
+
+                    results={}
+                    for item in use_rounds:
+                        results_i = np.zeros(len(use_rounds[item]["code_name"]))
+                        for i, round_i in enumerate(use_rounds[item]["code_name"]):
+                            results_i[i] = hc_eq.score_for_round(
+                                    all_rounds_objs[round_i], hc_from_score, "AGB", hc_params
+                                )[0]
+                        results[item] = dict(zip(use_rounds[item]["round_name"], results_i))
+
+                    # Return the results
+                    return render_template(
+                        "roundscomparison.html",
+                        form=form,
+                        rounds=roundnames,
+                        results=results,
+                        )
 
     # If first visit load the default form with no inputs
     return render_template(
