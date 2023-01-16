@@ -115,9 +115,9 @@
 {% macro render_round_comparison(results) %}
 
 {% for item in results %}
+<div class="column">
+<table class="comparetable">
 <b>{{ item }}</b>
-
-<table class="table">
   <tbody>
     {% for round in results[item] %}
       <tr>
@@ -127,6 +127,7 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
 <br>
 {% endfor %}
 {% endmacro %}

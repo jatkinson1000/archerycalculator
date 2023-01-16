@@ -22,11 +22,11 @@ class RoundComparisonForm(Form):
         label="Compound bow", false_values=(False, "")
     )
     
-    indoor = BooleanField(
-        label="Target indoor", false_values=(False, "")
-    )
     outdoor = BooleanField(
         label="Target outdoor", false_values=(False, "")
+    )
+    indoor = BooleanField(
+        label="Target indoor", false_values=(False, "")
     )
     wafield = BooleanField(
         label="WA Field", false_values=(False, "")

@@ -125,6 +125,14 @@ def roundcomparison():
             compound = True
 
         use_rounds = {}
+        if request.form.getlist("outdoor"):
+            outdoor_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
+                )
+            )
+            use_rounds["Outdoor Target"] = outdoor_rounds
+
         if request.form.getlist("indoor"):
             indoor_rounds = sql_to_dol(
                 query_db(
@@ -143,14 +151,6 @@ def roundcomparison():
                 codenames = utils.get_compound_codename(codenames)
             indoor_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
             use_rounds["Indoor Target"] = indoor_rounds
-
-        if request.form.getlist("outdoor"):
-            outdoor_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
-                )
-            )
-            use_rounds["Outdoor Target"] = outdoor_rounds
 
         if request.form.getlist("wafield"):
             wafield_rounds = sql_to_dol(
@@ -179,7 +179,7 @@ def roundcomparison():
         if request.form.getlist("unofficial"):
             unofficial_rounds = sql_to_dol(
                 query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('unofficial')"
+                    "SELECT code_name,round_name FROM rounds WHERE body IN ('custom')"
                 )
             )
             use_rounds["Unofficial"] = unofficial_rounds
