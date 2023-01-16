@@ -49,6 +49,13 @@
   &nbsp;
 {% endmacro %}
 
+{% macro render_box_list(fields) %}
+  {% for field in fields %}
+  <span style = "margin-left: 40px">{{ field()|safe }} - {{ field.label }}</span><br>
+  {% endfor %}
+  &nbsp;
+{% endmacro %}
+
 {% macro render_field_with_unit(mainfield, unitfield) %}
 <span>{{ mainfield(**kwargs)|safe }} {{ unitfield()|safe }}</span>
   {% if mainfield.errors %}
@@ -102,4 +109,25 @@
       {% endfor %}
    </tbody>
 </table>
+{% endmacro %}
+
+
+{% macro render_round_comparison(results) %}
+
+{% for item in results %}
+<div class="column">
+<table class="comparetable">
+<b>{{ item }}</b>
+  <tbody>
+    {% for round in results[item] %}
+      <tr>
+        <td>{{ round }}</td>
+        <td>{{ '%0.0f'|format(results[item][round]) }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<br>
+{% endfor %}
 {% endmacro %}

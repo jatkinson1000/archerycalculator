@@ -16,6 +16,9 @@
   gtag('js', new Date());
 
   gtag('config', 'G-WW52R2Y5K4');
+
+  {% block head %}{% endblock %}
+
 </script>
 
 
@@ -40,10 +43,10 @@
 
     <li>
     <input id="check01" type="checkbox" name="menu" class="menucheck"/>
-    <!--<label for="check01"><a href="{{ '/extras/groups' }}">Extras</a></label> -->
     <label class="menulabel" for="check01">Extras</label>
         <ul class="submenu">
             <li><a href="{{ '/extras/groups' }}">Group Sizes</a></li>
+            <li><a href="{{ '/extras/roundscomparison' }}">Round Comparisons</a></li>
         </ul>
     </li>
     

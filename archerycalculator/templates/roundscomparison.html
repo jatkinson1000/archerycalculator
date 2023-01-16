@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Round comparisons{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+  <datalist id="roundlist">
+  {% for round in rounds %}
+  <option>{{round}}</option>
+  {% endfor %}
+  </datalist>
+
+  <p>
+  Enter your score on one round to get an estimate of comparable scores on others.
+  </p>
+
+  {% from "_formhelpers.html" import render_textin_field, render_box, render_box_list %}
+  <form method=post>
+    {{ render_textin_field(form.score) }}
+    {{ render_textin_field(form.roundname, list="roundlist") }}
+    {{ render_box(form.compound) }}
+    <span>Show comparable scores for:</span>
+    {% set boxlist = [form.outdoor, form.indoor, form.wafield, form.ifaafield, form.virounds, form.unofficial] %}
+    {{ render_box_list(boxlist) }}
+    <input type=submit value=Calculate>
+
+  {% if error %}
+  <p style="color: red;">{{ error }}</p>
+  {% endif %}
+  </form>
+
+    {% if results is not none %}
+      {% from "_formhelpers.html" import render_round_comparison %}
+      If you score {{ '%0.0f'|format(request.form["score"]|float) }} on a {{ request.form["roundname"] }} round you can expect the following scores on the following rounds:
+      <div class="row">
+      {{ render_round_comparison(results) }}
+      </div>
+    {% endif %}
+
+{% endblock %}

@@ -68,7 +68,7 @@ nav ul li a, .menulabel {
 }
 
 nav ul li a:hover, .menulabel:hover {
-  background-color: white;
+  background-color: #dff;
   color: #3bf;
 }
 
@@ -117,7 +117,7 @@ nav ul li.right {float: right;}
 }
 
 .menucheck:checked ~ .menulabel {
-  background-color: white;
+  background-color: #dff;
   color: #3bf;
 }
 
@@ -143,13 +143,13 @@ nav ul li.right {float: right;}
 
 .submenu li a {
   color: white;
-  text-align: center;
+  text-align: left;
   padding: 1rem 1rem;
   text-decoration: none;
 }
 
 .submenu li a:hover {
-  background-color: white;
+  background-color: #dff;
   color: #3bf;
 }
 
@@ -274,9 +274,10 @@ th, td {
   text-align: center;
 }
 
-.hctable tbody tr:nth-child(odd){
+.classtable tbody tr:nth-child(odd), .hctable tbody tr:nth-child(odd), .comparetable tbody tr:nth-child(odd) {
   background-color: #eee;
 }
+
 
 /* Classification Table*/
 .classtable {
@@ -289,12 +290,26 @@ th, td {
   text-align: right;
 }
 
-.classtable tbody tr{
-  height: 3em;
-}
 
-.classtable tbody tr:nth-child(odd){
-  background-color: #eee;
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.column {
+  padding: 1%;
+}
+.comparetable {
+  box-sizing: border-box;
+  text-align: left;
+  font-size: min(calc(5px + 0.8vw), 1em);
+}
+.comparetable td {
+}
+.comparetable td:first-child {
+  padding-right: 20px;
+}
+.comparetable td:nth-child(2) {
+  text-align: right;
 }
 
 /* Info Page Classification Table*/
