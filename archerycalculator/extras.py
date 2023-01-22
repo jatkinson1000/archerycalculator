@@ -244,8 +244,9 @@ def roundcomparison():
                     for item in use_rounds:
                         results_i = np.zeros(len(use_rounds[item]["code_name"]))
                         for i, round_i in enumerate(use_rounds[item]["code_name"]):
+                            # Don't round up to avoid conflicts where score is different to that input
                             results_i[i] = hc_eq.score_for_round(
-                                    all_rounds_objs[round_i], hc_from_score, "AGB", hc_params
+                                    all_rounds_objs[round_i], hc_from_score, "AGB", hc_params, round_score_up=False
                                 )[0]
                         results[item] = dict(zip(use_rounds[item]["round_name"], results_i))
 
