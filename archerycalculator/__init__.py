@@ -36,31 +36,24 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # A simple page that says hello
-    @app.route("/rounds")
-    def rounds_page():
-        return render_template("rounds.html", rounds=[], error=None)
-
     from archerycalculator import calculator
-
     app.register_blueprint(calculator.bp)
     # Not 100% sure next line is neccessary... TODO: investigate further
     app.add_url_rule("/", endpoint="calculator")
 
     from archerycalculator import tables
-
     app.register_blueprint(tables.bp)
 
-    from archerycalculator import info
+    from archerycalculator import rounds
+    app.register_blueprint(rounds.bp)
 
+    from archerycalculator import info
     app.register_blueprint(info.bp)
 
     from archerycalculator import about
-
     app.register_blueprint(about.bp)
 
     from archerycalculator import extras
-
     app.register_blueprint(extras.bp)
     
     db.init_app(app)

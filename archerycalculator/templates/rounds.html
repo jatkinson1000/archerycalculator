@@ -14,6 +14,12 @@ These include World Archery and IFAA field rounds, World Archery and Archery GB 
 <p>The following is a list of the rounds that are available for handicap and
 classification calculation (Under Construction).</p>
 
+    {% if rounds is not none %}
+      {% from "_formhelpers.html" import render_round_list %}
+      <div class="row">
+      {{ render_round_list(rounds) }}
+      </div>
+    {% endif %}
 
 
   {% if error %}

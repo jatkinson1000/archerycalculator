@@ -9,7 +9,7 @@ bp = Blueprint("info", __name__, url_prefix="/info")
 
 # Single page (for now)
 @bp.route("/", strict_slashes=False)
-def about():
+def info():
     # return html
     return render_template(
         "info.html",
