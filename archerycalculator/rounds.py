@@ -65,6 +65,12 @@ def rounds_page():
         )
     )
 
+    rounds["Custom"] = sql_to_dol(
+        query_db(
+            "SELECT code_name,round_name FROM rounds WHERE body in ('custom')"
+        )
+    )
+
     for roundtype in rounds:
         roundsdict = dict(zip(rounds[roundtype]["code_name"], rounds[roundtype]["round_name"]))
         noncompoundroundnames = utils.indoor_display_filter(roundsdict)
