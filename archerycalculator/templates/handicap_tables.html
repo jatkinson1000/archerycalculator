@@ -12,21 +12,15 @@
   Select 1 or more rounds and click 'Generate' to produce a handicap table of scores.</p>
   <p>You can also generate a table of allowances for handicap shoots by checking the 'Create Allowance Table' box.</p>
 
-  <datalist id="roundlist">
-  {% for round in rounds %}
-  <option>{{round}}</option>
-  {% endfor %}
-  </datalist>
-
-  {% from "_formhelpers.html" import render_field_with_box, render_textin_field, render_box %}
+  {% from "_formhelpers.html" import render_select2_field_with_box, render_box %}
   <form method=post>
-      {{ render_field_with_box(form.round1, form.round1_compound, list="roundlist") }}
-      {{ render_field_with_box(form.round2, form.round2_compound, list="roundlist") }}
-      {{ render_field_with_box(form.round3, form.round3_compound, list="roundlist") }}
-      {{ render_field_with_box(form.round4, form.round4_compound, list="roundlist") }}
-      {{ render_field_with_box(form.round5, form.round5_compound, list="roundlist") }}
-      {{ render_field_with_box(form.round6, form.round6_compound, list="roundlist") }}
-      {{ render_field_with_box(form.round7, form.round7_compound, list="roundlist") }}
+      {{ render_select2_field_with_box(form.round1, form.round1_compound) }}
+      {{ render_select2_field_with_box(form.round2, form.round2_compound) }}
+      {{ render_select2_field_with_box(form.round3, form.round3_compound) }}
+      {{ render_select2_field_with_box(form.round4, form.round4_compound) }}
+      {{ render_select2_field_with_box(form.round5, form.round5_compound) }}
+      {{ render_select2_field_with_box(form.round6, form.round6_compound) }}
+      {{ render_select2_field_with_box(form.round7, form.round7_compound) }}
       {{ render_box(form.allowance) }}
     <input type=submit value=Generate>
 

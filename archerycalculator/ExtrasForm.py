@@ -3,7 +3,6 @@ from wtforms import (
     validators,
     IntegerField,
     SelectField,
-    SearchField,
     BooleanField,
 )
 
@@ -16,27 +15,13 @@ class GroupForm(Form):
 
 
 class RoundComparisonForm(Form):
-    roundname = SearchField("Round", [validators.InputRequired("Please provide.")])
+    roundname = SelectField("Round", [validators.InputRequired("Please provide.")])
     score = IntegerField("Score", [validators.InputRequired("Please provide.")])
-    compound = BooleanField(
-        label="Compound bow", false_values=(False, "")
-    )
-    
-    outdoor = BooleanField(
-        label="Target outdoor", false_values=(False, "")
-    )
-    indoor = BooleanField(
-        label="Target indoor", false_values=(False, "")
-    )
-    wafield = BooleanField(
-        label="WA Field", false_values=(False, "")
-    )
-    ifaafield = BooleanField(
-        label="IFAA Field", false_values=(False, "")
-    )
-    virounds = BooleanField(
-        label="VI Rounds", false_values=(False, "")
-    )
-    unofficial = BooleanField(
-        label="Unofficial Rounds", false_values=(False, "")
-    ) 
+    compound = BooleanField(label="Compound bow", false_values=(False, ""))
+
+    outdoor = BooleanField(label="Target outdoor", false_values=(False, ""))
+    indoor = BooleanField(label="Target indoor", false_values=(False, ""))
+    wafield = BooleanField(label="WA Field", false_values=(False, ""))
+    ifaafield = BooleanField(label="IFAA Field", false_values=(False, ""))
+    virounds = BooleanField(label="VI Rounds", false_values=(False, ""))
+    unofficial = BooleanField(label="Unofficial Rounds", false_values=(False, ""))

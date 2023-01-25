@@ -40,23 +40,23 @@ def groups():
         # Check the inputs are all valid
         known_group_size = abs(known_group_size)
         known_dist = abs(known_dist)
-        
+
         if known_group_unit == "cm":
             group_scale_factor = 1e-2
             group_unit = "cm"
         else:
             group_scale_factor = 2.54e-2
             group_unit = "in"
-        
+
         if known_dist_unit == "metres":
-            dists = np.asarray([18., 20., 30., 40., 50., 60., 70., 90.])
+            dists = np.asarray([18.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 90.0])
             dist_scale_factor = 1.0
             dist_unit = "m"
         else:
-            dists = np.asarray([20., 30., 40., 50., 60., 80., 100.])
+            dists = np.asarray([20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0])
             dist_scale_factor = 0.9144
             dist_unit = "yd"
-        
+
         # Generate the handicap params
         hc_params = hc_eq.HcParams()
         hc_scheme = "AGB"
@@ -69,10 +69,12 @@ def groups():
             return val - known_sig_r
 
         # Rootfind value of sigma_r
-        handicap = utils.rootfinding(-75, 300, f_root, hc_scheme, known_dist*dist_scale_factor, hc_params)
+        handicap = utils.rootfinding(
+            -75, 300, f_root, hc_scheme, known_dist * dist_scale_factor, hc_params
+        )
 
         # Map to other distances
-        sig_r = hc_eq.sigma_r(handicap, hc_scheme, dists*dist_scale_factor, hc_params)
+        sig_r = hc_eq.sigma_r(handicap, hc_scheme, dists * dist_scale_factor, hc_params)
 
         # Calculate group sizes
         groups = 2.0 * sig_r
@@ -80,8 +82,8 @@ def groups():
         icons = [None] * len(groups)
         for i, group in enumerate(groups):
             icons[i] = utils.group_icons(group)
-       
-        results = dict(zip(dists, zip(groups/group_scale_factor, icons)))
+
+        results = dict(zip(dists, zip(groups / group_scale_factor, icons)))
         print(results)
 
         # Return the results
@@ -91,7 +93,7 @@ def groups():
             results=results,
             group_unit=group_unit,
             dist_unit=dist_unit,
-            )
+        )
 
     # If first visit load the default form with no inputs
     return render_template(
@@ -113,14 +115,16 @@ def roundcomparison():
     roundnames = utils.indoor_display_filter(
         dict(zip(roundnames["code_name"], roundnames["round_name"]))
     )
-    
+
+    form.roundname.choices = [""] + roundnames
+
     error = None
     if request.method == "POST" and form.validate():
 
         # Get essential form results
         score = request.form["score"]
         roundname = request.form["roundname"]
-        compound=False
+        compound = False
         if request.form.getlist("compound"):
             compound = True
 
@@ -140,7 +144,9 @@ def roundcomparison():
                 )
             )
             # Deal with compound
-            roundsdicts = dict(zip(indoor_rounds["code_name"], indoor_rounds["round_name"]))
+            roundsdicts = dict(
+                zip(indoor_rounds["code_name"], indoor_rounds["round_name"])
+            )
             noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
             codenames = [
                 key
@@ -149,7 +155,10 @@ def roundcomparison():
             ]
             if compound:
                 codenames = utils.get_compound_codename(codenames)
-            indoor_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
+            indoor_rounds = {
+                "code_name": codenames,
+                "round_name": noncompoundroundnames,
+            }
             use_rounds["Indoor Target"] = indoor_rounds
 
         if request.form.getlist("wafield"):
@@ -167,7 +176,7 @@ def roundcomparison():
                 )
             )
             use_rounds["IFAA Field"] = ifaafield_rounds
-        
+
         if request.form.getlist("virounds"):
             vi_rounds = sql_to_dol(
                 query_db(
@@ -175,7 +184,7 @@ def roundcomparison():
                 )
             )
             use_rounds["VI"] = vi_rounds
-        
+
         if request.form.getlist("unofficial"):
             unofficial_rounds = sql_to_dol(
                 query_db(
@@ -240,15 +249,21 @@ def roundcomparison():
                         int_prec=False,
                     )
 
-                    results={}
+                    results = {}
                     for item in use_rounds:
                         results_i = np.zeros(len(use_rounds[item]["code_name"]))
                         for i, round_i in enumerate(use_rounds[item]["code_name"]):
                             # Don't round up to avoid conflicts where score is different to that input
                             results_i[i] = hc_eq.score_for_round(
-                                    all_rounds_objs[round_i], hc_from_score, "AGB", hc_params, round_score_up=False
-                                )[0]
-                        results[item] = dict(zip(use_rounds[item]["round_name"], results_i))
+                                all_rounds_objs[round_i],
+                                hc_from_score,
+                                "AGB",
+                                hc_params,
+                                round_score_up=False,
+                            )[0]
+                        results[item] = dict(
+                            zip(use_rounds[item]["round_name"], results_i)
+                        )
 
                     # Return the results
                     return render_template(
@@ -256,7 +271,7 @@ def roundcomparison():
                         form=form,
                         rounds=roundnames,
                         results=results,
-                        )
+                    )
 
     # If first visit load the default form with no inputs
     return render_template(

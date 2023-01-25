@@ -24,6 +24,19 @@
   &nbsp;
 {% endmacro %}
 
+{% macro render_select2_field(field) %}
+  <span >{{ field.label }}:</span>
+  <span>{{ field(class_="select2-js-basic", **kwargs)|safe }}</span>
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  &nbsp;
+{% endmacro %}
+
 {% macro render_box(field) %}
   <span >{{ field.label }}: {{ field()|safe }}</span>
   {% if field.errors %}
@@ -38,6 +51,19 @@
 
 {% macro render_field_with_box(mainfield, boxfield) %}
   <span >{{ mainfield.label }}: {{ mainfield(**kwargs)|safe }}</span>
+  {% if mainfield.errors %}
+    <ul class=errors>
+    {% for error in mainfield.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  <span >{{ boxfield.label }}: {{ boxfield()|safe }}</span>
+  &nbsp;
+{% endmacro %}
+
+{% macro render_select2_field_with_box(mainfield, boxfield) %}
+  <span >{{ mainfield.label }}: {{ mainfield(class_="select2-js-basic", **kwargs)|safe }}</span>
   {% if mainfield.errors %}
     <ul class=errors>
     {% for error in mainfield.errors %}

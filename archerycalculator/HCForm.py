@@ -1,7 +1,6 @@
 from wtforms import (
     Form,
     validators,
-    SearchField,
     IntegerField,
     DecimalField,
     SelectField,
@@ -15,7 +14,7 @@ class HCForm(Form):
         "Gender under AGB", [validators.InputRequired("Please provide.")]
     )
     age = SelectField("Age category", [validators.InputRequired("Please provide.")])
-    roundname = SearchField("Round", [validators.InputRequired("Please provide.")])
+    roundname = SelectField("Round", [validators.InputRequired("Please provide.")])
     score = IntegerField("Score", [validators.InputRequired("Please provide.")])
 
     # Advanced options

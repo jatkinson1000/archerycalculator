@@ -14,18 +14,12 @@
   See the other pages for generating a full set of <a href="/tables/handicap">handicap</a> or <a href="/tables/classification">classification</a> tables.
   </p>
 
-  <datalist id="roundlist">
-  {% for round in rounds %}
-  <option>{{round}}</option>
-  {% endfor %}
-  </datalist>
-
-  {% from "_formhelpers.html" import render_textin_field %}
+  {% from "_formhelpers.html" import render_textin_field, render_select2_field %}
   <form method=post>
     {{ render_textin_field(form.bowstyle) }}
     {{ render_textin_field(form.gender) }}
     {{ render_textin_field(form.age) }}
-    {{ render_textin_field(form.roundname, list="roundlist") }}
+    {{ render_select2_field(form.roundname) }}
     {{ render_textin_field(form.score) }}
     <input type=submit value=Calculate>
 

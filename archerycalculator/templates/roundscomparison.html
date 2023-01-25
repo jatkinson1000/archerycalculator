@@ -6,20 +6,14 @@
 
 {% block content %}
 
-  <datalist id="roundlist">
-  {% for round in rounds %}
-  <option>{{round}}</option>
-  {% endfor %}
-  </datalist>
-
   <p>
   Enter your score on one round to get an estimate of comparable scores on others.
   </p>
 
-  {% from "_formhelpers.html" import render_textin_field, render_box, render_box_list %}
+  {% from "_formhelpers.html" import render_textin_field, render_box, render_box_list, render_select2_field %}
   <form method=post>
     {{ render_textin_field(form.score) }}
-    {{ render_textin_field(form.roundname, list="roundlist") }}
+    {{ render_select2_field(form.roundname) }}
     {{ render_box(form.compound) }}
     <span>Show comparable scores for:</span>
     {% set boxlist = [form.outdoor, form.indoor, form.wafield, form.ifaafield, form.virounds, form.unofficial] %}

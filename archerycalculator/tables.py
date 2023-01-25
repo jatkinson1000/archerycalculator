@@ -26,6 +26,15 @@ def handicap_tables():
         dict(zip(roundnames["code_name"], roundnames["round_name"]))
     )
 
+    # Set defaults
+    form.round1.choices = [""] + all_rounds
+    form.round2.choices = [""] + all_rounds
+    form.round3.choices = [""] + all_rounds
+    form.round4.choices = [""] + all_rounds
+    form.round5.choices = [""] + all_rounds
+    form.round6.choices = [""] + all_rounds
+    form.round7.choices = [""] + all_rounds
+
     if request.method == "POST" and form.validate():
         error = None
 
@@ -69,7 +78,6 @@ def handicap_tables():
                 # If errors reload default with error message
                 return render_template(
                     "handicap_tables.html",
-                    rounds=all_rounds,
                     form=form,
                     error=error,
                 )
@@ -109,7 +117,6 @@ def handicap_tables():
         # Return the results
         return render_template(
             "handicap_tables.html",
-            rounds=all_rounds,
             form=form,
             roundnames=rounds_req,
             results=results,
@@ -119,7 +126,6 @@ def handicap_tables():
     return render_template(
         "handicap_tables.html",
         form=form,
-        rounds=all_rounds,
         error=None,
     )
 

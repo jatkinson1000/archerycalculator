@@ -43,6 +43,7 @@ def calculator():
     form.bowstyle.choices = bowstylelist
     form.gender.choices = genderlist
     form.age.choices = agelist
+    form.roundname.choices = [""] + roundnames
 
     error = None
     warning_bowstyle = None
@@ -228,7 +229,6 @@ def calculator():
                 return render_template(
                     "calculator.html",
                     form=form,
-                    rounds=roundnames,
                     results=results,
                     sig_t=2.0 * RAD2DEG * sig_t,
                     sig_r_18=2.0 * 100.0 * sig_r_18,
@@ -244,7 +244,6 @@ def calculator():
     return render_template(
         "calculator.html",
         form=form,
-        rounds=roundnames,
         results=None,
         error=error,
     )
