@@ -407,6 +407,12 @@ def event_tables():
                             age_round = age_round.replace("60", "50_c")
                         else:
                             age_round = age_round.replace("80", "122")
+                            if age_j.lower().replace(" ", "") in ["adult", "under21"]:
+                                age_round = "wa720_70"
+                            elif age_j.lower().replace(" ", "") in ["50+", "under18"]:
+                                age_round = age_round.replace("70", "60")
+                            elif age_j.lower().replace(" ", "") in ["under16"]:
+                                age_round = "metric_122_50"
                             if bowstyle.lower() in ["barebow"]:
                                 age_round = age_round.replace("70", "50_b")
                                 age_round = age_round.replace("60", "50_b")
