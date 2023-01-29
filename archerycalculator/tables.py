@@ -307,3 +307,210 @@ def classification_tables():
         form=form,
         error=None,
     )
+
+
+@bp.route("/classbyevent", methods=("GET", "POST"))
+def event_tables():
+
+    roundfamilies = {
+        "WA 1440/Metrics": ["wa1440", "metric1440"],
+        "WA 720/Metrics": ["wa720", "metric720"],
+        "York/Hereford/Bristols": ["york_hereford_bristol"],
+        "St. George/Albion/Windsor": ["stgeorge_albion_windsor"],
+        "National": ["national"],
+        "Western": ["western"],
+        "Warwick": ["warwick"],
+        "WA Field 24": ["wafield_24"],
+    }
+
+    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
+        "bowstyle"
+    ]
+
+    # Load form and set defaults
+    form = TableForm.EventTableForm(request.form, bowstyle=bowstylelist[1])
+    form.bowstyle.choices = bowstylelist
+
+    form.roundfamily.choices = list(roundfamilies.keys())
+
+    if request.method == "POST" and form.validate():
+        error = None
+
+        # Get form results and store for return
+        bowstyle = request.form["bowstyle"]
+        roundfamily = request.form["roundfamily"]
+
+        # If restricting to named round set max dist as 60
+        if (
+            request.form.getlist("restrict_to_named")
+            and roundfamily in list(roundfamilies.keys())[3:7]
+        ):
+            max_dist = 60
+        else:
+            max_dist = 9999
+
+        # Check the inputs are all valid
+        bowstylecheck = query_db(
+            "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
+        )
+        if len(bowstylecheck) == 0:
+            error = "Invalid bowstyle. Please select from dropdown."
+
+        # Account for nuances in each discipline and generate results
+        # Target outdoor:
+        if roundfamily in list(roundfamilies.keys())[:7]:
+            all_rounds_objs = rounds.read_json_to_round_dict(
+                [
+                    "AGB_outdoor_imperial.json",
+                    "AGB_outdoor_metric.json",
+                    "WA_outdoor.json",
+                ]
+            )
+            if bowstyle.lower() in ["traditional", "flatbow"]:
+                bowstyle = "barebow"
+
+            genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+            agelist = sql_to_dol(
+                query_db("SELECT age_group,male_dist,female_dist FROM ages")
+            )
+            classlist = sql_to_dol(query_db("SELECT shortname FROM classes"))[
+                "shortname"
+            ]
+
+            roundslist = {"code_name": [], "round_name": []}
+            for family_i in roundfamilies[roundfamily]:
+                roundslist_i = sql_to_dol(
+                    query_db(
+                        "SELECT code_name,round_name FROM rounds WHERE family IN (?)",
+                        [family_i],
+                    )
+                )
+                for k in roundslist:
+                    roundslist[k] = roundslist[k] + roundslist_i[k]
+
+            results = {}
+            for gender in genderlist:
+                for j, age_j in enumerate(agelist["age_group"]):
+
+                    # Get appropriate round from distance
+                    for i, rnd_i in enumerate(roundslist["code_name"]):
+                        if all_rounds_objs[rnd_i].max_distance() >= min(
+                            max_dist, int(agelist[f"{gender.lower()}_dist"][j])
+                        ):
+                            age_round = roundslist["code_name"][i]
+
+                    # Check for 720 based on bowstyle
+                    if roundfamily in list(roundfamilies.keys())[1]:
+                        if bowstyle.lower() in ["compound"]:
+                            age_round = age_round.replace("122", "80")
+                            age_round = age_round.replace("70", "50_c")
+                            age_round = age_round.replace("60", "50_c")
+                        else:
+                            age_round = age_round.replace("80", "122")
+                            if bowstyle.lower() in ["barebow"]:
+                                age_round = age_round.replace("70", "50_b")
+                                age_round = age_round.replace("60", "50_b")
+
+                    # Check aliases
+                    age_round = utils.check_alias(
+                        age_round, age_j, gender, bowstyle.lower()
+                    )
+
+                    results[f"{age_j} {gender}"] = [
+                        sql_to_dol(
+                            query_db(
+                                "SELECT round_name FROM rounds WHERE code_name IN (?)",
+                                [age_round],
+                            )
+                        )["round_name"][0]
+                    ] + [
+                        str(int(i))
+                        for i in class_func.AGB_outdoor_classification_scores(
+                            age_round, bowstyle, gender, age_j
+                        )[-1::-1]
+                    ]
+            classes = classlist[-2::-1]
+
+        # Field:
+        elif roundfamily in list(roundfamilies.keys())[7]:
+            all_rounds_objs = rounds.read_json_to_round_dict(
+                [
+                    "WA_field.json",
+                ]
+            )
+
+            # Done manually for now, update in future
+            genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+            agelist = {
+                "age_group": ["Adult", "Under 18"],
+                "male_dist": [60, 60],
+                "female_dist": [60, 60],
+            }
+            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
+
+            if bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
+                agelist["male_dist"] = [50, 50]
+                agelist["female_dist"] = [50, 50]
+
+            roundslist = {"code_name": [], "round_name": []}
+            for family_i in roundfamilies[roundfamily]:
+                roundslist_i = sql_to_dol(
+                    query_db(
+                        "SELECT code_name,round_name FROM rounds WHERE family IN (?)",
+                        [family_i],
+                    )
+                )
+                for k in roundslist:
+                    roundslist[k] = roundslist[k] + roundslist_i[k]
+
+            results = {}
+            for gender in genderlist:
+                for j, age_j in enumerate(agelist["age_group"]):
+
+                    # Get appropriate round from distance
+                    for i, rnd_i in enumerate(roundslist["code_name"]):
+                        if all_rounds_objs[rnd_i].max_distance() >= int(
+                            agelist[f"{gender.lower()}_dist"][j]
+                        ):
+                            age_round = roundslist["code_name"][i]
+                    # Ensure we have the 24 target round, not 12 target unit
+                    age_round = age_round.replace("12", "24")
+
+                    results[f"{age_j} {gender}"] = [
+                        sql_to_dol(
+                            query_db(
+                                "SELECT round_name FROM rounds WHERE code_name IN (?)",
+                                [age_round],
+                            )
+                        )["round_name"][0]
+                    ] + [
+                        str(int(i))
+                        for i in class_func.AGB_field_classification_scores(
+                            age_round, bowstyle, gender, age_j
+                        )[-1::-1]
+                    ]
+            classes = classlist[-2::-1]
+
+        if error is None:
+            # Return the results
+            # Flip array so lowest class on left for printing
+            return render_template(
+                "event_tables.html",
+                form=form,
+                results=results,
+                classes=classes,
+            )
+        else:
+            # If errors reload default with error message
+            return render_template(
+                "event_tables.html",
+                form=form,
+                error=error,
+            )
+
+    # If first visit load the default form with no inputs
+    return render_template(
+        "event_tables.html",
+        form=form,
+        error=None,
+    )

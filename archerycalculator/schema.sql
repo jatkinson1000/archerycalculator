@@ -18,7 +18,9 @@ CREATE TABLE bowstyles (
 CREATE TABLE ages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   age_group TEXT NOT NULL,
-  gov_body TEXT NOT NULL
+  gov_body TEXT NOT NULL,
+  male_dist TEXT NOT NULL,
+  female_dist TEXT NOT NULL
 );
 
 CREATE TABLE rounds (
@@ -26,7 +28,8 @@ CREATE TABLE rounds (
   round_name TEXT NOT NULL,
   code_name TEXT UNIQUE NOT NULL,
   location TEXT,
-  body TEXT NOT NULL
+  body TEXT NOT NULL,
+  family TEXT NOT NULL
 );
 
 CREATE TABLE classes (

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Archery Classification Tables by Event{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+  <p>
+  Generate classification tables using the Archery GB target schemes for particular events.
+  <br>
+  For a summary of the various classification schemes see the <a href="/info">information page</a>.
+  <br>
+  Select the round family and bowstyle and click 'Generate' to produce a table of classification scores for all ages and genders on their appropriate rounds.
+  The resulting table will show classifications available on the age-, bowstyle-, and gender-appropriate round.
+  <br>
+  <br>
+  These tables are useful for coaches or tournament organisers to print out for a specific event as a quick record for all competitors.
+  </p>
+
+    {% from "_formhelpers.html" import render_textin_field, render_box %}
+  <form method=post>
+    {{ render_textin_field(form.bowstyle) }}
+    {{ render_textin_field(form.roundfamily) }}
+    {{ render_box(form.restrict_to_named, "By default rounds will be shown based on longest distance. Select this to restrict all adults to shooting the named round (e.g. National).") }}
+    <input type=submit value=Generate>
+
+  {% if error %}
+  <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
+  {% if results is defined %}
+    {% from "_formhelpers.html" import render_event_table %}
+    {{ render_event_table(classes, results) }}
+  {% endif %}
+
+{% endblock %}

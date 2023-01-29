@@ -37,7 +37,7 @@
   &nbsp;
 {% endmacro %}
 
-{% macro render_box(field) %}
+{% macro render_box(field, message) %}
   <span >{{ field.label }}: {{ field()|safe }}</span>
   {% if field.errors %}
     <ul class=errors>
@@ -46,6 +46,7 @@
     {% endfor %}
     </ul>
   {% endif %}
+  <span style="font-size: .8em;">{{ message }}</span>
   &nbsp;
 {% endmacro %}
 
@@ -129,6 +130,31 @@
       {% for row in results %}
         <tr>
         {% for item in row %}
+          <td>{{ item if item != '-9999' else '' }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+   </tbody>
+</table>
+{% endmacro %}
+
+
+{% macro render_event_table(classes, results) %}
+<table class="eventtable">
+   <thead>
+     <tr>
+       <th>Category</th>
+       <th>Round</th>
+       {% for item in classes %}
+         <th>{{ item }}</th>
+       {% endfor %}
+     </tr>
+   </thead>
+   <tbody>
+      {% for key in results %}
+        <tr>
+        <td>{{ key }}</td>
+        {% for item in results[key] %}
           <td>{{ item if item != '-9999' else '' }}</td>
         {% endfor %}
         </tr>

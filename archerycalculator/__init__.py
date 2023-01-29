@@ -1,16 +1,6 @@
 import os
 
 from flask import Flask
-from flask import (
-    # Blueprint,
-    # flash,
-    # g,
-    # redirect,
-    render_template,
-    # request,
-    # session,
-    # url_for,
-)
 
 from archerycalculator import db
 
@@ -55,7 +45,7 @@ def create_app(test_config=None):
 
     from archerycalculator import extras
     app.register_blueprint(extras.bp)
-    
+
     db.init_app(app)
 
     return app

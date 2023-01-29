@@ -51,8 +51,8 @@ def load_genders(db):
 def load_ages(db):
     for item in ages:
         db.execute(
-            "INSERT INTO ages (age_group,gov_body) VALUES (?,?);",
-            (item["age_group"], "AGB"),
+            "INSERT INTO ages (age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);",
+            (item["age_group"], "AGB", item["male"][0], item["female"][0]),
         )
     db.commit()
 
@@ -60,8 +60,14 @@ def load_ages(db):
 def load_rounds(db):
     for item in rounds:
         db.execute(
-            "INSERT INTO rounds (round_name,code_name,body,location) VALUES (?,?,?,?);",
-            (rounds[item].name, item, rounds[item].body, rounds[item].location),
+            "INSERT INTO rounds (round_name,code_name,body,location,family) VALUES (?,?,?,?,?);",
+            (
+                rounds[item].name,
+                item,
+                rounds[item].body,
+                rounds[item].location,
+                rounds[item].family,
+            ),
         )
     db.commit()
 

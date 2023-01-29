@@ -1,21 +1,20 @@
 from flask import (
     Blueprint,
     render_template,
-    request,
 )
-import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
 
-from archeryutils import rounds as au_rounds
+from archerycalculator import utils
 
-from archerycalculator import ExtrasForm, utils
 
 bp = Blueprint("rounds", __name__, url_prefix="/rounds")
+
+
 @bp.route("/", strict_slashes=False)
 def rounds_page():
 
-    rounds={}
+    rounds = {}
 
     rounds["AGB Outdoor"] = sql_to_dol(
         query_db(

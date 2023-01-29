@@ -40,3 +40,11 @@ class ClassificationTableForm(Form):
     )
     age = SelectField("Age category", [validators.InputRequired("Please provide.")])
     discipline = SelectField("Discipline")
+
+
+class EventTableForm(Form):
+    bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
+    roundfamily = SelectField("RoundFamily")
+    restrict_to_named = BooleanField(
+        label="Restrict to named round", false_values=(False, "")
+    )

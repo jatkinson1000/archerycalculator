@@ -139,6 +139,49 @@ def get_compound_codename(round_codenames):
         return round_codenames
 
 
+def check_alias(round_codename, age, gender, bowstyle):
+    """
+    select the 'appropriate' round from aliases
+
+    Parameters
+    ----------
+    round_codename : str
+        str round codename to check
+
+    Returns
+    -------
+    round_codename : str
+        amended round codenames
+
+    References
+    ----------
+    """
+    # York, Hereford, Bristols
+    if (round_codename == "hereford") and (gender.lower() == "male"):
+        round_codename = "bristol_i"
+    if (round_codename == "bristol_i") and (gender.lower() == "female"):
+        round_codename = "hereford"
+
+    # WA1440s
+    if round_codename == "metric_i":
+        round_codename = "wa1440_70"
+    if round_codename == "metric_ii":
+        round_codename = "wa1440_60"
+
+    # WA720s
+    if (round_codename == "wa720_50_c") and (bowstyle.lower() != "compound"):
+        round_codename = "metric_80_50"
+    if (round_codename == "metric_80_50") and (bowstyle.lower() == "compound"):
+        round_codename = "wa720_50_c"
+
+    if (round_codename == "wa720_50_b") and (bowstyle.lower() != "barebow"):
+        round_codename = "metric_122_50"
+    if (round_codename == "metric_122_50") and (bowstyle.lower() == "barebow"):
+        round_codename = "wa720_50_b"
+
+    return round_codename
+
+
 def rootfinding(x_min, x_max, f_root, *args):
     """
     For bracket and function find the value such that f=0
@@ -149,7 +192,7 @@ def rootfinding(x_min, x_max, f_root, *args):
         bounds of the search bracket
     f_root : function
         function to minimise
-    args : 
+    args :
         arguments to f_root
 
     Returns

@@ -256,7 +256,6 @@ th, td {
     border: None;
     overflow-wrap: break-word;
     overflow: hidden;
-    padding: 0;
 }
 
 /* Handicap Table*/
@@ -266,7 +265,8 @@ th, td {
 }
 
 .hctable th, .hctable td{
-    width: 10vw;
+  width: 10vw;
+  padding-left: 10px
 }
 
 .hctable th:first-child, .hctable td:first-child {
@@ -274,21 +274,29 @@ th, td {
   text-align: center;
 }
 
-.classtable tbody tr:nth-child(odd), .hctable tbody tr:nth-child(odd), .comparetable tbody tr:nth-child(odd) {
+.classtable tbody tr:nth-child(odd), .hctable tbody tr:nth-child(odd), .comparetable tbody tr:nth-child(odd),
+.eventtable tbody tr:nth-child(odd) {
   background-color: #eee;
 }
 
 
-/* Classification Table*/
-.classtable {
+/* Classification and EventClassification Table*/
+.classtable, .eventtable {
   text-align: center;
   font-size: min(calc(5px + 0.8vw), 1em);
 }
 
-.classtable th:first-child, .classtable td:first-child {
+.classtable th:first-child, .classtable td:first-child,
+.eventtable th:first-child, .eventtable td:first-child {
   font-weight: bold;
   text-align: right;
 }
+
+.eventtable th:nth-child(2), .eventtable td:nth-child(2) {
+  text-align: left;
+  padding-left: 10px
+}
+
 
 
 .row {
@@ -311,6 +319,8 @@ th, td {
 .comparetable td:nth-child(2) {
   text-align: right;
 }
+
+
 
 /* Info Page Classification Table*/
 .infoclasstable {
