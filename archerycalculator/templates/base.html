@@ -19,8 +19,12 @@
     </script>
     <!-- User -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <meta name=description content="The best archery handicap and classification calculator available.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page specific attributes -->
+    <title>{% block title %}{% endblock %} ArcheryCalculator.co.uk</title>
+    {% block meta %}{% endblock %}
+    <meta name="theme-color" content="#3bf">
 </head>
 
 <!-- Google tag (gtag.js) -->
@@ -38,7 +42,6 @@
 
 
 <body>
-<title>{% block title %}{% endblock %}ArcheryCalculator.co.uk</title>
 
 <nav>
     <h1><a href="/">ArcheryCalculator.co.uk</a></h1>
