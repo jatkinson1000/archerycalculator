@@ -16,8 +16,12 @@
                 allowClear: true,
             });
         });
+
+        $(document).on('select2:open', () => {
+            document.querySelector('.select2-search__field').focus();
+        });
     </script>
-    <!-- User -->
+    <!-- Us/er -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
