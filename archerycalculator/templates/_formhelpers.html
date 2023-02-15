@@ -1,6 +1,6 @@
-{% macro render_field(field) %}
-  <dt>{{ field.label }}
-  <dd>{{ field(**kwargs)|safe }}
+{% macro render_textin_field(field) %}
+  <span >{{ field.label }}:</span>
+  <span>{{ field(class_="text-input", **kwargs)|safe }}</span>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}
@@ -8,12 +8,25 @@
     {% endfor %}
     </ul>
   {% endif %}
-  </dd>
+  &nbsp;
 {% endmacro %}
 
-{% macro render_textin_field(field) %}
+{% macro render_checkbox(field) %}
   <span >{{ field.label }}:</span>
-  <span>{{ field(**kwargs)|safe }}</span>
+  <span>{{ field(class_="checkbox", **kwargs)|safe }}</span>
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  &nbsp;
+{% endmacro %}
+
+{% macro render_select2_no_search_field(field) %}
+  <span >{{ field.label }}:</span>
+  <span>{{ field(class_="select2-js-basic-hide-search", **kwargs)|safe }}</span>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}

@@ -4,14 +4,14 @@ from flask import (
     request,
 )
 
-from archerycalculator.db import query_db, sql_to_dol
-
 from archeryutils import rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
 
 from archerycalculator import HCForm, utils
+from archerycalculator.db import query_db, sql_to_dol
+
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
 
@@ -34,15 +34,12 @@ def calculator():
     # Load form and set defaults
     form = HCForm.HCForm(
         request.form,
-        bowstyle=bowstylelist[1],
-        gender=genderlist[1],
-        age=agelist[1],
     )
 
     # Set form choices
-    form.bowstyle.choices = bowstylelist
-    form.gender.choices = genderlist
-    form.age.choices = agelist
+    form.bowstyle.choices = [""] + bowstylelist
+    form.gender.choices = [""] + genderlist
+    form.age.choices = [""] + agelist
     form.roundname.choices = [""] + roundnames
 
     error = None

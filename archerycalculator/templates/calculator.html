@@ -27,11 +27,11 @@
   See the other pages for generating a full set of <a href="/tables/handicap">handicap</a> or <a href="/tables/classification">classification</a> tables.
   </p>
 
-  {% from "_formhelpers.html" import render_textin_field, render_select2_field %}
+  {% from "_formhelpers.html" import render_textin_field, render_select2_field, render_select2_no_search_field, render_checkbox %}
   <form method=post>
-    {{ render_textin_field(form.bowstyle) }}
-    {{ render_textin_field(form.gender) }}
-    {{ render_textin_field(form.age) }}
+    {{ render_select2_no_search_field(form.bowstyle) }}
+    {{ render_select2_no_search_field(form.gender) }}
+    {{ render_select2_no_search_field(form.age) }}
     {{ render_select2_field(form.roundname) }}
     {{ render_textin_field(form.score) }}
     <input type=submit value=Calculate>
@@ -65,16 +65,19 @@
       The <b>maximum</b> possible score on a {{ results["roundname"] }} is <b>{{ results["maxscore"] }}</b>.
       </p>
       <p>
-      To see comparable scores on other rounds visit the <a href="/extras/roundscomparison">Round Comparison page </a>.
+      To see comparable scores on other rounds visit the <a href="/extras/roundscomparison">round comparison page</a>.
       </p>
-      <p>
+      <p style="margin-bottom: 0;">
       This handicap represents an angular spread of {{ '%0.3f'|format(sig_t) }} degrees at the bow and
-         typical group size of:
-         <ul style="margin-top: auto;">
+      typical group size of:
+      </p>
+         <ul style="margin-top: auto; margin-bottom: 0;">
              <li>{{ '%0.1f'|format(sig_r_18) }}cm at 18m</li>
              <li>{{ '%0.1f'|format(sig_r_50) }}cm at 50m</li>
              <li>{{ '%0.1f'|format(sig_r_70) }}cm at 70m</li>
          </ul>
+      <p style="margin-top: 0;">
+      For group sizes at more distances visit the <a href="/extras/groups">group sizes page</a>.
       </p>
     {% endif %}
 
@@ -91,7 +94,7 @@
             Select this option to return a fractional handicap corresponding to the exact score rather than the whole numbers from the official tables.
         </span>
         <br>
-        {{ render_textin_field(form.decimalHC) }}
+        {{ render_checkbox(form.decimalHC) }}
     
         <br>
         <br>
@@ -111,7 +114,7 @@
             Use an alternative scheme for calculating the handicap (Note this does not affect the classifications).
         </span>
         <br>
-        {{ render_textin_field(form.scheme) }}
+        {{ render_select2_no_search_field(form.scheme) }}
     </span>
 
   </form>

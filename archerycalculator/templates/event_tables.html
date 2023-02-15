@@ -31,10 +31,10 @@
   These tables are useful for coaches or tournament organisers to print out for a specific event as a quick record for all competitors.
   </p>
 
-    {% from "_formhelpers.html" import render_textin_field, render_box %}
+    {% from "_formhelpers.html" import render_select2_no_search_field, render_select2_field, render_box %}
   <form method=post>
-    {{ render_textin_field(form.bowstyle) }}
-    {{ render_textin_field(form.roundfamily) }}
+    {{ render_select2_no_search_field(form.bowstyle) }}
+    {{ render_select2_field(form.roundfamily) }}
     {{ render_box(form.restrict_to_named, "By default rounds will be shown based on longest distance. Select this to restrict all adults to shooting the named round (e.g. National).") }}
     <input type=submit value=Generate>
 
