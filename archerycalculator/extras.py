@@ -7,7 +7,7 @@ import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
 
-from archeryutils import rounds
+from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 
@@ -196,7 +196,7 @@ def roundcomparison():
         if len(use_rounds) == 0:
             error = "Please select one of more groups of rounds to compare to."
         else:
-            all_rounds_objs = rounds.read_json_to_round_dict(
+            all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
                     "AGB_outdoor_metric.json",

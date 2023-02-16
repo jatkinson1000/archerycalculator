@@ -4,7 +4,7 @@ from flask import (
     request,
 )
 
-from archeryutils import rounds
+from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 from archeryutils.classifications import classifications as class_func
@@ -96,7 +96,7 @@ def calculator():
 
         if error is None:
 
-            all_rounds_objs = rounds.read_json_to_round_dict(
+            all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
                     "AGB_outdoor_metric.json",

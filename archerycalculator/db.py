@@ -30,11 +30,11 @@ def init_db():
     db = get_db()
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
-    populate_db.load_bowstyles(db)
-    populate_db.load_ages(db)
-    populate_db.load_genders(db)
-    populate_db.load_rounds(db)
-    populate_db.load_classes(db)
+    populate_db.load_bowstyles_to_db(db)
+    populate_db.load_ages_to_db(db)
+    populate_db.load_genders_to_db(db)
+    populate_db.load_rounds_to_db(db)
+    populate_db.load_classes_to_db(db)
 
 
 def query_db(query, args=(), one=False):

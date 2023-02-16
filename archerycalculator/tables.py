@@ -7,7 +7,7 @@ import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
 
-from archeryutils import rounds
+from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.classifications import classifications as class_func
 
@@ -38,7 +38,7 @@ def handicap_tables():
     if request.method == "POST" and form.validate():
         error = None
 
-        all_rounds_objs = rounds.read_json_to_round_dict(
+        all_rounds_objs = load_rounds.read_json_to_round_dict(
             [
                 "AGB_outdoor_imperial.json",
                 "AGB_outdoor_metric.json",
@@ -359,7 +359,7 @@ def event_tables():
         # Account for nuances in each discipline and generate results
         # Target outdoor:
         if roundfamily in list(roundfamilies.keys())[:7]:
-            all_rounds_objs = rounds.read_json_to_round_dict(
+            all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
                     "AGB_outdoor_metric.json",
@@ -439,7 +439,7 @@ def event_tables():
 
         # Field:
         elif roundfamily in list(roundfamilies.keys())[7]:
-            all_rounds_objs = rounds.read_json_to_round_dict(
+            all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",
                 ]

@@ -1,4 +1,4 @@
-from archeryutils import rounds
+from archeryutils import load_rounds
 from archeryutils.classifications import classifications as class_func
 
 
@@ -10,7 +10,7 @@ ages = class_func.read_ages_json()
 
 classes = class_func.read_classes_json()
 
-rounds = rounds.read_json_to_round_dict(
+rounds = load_rounds.read_json_to_round_dict(
     [
         "AGB_outdoor_imperial.json",
         "AGB_outdoor_metric.json",
@@ -26,7 +26,7 @@ rounds = rounds.read_json_to_round_dict(
 )
 
 
-def load_bowstyles(db):
+def load_bowstyles_to_db(db):
     # AGB Target bowstyles from file
     for item in bowstyles:
         db.execute(
@@ -42,13 +42,13 @@ def load_bowstyles(db):
     db.commit()
 
 
-def load_genders(db):
+def load_genders_to_db(db):
     for item in genders:
         db.execute("INSERT INTO genders (gender) VALUES (?);", [item])
     db.commit()
 
 
-def load_ages(db):
+def load_ages_to_db(db):
     for item in ages:
         db.execute(
             "INSERT INTO ages (age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);",
@@ -57,7 +57,7 @@ def load_ages(db):
     db.commit()
 
 
-def load_rounds(db):
+def load_rounds_to_db(db):
     for item in rounds:
         db.execute(
             "INSERT INTO rounds (round_name,code_name,body,location,family) VALUES (?,?,?,?,?);",
@@ -72,7 +72,7 @@ def load_rounds(db):
     db.commit()
 
 
-def load_classes(db):
+def load_classes_to_db(db):
     for i, shortname in enumerate(classes["classes"]):
         db.execute(
             "INSERT INTO classes (shortname,longname) VALUES (?,?);",
