@@ -320,8 +320,13 @@ def event_tables():
         "National": ["national"],
         "Western": ["western"],
         "Warwick": ["warwick"],
+        "Long Metrics": ["metriclong"],
+        "Short Metrics": ["metricshort"],
         "WA Field 24": ["wafield_24"],
     }
+    short_metric_conversion = {
+            "wa1440_90": ""
+            }
 
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
@@ -358,7 +363,7 @@ def event_tables():
 
         # Account for nuances in each discipline and generate results
         # Target outdoor:
-        if roundfamily in list(roundfamilies.keys())[:7]:
+        if roundfamily in list(roundfamilies.keys())[:9]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
@@ -438,7 +443,7 @@ def event_tables():
             classes = classlist[-2::-1]
 
         # Field:
-        elif roundfamily in list(roundfamilies.keys())[7]:
+        elif roundfamily in list(roundfamilies.keys())[9]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",
