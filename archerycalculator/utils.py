@@ -182,6 +182,60 @@ def check_alias(round_codename, age, gender, bowstyle):
     return round_codename
 
 
+def order_rounds(rounds, age=None, gender=None, bowstyle=None):
+    """
+    Given an iterator of rounds, sort them into an approved order.
+
+    Parameters
+    ----------
+    rounds : dict of str:str
+        dictionary of round codenames mapped to their family
+
+    Returns
+    -------
+    sorted_rounds : dict of str:str
+        dict of sorted rounds input dict
+
+    References
+    ----------
+    """
+
+    # TODO Easy way to do this with dict? Otherwise should we bother?
+    # Just in case, check for aliases and filter
+    # if not any(arg is None for arg in (age, gender, bowstyle)):
+    #     rounds = [check_alias(round, age, gender, bowstyle) for round in rounds]
+
+    # Sort by family - rounds should already sorted within families. and filtered.
+    order = [
+            "york_hereford_bristol",
+            "stgeorge_albion_windsor",
+            "national",
+            "western",
+            "warwick",
+            "american",
+            "stnicholas",
+            "wa1440",
+            "metric1440",
+            "wa900",
+            "720",
+            "metriclong",
+            "metricshort",
+            ]
+    
+    sorted_rounds = {}
+    for family in order:
+        if family == "720":
+            # Special treatment needed to sort the wa720 and metric720 families
+            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "wa720" and "wa720_50_c" not in key})
+            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "metric720" and "metric_80" not in key})
+            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "wa720" and "wa720_50_c" in key})
+            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "metric720" and "metric_80" in key})
+        else:
+            sorted_rounds.update({ key:value for (key,value) in rounds.items() if value == family})
+
+    return sorted_rounds
+
+
 def rootfinding(x_min, x_max, f_root, *args):
     """
     For bracket and function find the value such that f=0

@@ -186,7 +186,7 @@ def classification_tables():
         if discipline in ["outdoor"]:
             use_rounds = sql_to_dol(
                 query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
+                    "SELECT code_name,round_name,family FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
                 )
             )
 
@@ -195,15 +195,25 @@ def classification_tables():
 
             # Perform filtering based upon category to make more aesthetic and avoid duplicates
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+
             filtered_names = utils.check_blacklist(
                 use_rounds["code_name"], age, gender, bowstyle
             )
-            round_names = [
-                roundsdicts[key]
-                for key in list(roundsdicts.keys())
-                if key in filtered_names
-            ]
-            use_rounds = {"code_name": filtered_names, "round_name": round_names}
+
+            # Sort filtered rounds into the order desired for outputting
+            rounds_families = {codename:family for (codename,family) in dict(zip(use_rounds["code_name"], use_rounds["family"])).items() if codename in filtered_names}
+            ordered_names = list(utils.order_rounds(rounds_families).keys())
+
+            # Get list of actual names for pretty output
+            #round_names = [
+            #    roundsdicts[key]
+            #    for key in list(roundsdicts.keys())
+            #    if key in ordered_names
+            #]
+            round_names = [roundsdicts[codename] for codename in ordered_names]
+            
+            # Final dict of rounds to use
+            use_rounds = {"code_name": ordered_names, "round_name": round_names}
 
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
