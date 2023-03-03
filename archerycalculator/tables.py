@@ -247,13 +247,13 @@ def classification_tables():
 
             if bowstyle.lower() in ["recurve", "compound"]:
                 use_rounds = {
-                    "code_name": ["wa_field_24_red"],
-                    "round_name": ["WA Field 24 Red"],
+                    "code_name": ["wa_field_24_red_marked", "wa_field_24_red_unmarked", "wa_field_24_red_mixed"],
+                    "round_name": ["WA Field 24 Red Marked", "WA Field 24 Red Unmarked", "WA Field 24 Red Mixed"],
                 }
             elif bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
                 use_rounds = {
-                    "code_name": ["wa_field_24_blue"],
-                    "round_name": ["WA Field 24 Blue"],
+                    "code_name": ["wa_field_24_blue_marked", "wa_field_24_blue_unmarked", "wa_field_24_blue_mixed"],
+                    "round_name": ["WA Field 24 Blue Marked", "WA Field 24 Blue Unmarked", "WA Field 24 Blue Mixed"],
                 }
 
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
@@ -320,7 +320,9 @@ def event_tables():
         "National": ["national"],
         "Western": ["western"],
         "Warwick": ["warwick"],
-        "WA Field 24": ["wafield_24"],
+        "WA Field 24 Marked": ["wafield_24_marked"],
+        "WA Field 24 Unmarked": ["wafield_24_unmarked"],
+        "WA Field 24 Mixed": ["wafield_24_mixed"],
     }
 
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
@@ -438,7 +440,7 @@ def event_tables():
             classes = classlist[-2::-1]
 
         # Field:
-        elif roundfamily in list(roundfamilies.keys())[7]:
+        elif roundfamily in list(roundfamilies.keys())[7:]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",
@@ -449,14 +451,12 @@ def event_tables():
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
             agelist = {
                 "age_group": ["Adult", "Under 18"],
-                "male_dist": [60, 60],
-                "female_dist": [60, 60],
+                "peg" : ["red", "red"]
             }
             classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
 
             if bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
-                agelist["male_dist"] = [50, 50]
-                agelist["female_dist"] = [50, 50]
+                agelist["peg"] = ["blue", "blue"]
 
             roundslist = {"code_name": [], "round_name": []}
             for family_i in roundfamilies[roundfamily]:
@@ -474,25 +474,25 @@ def event_tables():
                 for j, age_j in enumerate(agelist["age_group"]):
 
                     # Get appropriate round from distance
+                    age_app_rounds = []
                     for i, rnd_i in enumerate(roundslist["code_name"]):
-                        if all_rounds_objs[rnd_i].max_distance() >= int(
-                            agelist[f"{gender.lower()}_dist"][j]
-                        ):
-                            age_round = roundslist["code_name"][i]
-                    # Ensure we have the 24 target round, not 12 target unit
-                    age_round = age_round.replace("12", "24")
+                        if f"{agelist['peg'][j]}" in rnd_i:
+                            age_app_rounds.append(rnd_i)
+
+                    # Ensure 24 target round, not 12 target unit and remove duplicates
+                    age_app_rounds = list(set([x.replace("12", "24") for x in age_app_rounds]))
 
                     results[f"{age_j} {gender}"] = [
                         sql_to_dol(
                             query_db(
                                 "SELECT round_name FROM rounds WHERE code_name IN (?)",
-                                [age_round],
+                                age_app_rounds,
                             )
                         )["round_name"][0]
                     ] + [
                         str(int(i))
                         for i in class_func.AGB_field_classification_scores(
-                            age_round, bowstyle, gender, age_j
+                            age_app_rounds[0], bowstyle, gender, age_j
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
