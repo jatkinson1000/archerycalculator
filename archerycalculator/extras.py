@@ -130,18 +130,13 @@ def roundcomparison():
 
         use_rounds = {}
         if request.form.getlist("outdoor"):
-            outdoor_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
-                )
+            use_rounds["Outdoor Target"] = utils.fetch_and_sort_rounds(
+                location="outdoor", body=["AGB", "WA"]
             )
-            use_rounds["Outdoor Target"] = outdoor_rounds
 
         if request.form.getlist("indoor"):
-            indoor_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"
-                )
+            indoor_rounds = utils.fetch_and_sort_rounds(
+                location="indoor", body=["AGB", "WA"]
             )
             # Deal with compound
             roundsdicts = dict(
@@ -162,21 +157,17 @@ def roundcomparison():
             use_rounds["Indoor Target"] = indoor_rounds
 
         if request.form.getlist("wafield"):
-            wafield_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA')"
-                )
+            use_rounds["WA Field"] = utils.fetch_and_sort_rounds(
+                location="field", body=["AGB", "WA"]
             )
-            use_rounds["WA Field"] = wafield_rounds
 
         if request.form.getlist("ifaafield"):
-            ifaafield_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('field') AND body in ('IFAA')"
-                )
+            use_rounds["IFAA Field"] = utils.fetch_and_sort_rounds(
+                location="field", body="IFAA"
             )
-            use_rounds["IFAA Field"] = ifaafield_rounds
 
+        # TODO These don't use a location.
+        # Condiser doing so or extending fetch and sort function
         if request.form.getlist("virounds"):
             vi_rounds = sql_to_dol(
                 query_db(

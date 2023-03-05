@@ -1,5 +1,7 @@
 import numpy as np
 
+from archerycalculator.db import query_db, sql_to_dol
+
 
 def check_blacklist(roundlist, age, gender, bowstyle):
     """
@@ -28,24 +30,29 @@ def check_blacklist(roundlist, age, gender, bowstyle):
 
     # Gender
     if gender.lower() in ["male"]:
+        # Men don't get ladies rounds
         blacklist.append("hereford")
         blacklist.append("long_metric_ladies")
         blacklist.append("wa1440_60")
-        if age.lower().replace(" ", "") in ["50+"]:
+        # 50+ and U18 Men get 70m 1440, rest get Metric I
+        if age.lower().replace(" ", "") not in ["adult", "under21"]:
             blacklist.append("metric_i")
         else:
             blacklist.append("wa1440_70")
 
     if gender.lower() in ["female"]:
+        # Ladies get ladies rounds
         blacklist.append("bristol_i")
         blacklist.append("long_metric_i")
-        if age.lower().replace(" ", "") in ["50+"]:
+        blacklist.append("metric_i")
+        # 50+ and U18 Ladies get 60m 1440, rest get Metric II
+        if age.lower().replace(" ", "") not in ["adult", "under21"]:
             blacklist.append("metric_ii")
         else:
             blacklist.append("wa1440_60")
 
     # Age
-    if age.lower().replace(" ", "") in ["adult", "50+"]:
+    if age.lower().replace(" ", "") in ["adult", "50+", "under21"]:
         blacklist.append("short_metric_i")
     else:
         blacklist.append("short_metric")
@@ -207,33 +214,117 @@ def order_rounds(rounds, age=None, gender=None, bowstyle=None):
 
     # Sort by family - rounds should already sorted within families. and filtered.
     order = [
-            "york_hereford_bristol",
-            "stgeorge_albion_windsor",
-            "national",
-            "western",
-            "warwick",
-            "american",
-            "stnicholas",
-            "wa1440",
-            "metric1440",
-            "wa900",
-            "720",
-            "metriclong",
-            "metricshort",
-            ]
-    
+        # OUTDOOR
+        "york_hereford_bristol",
+        "stgeorge_albion_windsor",
+        "national",
+        "western",
+        "warwick",
+        "american",
+        "stnicholas",
+        "wa1440",
+        "metric1440",
+        "wa900",
+        # 720 have special treatment
+        "720",
+        "metriclong",
+        "metricshort",
+        # INDOOR
+        # FIELD
+        "wafield",
+        "ifaafield",
+    ]
+
     sorted_rounds = {}
     for family in order:
         if family == "720":
             # Special treatment needed to sort the wa720 and metric720 families
-            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "wa720" and "wa720_50_c" not in key})
-            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "metric720" and "metric_80" not in key})
-            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "wa720" and "wa720_50_c" in key})
-            sorted_rounds.update({key:value for (key,value) in rounds.items() if value == "metric720" and "metric_80" in key})
+            sorted_rounds.update(
+                {
+                    key: value
+                    for (key, value) in rounds.items()
+                    if value == "wa720" and "wa720_50_c" not in key
+                }
+            )
+            sorted_rounds.update(
+                {
+                    key: value
+                    for (key, value) in rounds.items()
+                    if value == "metric720" and "metric_80" not in key
+                }
+            )
+            sorted_rounds.update(
+                {
+                    key: value
+                    for (key, value) in rounds.items()
+                    if value == "wa720" and "wa720_50_c" in key
+                }
+            )
+            sorted_rounds.update(
+                {
+                    key: value
+                    for (key, value) in rounds.items()
+                    if value == "metric720" and "metric_80" in key
+                }
+            )
+        elif family == "wafield":
+            # Select 24 target rounds first, then 12 target units
+            sorted_rounds.update(
+                {key: value for (key, value) in rounds.items() if "24" in key}
+            )
+        elif family == "ifaafield":
+            # Select full rounds first, then units
+            sorted_rounds.update(
+                {key: value for (key, value) in rounds.items() if "unit" not in key}
+            )
         else:
-            sorted_rounds.update({ key:value for (key,value) in rounds.items() if value == family})
+            sorted_rounds.update(
+                {key: value for (key, value) in rounds.items() if value == family}
+            )
+
+    # Catch any rounds in the list that are not included in the families listed above
+    sorted_rounds.update({codename: rounds[codename] for codename in rounds.keys()})
 
     return sorted_rounds
+
+
+def fetch_and_sort_rounds(location, body):
+    """
+    Fetch rounds for a given location and body from database and order.
+
+    Parameters
+    ----------
+    location : Union str, list
+        location to match
+    body : Union str, list
+        governing body to match
+
+    Returns
+    -------
+    sorted : dict of str: str
+    """
+
+    if not isinstance(location, list):
+        location = [location]
+    if not isinstance(body, list):
+        body = [body]
+
+    db_rounds = sql_to_dol(
+        query_db(
+            f"""SELECT code_name,round_name,family FROM rounds WHERE location IN ('{"', '".join(location)}') AND body in ('{"', '".join(body)}')"""
+        )
+    )
+
+    rounds_names = dict(zip(db_rounds["code_name"], db_rounds["round_name"]))
+    rounds_families = dict(zip(db_rounds["code_name"], db_rounds["family"]))
+    ordered_names = list(order_rounds(rounds_families).keys())
+
+    return_rounds = {
+        "code_name": ordered_names,
+        "round_name": [rounds_names[codename] for codename in ordered_names],
+    }
+
+    return return_rounds
 
 
 def rootfinding(x_min, x_max, f_root, *args):
