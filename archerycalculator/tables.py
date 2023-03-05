@@ -201,17 +201,23 @@ def classification_tables():
             )
 
             # Sort filtered rounds into the order desired for outputting
-            rounds_families = {codename:family for (codename,family) in dict(zip(use_rounds["code_name"], use_rounds["family"])).items() if codename in filtered_names}
+            rounds_families = {
+                codename: family
+                for (codename, family) in dict(
+                    zip(use_rounds["code_name"], use_rounds["family"])
+                ).items()
+                if codename in filtered_names
+            }
             ordered_names = list(utils.order_rounds(rounds_families).keys())
 
             # Get list of actual names for pretty output
-            #round_names = [
+            # round_names = [
             #    roundsdicts[key]
             #    for key in list(roundsdicts.keys())
             #    if key in ordered_names
-            #]
+            # ]
             round_names = [roundsdicts[codename] for codename in ordered_names]
-            
+
             # Final dict of rounds to use
             use_rounds = {"code_name": ordered_names, "round_name": round_names}
 
@@ -257,13 +263,29 @@ def classification_tables():
 
             if bowstyle.lower() in ["recurve", "compound"]:
                 use_rounds = {
-                    "code_name": ["wa_field_24_red_marked", "wa_field_24_red_unmarked", "wa_field_24_red_mixed"],
-                    "round_name": ["WA Field 24 Red Marked", "WA Field 24 Red Unmarked", "WA Field 24 Red Mixed"],
+                    "code_name": [
+                        "wa_field_24_red_marked",
+                        "wa_field_24_red_unmarked",
+                        "wa_field_24_red_mixed",
+                    ],
+                    "round_name": [
+                        "WA Field 24 Red Marked",
+                        "WA Field 24 Red Unmarked",
+                        "WA Field 24 Red Mixed",
+                    ],
                 }
             elif bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
                 use_rounds = {
-                    "code_name": ["wa_field_24_blue_marked", "wa_field_24_blue_unmarked", "wa_field_24_blue_mixed"],
-                    "round_name": ["WA Field 24 Blue Marked", "WA Field 24 Blue Unmarked", "WA Field 24 Blue Mixed"],
+                    "code_name": [
+                        "wa_field_24_blue_marked",
+                        "wa_field_24_blue_unmarked",
+                        "wa_field_24_blue_mixed",
+                    ],
+                    "round_name": [
+                        "WA Field 24 Blue Marked",
+                        "WA Field 24 Blue Unmarked",
+                        "WA Field 24 Blue Mixed",
+                    ],
                 }
 
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
@@ -459,10 +481,7 @@ def event_tables():
 
             # Done manually for now, update in future
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = {
-                "age_group": ["Adult", "Under 18"],
-                "peg" : ["red", "red"]
-            }
+            agelist = {"age_group": ["Adult", "Under 18"], "peg": ["red", "red"]}
             classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
 
             if bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
@@ -490,7 +509,9 @@ def event_tables():
                             age_app_rounds.append(rnd_i)
 
                     # Ensure 24 target round, not 12 target unit and remove duplicates
-                    age_app_rounds = list(set([x.replace("12", "24") for x in age_app_rounds]))
+                    age_app_rounds = list(
+                        set([x.replace("12", "24") for x in age_app_rounds])
+                    )
 
                     results[f"{age_j} {gender}"] = [
                         sql_to_dol(
