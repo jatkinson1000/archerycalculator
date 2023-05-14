@@ -29,7 +29,7 @@
   </p>
 
     {% from "_formhelpers.html" import render_select2_no_search_field %}
-  <form method=post>
+  <form method=get>
     {{ render_select2_no_search_field(form.bowstyle) }}
     {{ render_select2_no_search_field(form.gender) }}
     {{ render_select2_no_search_field(form.age) }}
