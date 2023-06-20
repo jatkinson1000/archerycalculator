@@ -198,8 +198,8 @@ def calculator():
                         age.lower(),
                     )
                     results["classification"] = class_from_score
-                    if scheme == "AGB":
-                        warning_handicap_system = "Note: This handicap uses the new scheme that will come into effect for indoor rounds from July 2023. To use the 'old' scheme for 2022/2023 please select 'Old Archery GB' in the advanced options below."
+                    # if scheme == "AGB":
+                    #     warning_handicap_system = "Note: This handicap uses the new scheme that will come into effect for indoor rounds from July 2023. To use the 'old' scheme for 2022/2023 please select 'Old Archery GB' in the advanced options below."
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
                     class_from_score = class_func.calculate_AGB_field_classification(

@@ -138,7 +138,6 @@ def classification_tables():
     ]
     genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
     agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
-    classlist = sql_to_dol(query_db("SELECT shortname FROM classes"))["shortname"]
 
     # Load form and set defaults
     form = TableForm.ClassificationTableForm(
@@ -184,13 +183,16 @@ def classification_tables():
         results["age"] = age
 
         if discipline in ["outdoor"]:
+            
+            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'"))["shortname"]
+            
             use_rounds = sql_to_dol(
                 query_db(
                     "SELECT code_name,round_name,family FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
                 )
             )
 
-            if bowstyle.lower() in ["traditional", "flatbow"]:
+            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
 
             # Perform filtering based upon category to make more aesthetic and avoid duplicates
@@ -229,14 +231,17 @@ def classification_tables():
                     )
                 )
         elif discipline in ["indoor"]:
-            # TODO: This is a bodge - put indoor classes in database properly and fetch above!
-            classlist = ["A", "B", "C", "D", "E", "F", "G", "H", "UC"]
+            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'indoor'"))["shortname"]
 
             use_rounds = sql_to_dol(
                 query_db(
                     "SELECT code_name,round_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"
                 )
             )
+
+            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                bowstyle = "barebow"
+
             # Filter out compound rounds for non-recurve and vice versa
             # TODO: This is pretty horrible... is there a better way?
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
