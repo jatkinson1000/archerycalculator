@@ -8,7 +8,9 @@ genders = class_func.read_genders_json()
 
 ages = class_func.read_ages_json()
 
-classes = class_func.read_classes_json()
+classes_in = class_func.read_classes_in_json()
+
+classes_out = class_func.read_classes_out_json()
 
 rounds = load_rounds.read_json_to_round_dict(
     [
@@ -73,13 +75,14 @@ def load_rounds_to_db(db):
 
 
 def load_classes_to_db(db):
-    for i, shortname in enumerate(classes["classes"]):
+    for classes in [classes_in, classes_out]:
+        for i, shortname in enumerate(classes["classes"]):
+            db.execute(
+                "INSERT INTO classes (shortname,longname,location) VALUES (?,?,?);",
+                (shortname, classes["classes_long"][i], classes["location"]),
+            )
         db.execute(
-            "INSERT INTO classes (shortname,longname) VALUES (?,?);",
-            (shortname, classes["classes_long"][i]),
+            "INSERT INTO classes (shortname,longname,location) VALUES (?,?,?);",
+            ("UC", "Unclassified",classes["location"]),
         )
-    db.execute(
-        "INSERT INTO classes (shortname,longname) VALUES (?,?);",
-        ("UC", "Unclassified"),
-    )
-    db.commit()
+        db.commit()

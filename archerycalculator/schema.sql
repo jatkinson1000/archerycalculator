@@ -35,5 +35,6 @@ CREATE TABLE rounds (
 CREATE TABLE classes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   shortname TEXT NOT NULL,
-  longname TEXT NOT NULL
+  longname TEXT NOT NULL,
+  location TEXT NOT NULL
 );
