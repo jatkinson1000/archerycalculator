@@ -29,7 +29,7 @@
     {{ render_select2_field(form.roundname) }}
     {{ render_box(form.compound) }}
     <span>Show comparable scores for:</span>
-    {% set boxlist = [form.outdoor, form.indoor, form.wafield, form.ifaafield, form.virounds, form.unofficial] %}
+    {% set boxlist = [form.outdoor, form.indoor, form.wafield, form.ifaafield, form.clout, form.virounds, form.unofficial] %}
     {{ render_box_list(boxlist) }}
     <input type=submit value=Calculate>
 
