@@ -38,14 +38,16 @@ hr {
 /* ----------------------- */
 /* NAVBAR */
 /* ----------------------- */
-nav h1 {
+nav p  {
   flex: auto;
   padding: 1rem 1rem 0rem;
 }
 
-nav h1 a {
+nav p a {
   text-decoration: none;
   color: #3bf;
+  font-weight: bold;
+  font-size: 1.5em;
 }
 
 nav ul  {
