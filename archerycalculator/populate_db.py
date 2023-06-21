@@ -21,6 +21,8 @@ rounds = load_rounds.read_json_to_round_dict(
         "WA_VI.json",
         "WA_field.json",
         "IFAA_field.json",
+        "AGB_clout.json",
+        "WA_clout.json",
         "Custom.json",
     ]
 )
