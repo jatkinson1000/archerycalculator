@@ -27,6 +27,11 @@ def rounds_page():
     rounds["WA Field"] = utils.fetch_and_sort_rounds(location="field", body="WA")
 
     rounds["IFAA Field"] = utils.fetch_and_sort_rounds(location="field", body="IFAA")
+    
+    # Combine Clout into a single set for now
+    rounds["Clout"] = sql_to_dol(
+        query_db("SELECT code_name,round_name FROM rounds WHERE location in ('clout')")
+    )
 
     # TODO These don't have a family allocated.
     # Condiser doing so or extending fetch and sort function
