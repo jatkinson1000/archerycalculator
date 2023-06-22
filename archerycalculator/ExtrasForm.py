@@ -23,5 +23,6 @@ class RoundComparisonForm(Form):
     indoor = BooleanField(label="Target indoor", false_values=(False, ""))
     wafield = BooleanField(label="WA Field", false_values=(False, ""))
     ifaafield = BooleanField(label="IFAA Field", false_values=(False, ""))
+    clout = BooleanField(label="Clout", false_values=(False, ""))
     virounds = BooleanField(label="VI Rounds", false_values=(False, ""))
     unofficial = BooleanField(label="Unofficial Rounds", false_values=(False, ""))

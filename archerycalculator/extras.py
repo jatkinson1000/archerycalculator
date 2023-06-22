@@ -166,6 +166,15 @@ def roundcomparison():
                 location="field", body="IFAA"
             )
 
+        # Combine metric and imperial Clout
+        if request.form.getlist("clout"):
+            clout_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name FROM rounds WHERE location in ('clout')"
+                )
+            )
+            use_rounds["clout"] = clout_rounds
+
         # TODO These don't use a location.
         # Condiser doing so or extending fetch and sort function
         if request.form.getlist("virounds"):
@@ -194,6 +203,8 @@ def roundcomparison():
                     "AGB_indoor.json",
                     "WA_outdoor.json",
                     "WA_indoor.json",
+                    "AGB_clout.json",
+                    "WA_clout.json",
                     "WA_field.json",
                     "IFAA_field.json",
                     "AGB_VI.json",
