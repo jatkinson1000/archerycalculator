@@ -242,19 +242,31 @@ def classification_tables():
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
 
-            # Filter out compound rounds for non-recurve and vice versa
-            # TODO: This is pretty horrible... is there a better way?
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+            
+            # Filter out:
+            #   - compound rounds for non-recurve and vice versa
+            #   - triple spot rounds for all
+            # TODO: This is pretty horrible... is there a better way?
+            # Get rid of all compound rounds
             noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
             codenames = [
                 key
                 for key in list(roundsdicts.keys())
                 if roundsdicts[key] in noncompoundroundnames
             ]
+            # Filter out triple-spot rounds using blacklist function and get
+            # corresponding reduced set of 'non-compound' roundnames.
+            codenames = utils.check_blacklist(
+                codenames, age, gender, bowstyle
+            )
+            noncompoundroundnames = [roundsdicts[codename] for codename in codenames]
+            # Convert codenames to compound codename if required.
             if bowstyle.lower() in ["compound"]:
                 codenames = utils.get_compound_codename(codenames)
+            print(codenames)
             use_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
-
+            print(use_rounds)
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
