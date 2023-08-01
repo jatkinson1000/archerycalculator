@@ -5,8 +5,7 @@ from archerycalculator.db import query_db, sql_to_dol
 
 def check_blacklist(roundlist, age, gender, bowstyle):
     """
-    Filter indoor rounds to remove any with compound scoring for the purposes of
-    display
+    Filter rounds to remove any we don't want showing up on tables.
 
     Parameters
     ----------
@@ -67,6 +66,14 @@ def check_blacklist(roundlist, age, gender, bowstyle):
         blacklist.append("metric_122_50")
     else:
         blacklist.append("wa720_50_b")
+
+    # Triple face rounds indoor
+    blacklist.append("bray_i_triple")
+    blacklist.append("bray_ii_triple")
+    blacklist.append("portsmouth_triple")
+    blacklist.append("wa18_triple")
+    blacklist.append("wa25_triple")
+    blacklist.append("worcester_5_centre")
 
     saferounds = []
     for roundname in roundlist:
