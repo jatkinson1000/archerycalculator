@@ -264,9 +264,7 @@ def classification_tables():
             # Convert codenames to compound codename if required.
             if bowstyle.lower() in ["compound"]:
                 codenames = utils.get_compound_codename(codenames)
-            print(codenames)
             use_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
-            print(use_rounds)
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
