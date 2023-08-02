@@ -167,7 +167,7 @@ def calculator():
                 if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
                     # TODO: Consider re-assigning bowstyle here for cleaner code,
                     #   rather than in archeryutils?
-                    if bowstyle.lower() in ["traditional", "flatbow"]:
+                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
                     class_from_score = class_func.calculate_AGB_outdoor_classification(
@@ -187,8 +187,8 @@ def calculator():
                 elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
                     # TODO: Consider re-assigning bowstyle here for cleaner code,
                     #   rather than in archeryutils?
-                    if bowstyle.lower() not in ["compound", "recurve"]:
-                        warning_bowstyle = f"Note: Treating {bowstyle} as Recurve for the purposes of classifications."
+                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                        warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
                     class_from_score = class_func.calculate_AGB_indoor_classification(
                         round_codename,
@@ -198,8 +198,6 @@ def calculator():
                         age.lower(),
                     )
                     results["classification"] = class_from_score
-                    # if scheme == "AGB":
-                    #     warning_handicap_system = "Note: This handicap uses the new scheme that will come into effect for indoor rounds from July 2023. To use the 'old' scheme for 2022/2023 please select 'Old Archery GB' in the advanced options below."
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
                     class_from_score = class_func.calculate_AGB_field_classification(
