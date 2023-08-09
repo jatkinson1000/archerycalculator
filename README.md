@@ -2,9 +2,12 @@
 
 ![GitHub](https://img.shields.io/github/license/jatkinson1000/archerycalculator)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <!-- ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jatkinson1000/archerycalculator/testing.yaml) -->
 <!-- [![codecov](https://codecov.io/gh/jatkinson1000/archerycalculator/branch/main/graph/badge.svg?token=AZU7G6H8T0)](https://codecov.io/gh/jatkinson1000/archerycalculator) -->
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=JEABJ3UJU4XD4)
+<a href="https://www.buymeacoffee.com/jackatkinsr" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 Code for the [archerycalculator](https://archerycalculator.co.uk) website.  
 This is a flask application for calculating Archery handicaps and classifications.  
@@ -85,3 +88,7 @@ who can afford it, can be given through
 [Buy me a coffee](https://www.buymeacoffee.com/jackatkinsr) or
 [donating via paypal](https://www.paypal.com/donate/?hosted_button_id=JEABJ3UJU4XD4).  
 This will primarily be used to pay domain and hosting costs.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=JEABJ3UJU4XD4)
+<a href="https://www.buymeacoffee.com/jackatkinsr" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
