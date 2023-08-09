@@ -1,5 +1,3 @@
-# archerycalculator
-
 ![GitHub](https://img.shields.io/github/license/jatkinson1000/archerycalculator)
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -9,13 +7,18 @@
 [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=JEABJ3UJU4XD4)
 <a href="https://www.buymeacoffee.com/jackatkinsr" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
-Code for the [archerycalculator](https://archerycalculator.co.uk) website.  
-This is a flask application for calculating Archery handicaps and classifications.  
-Information about how to [support](#support) the project is given below.
+<br>
+
+# archerycalculator
+
+Code for the [archerycalculator.co.uk](https://archerycalculator.co.uk) website.  
+This is a flask application for calculating archery handicaps and classifications.
+It is largely built on top of the
+[_archeryutils_](https://github.com/jatkinson1000/archeryutils) package.
 
 ## Usage
 Usage is allowed under the
-[licensing specified](https://github.com/jatkinson1000/archerycalculator#license).
+[licensing specified](#license).
 We encourage usage and welcome feature requests.
 It is appreciated if visible credit is given by any projects using `archerycalculator`.
 
@@ -27,7 +30,8 @@ To install, clone the repository, navigate to `archerycalculator/`, and run:
 It is recommended to use a virtual environment.
 
 ### Getting Started
-This is a flask app. After installing you can initialise the project databases and
+This is a flask app.  
+After installing you can initialise the project databases and
 start the app running by running:
 
     flask --app archerycalculator init-db
@@ -41,7 +45,7 @@ opened in a browser.
 Copyright &copy; Jack Atkinson
 
 _archerycalculator_ is distributed under the
-[MIT Licence](https://github.com/jatkinson1000/archerycalculator/blob/main/LICENSE).
+[MIT Licence](LICENSE).
 
 ### Authors and Acknowledgment
 See [Contributors](https://github.com/jatkinson1000/archerycalculator/graphs/contributors)
