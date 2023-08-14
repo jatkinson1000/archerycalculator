@@ -367,6 +367,8 @@ def event_tables():
         "National": ["national"],
         "Western": ["western"],
         "Warwick": ["warwick"],
+        "Portsmouth": ["portsmouth"],
+        "WA 18": ["wa18"],
         "WA Field 24 Marked": ["wafield_24_marked"],
         "WA Field 24 Unmarked": ["wafield_24_unmarked"],
         "WA Field 24 Mixed": ["wafield_24_mixed"],
@@ -422,9 +424,7 @@ def event_tables():
             agelist = sql_to_dol(
                 query_db("SELECT age_group,male_dist,female_dist FROM ages")
             )
-            classlist = sql_to_dol(query_db("SELECT shortname FROM classes"))[
-                "shortname"
-            ]
+            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'"))["shortname"]
 
             roundslist = {"code_name": [], "round_name": []}
             for family_i in roundfamilies[roundfamily]:
@@ -486,8 +486,51 @@ def event_tables():
                     ]
             classes = classlist[-2::-1]
 
+        # Target indoor:
+        if roundfamily in list(roundfamilies.keys())[7:9]:
+            all_rounds_objs = load_rounds.read_json_to_round_dict(
+                [
+                    "AGB_indoor.json",
+                    "WA_indoor.json",
+                ]
+            )
+            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                bowstyle = "barebow"
+
+            genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+            agelist = sql_to_dol(
+                query_db("SELECT age_group FROM ages")
+            )
+            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'indoor'"))["shortname"]
+
+            round_codename = roundfamilies[roundfamily][0]
+
+            results = {}
+            for gender in genderlist:
+                for j, age_j in enumerate(agelist["age_group"]):
+                    # Check for Compound round
+                    if bowstyle.lower() in ["compound"]:
+                        age_round = round_codename + "_compound"
+                    else:
+                        age_round = round_codename
+
+                    results[f"{age_j} {gender}"] = [
+                        sql_to_dol(
+                            query_db(
+                                "SELECT round_name FROM rounds WHERE code_name IN (?)",
+                                [round_codename],
+                            )
+                        )["round_name"][0]
+                    ] + [
+                        str(int(i))
+                        for i in class_func.AGB_indoor_classification_scores(
+                            age_round, bowstyle, gender, age_j
+                        )[-1::-1]
+                    ]
+            classes = classlist[-2::-1]
+
         # Field:
-        elif roundfamily in list(roundfamilies.keys())[7:]:
+        elif roundfamily in list(roundfamilies.keys())[9:]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",
