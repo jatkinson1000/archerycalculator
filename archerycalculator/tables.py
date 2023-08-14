@@ -183,9 +183,11 @@ def classification_tables():
         results["age"] = age
 
         if discipline in ["outdoor"]:
-            
-            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'"))["shortname"]
-            
+
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
+
             use_rounds = sql_to_dol(
                 query_db(
                     "SELECT code_name,round_name,family FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
@@ -231,7 +233,9 @@ def classification_tables():
                     )
                 )
         elif discipline in ["indoor"]:
-            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'indoor'"))["shortname"]
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
+            )["shortname"]
 
             use_rounds = sql_to_dol(
                 query_db(
@@ -243,7 +247,7 @@ def classification_tables():
                 bowstyle = "barebow"
 
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
-            
+
             # Filter out:
             #   - compound rounds for non-recurve and vice versa
             #   - triple spot rounds for all
@@ -257,9 +261,7 @@ def classification_tables():
             ]
             # Filter out triple-spot rounds using blacklist function and get
             # corresponding reduced set of 'non-compound' roundnames.
-            codenames = utils.check_blacklist(
-                codenames, age, gender, bowstyle
-            )
+            codenames = utils.check_blacklist(codenames, age, gender, bowstyle)
             noncompoundroundnames = [roundsdicts[codename] for codename in codenames]
             # Convert codenames to compound codename if required.
             if bowstyle.lower() in ["compound"]:
@@ -424,7 +426,9 @@ def event_tables():
             agelist = sql_to_dol(
                 query_db("SELECT age_group,male_dist,female_dist FROM ages")
             )
-            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'"))["shortname"]
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
 
             roundslist = {"code_name": [], "round_name": []}
             for family_i in roundfamilies[roundfamily]:
@@ -498,10 +502,10 @@ def event_tables():
                 bowstyle = "barebow"
 
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = sql_to_dol(
-                query_db("SELECT age_group FROM ages")
-            )
-            classlist = sql_to_dol(query_db("SELECT shortname FROM classes WHERE location IS 'indoor'"))["shortname"]
+            agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
+            )["shortname"]
 
             round_codename = roundfamilies[roundfamily][0]
 
