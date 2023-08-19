@@ -74,6 +74,7 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     blacklist.append("wa18_triple")
     blacklist.append("wa25_triple")
     blacklist.append("worcester_5_centre")
+    blacklist.append("vegas_300_triple")
 
     saferounds = []
     for roundname in roundlist:
