@@ -1,5 +1,5 @@
 from archeryutils import load_rounds
-from archeryutils.classifications import classifications as class_func
+import archeryutils.classifications as class_func
 
 
 bowstyles = class_func.read_bowstyles_json()
