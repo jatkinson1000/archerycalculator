@@ -1,5 +1,5 @@
 from archeryutils import load_rounds
-import archeryutils.classifications as class_func
+import archeryutils.classifications.classification_utils as class_func
 
 
 bowstyles = class_func.read_bowstyles_json()
@@ -8,9 +8,9 @@ genders = class_func.read_genders_json()
 
 ages = class_func.read_ages_json()
 
-classes_in = class_func.read_classes_in_json()
+classes_in = class_func.read_classes_json("agb_indoor")
 
-classes_out = class_func.read_classes_out_json()
+classes_out = class_func.read_classes_json("agb_outdoor")
 
 rounds = load_rounds.read_json_to_round_dict(
     [
