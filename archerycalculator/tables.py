@@ -9,7 +9,7 @@ from archerycalculator.db import query_db, sql_to_dol
 
 from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
-from archeryutils.classifications import classifications as class_func
+import archeryutils.classifications as class_func
 
 from archerycalculator import TableForm, utils
 
@@ -228,7 +228,7 @@ def classification_tables():
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.AGB_outdoor_classification_scores(
+                    class_func.agb_outdoor_classification_scores(
                         round_i, bowstyle, gender, age
                     )
                 )
@@ -270,7 +270,7 @@ def classification_tables():
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.AGB_indoor_classification_scores(
+                    class_func.agb_indoor_classification_scores(
                         round_i, bowstyle, gender, age
                     )
                 )
@@ -308,7 +308,7 @@ def classification_tables():
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.AGB_field_classification_scores(
+                    class_func.agb_field_classification_scores(
                         round_i, bowstyle, gender, age
                     )
                 )
@@ -484,7 +484,7 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.AGB_outdoor_classification_scores(
+                        for i in class_func.agb_outdoor_classification_scores(
                             age_round, bowstyle, gender, age_j
                         )[-1::-1]
                     ]
@@ -527,7 +527,7 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.AGB_indoor_classification_scores(
+                        for i in class_func.agb_indoor_classification_scores(
                             age_round, bowstyle, gender, age_j
                         )[-1::-1]
                     ]
@@ -584,7 +584,7 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.AGB_field_classification_scores(
+                        for i in class_func.agb_field_classification_scores(
                             age_app_rounds[0], bowstyle, gender, age_j
                         )[-1::-1]
                     ]

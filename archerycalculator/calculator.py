@@ -7,7 +7,7 @@ from flask import (
 from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
-from archeryutils.classifications import classifications as class_func
+import archeryutils.classifications as class_func
 
 from archerycalculator import HCForm, utils
 from archerycalculator.db import query_db, sql_to_dol
@@ -170,7 +170,7 @@ def calculator():
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
-                    class_from_score = class_func.calculate_AGB_outdoor_classification(
+                    class_from_score = class_func.calculate_agb_outdoor_classification(
                         round_codename,
                         float(score),
                         bowstyle.lower(),
@@ -190,7 +190,7 @@ def calculator():
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
-                    class_from_score = class_func.calculate_AGB_indoor_classification(
+                    class_from_score = class_func.calculate_agb_indoor_classification(
                         round_codename,
                         float(score),
                         bowstyle.lower(),
@@ -205,7 +205,7 @@ def calculator():
                     results["classification"] = class_from_score
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
-                    class_from_score = class_func.calculate_AGB_field_classification(
+                    class_from_score = class_func.calculate_agb_field_classification(
                         round_codename,
                         float(score),
                         bowstyle.lower(),
