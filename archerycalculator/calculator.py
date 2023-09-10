@@ -197,9 +197,12 @@ def calculator():
                         gender.lower(),
                         age.lower(),
                     )
+                    class_from_score = query_db(
+                        "SELECT longname FROM classes WHERE shortname IS (?)",
+                        [class_from_score],
+                        one=True,
+                    )["longname"]
                     results["classification"] = class_from_score
-
-                    warning_handicap_round = "Note: These new indoor classifications are provisional, pending release by AGB."
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
                     class_from_score = class_func.calculate_agb_field_classification(
