@@ -20,7 +20,11 @@ CREATE TABLE ages (
   age_group TEXT NOT NULL,
   gov_body TEXT NOT NULL,
   male_dist TEXT NOT NULL,
-  female_dist TEXT NOT NULL
+  female_dist TEXT NOT NULL,
+  red_dist_max TEXT NOT NULL,
+  red_dist_min TEXT NOT NULL,
+  blue_dist_max TEXT NOT NULL,
+  blue_dist_min TEXT NOT NULL
 );
 
 CREATE TABLE rounds (

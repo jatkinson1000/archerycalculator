@@ -19,7 +19,6 @@ bp = Blueprint("calculator", __name__, url_prefix="/")
 # Single home page (for now)
 @bp.route("/", methods=("GET", "POST"))
 def calculator():
-
     # Set form choices
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
@@ -47,7 +46,6 @@ def calculator():
     warning_handicap_round = None
     warning_handicap_system = None
     if request.method == "POST" and form.validate():
-
         # Get essential form results
         bowstyle = request.form["bowstyle"]
         gender = request.form["gender"]
@@ -95,7 +93,6 @@ def calculator():
         results["roundname"] = roundname
 
         if error is None:
-
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
@@ -165,10 +162,11 @@ def calculator():
 
                 # Calculate the classification
                 if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
-                    # TODO: Consider re-assigning bowstyle here for cleaner code,
-                    #   rather than in archeryutils?
+                    # Handle non-outdoor bowstyles
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
+                    elif bowstyle.lower() in "compound barebow":
+                        warning_bowstyle = f"Note: Treating {bowstyle} as Compound for the purposes of classifications."
 
                     class_from_score = class_func.calculate_agb_outdoor_classification(
                         round_codename,
@@ -185,10 +183,11 @@ def calculator():
                     results["classification"] = class_from_score
 
                 elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
-                    # TODO: Consider re-assigning bowstyle here for cleaner code,
-                    #   rather than in archeryutils?
+                    # Handle non-indoor bowstyles
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
+                    elif bowstyle.lower() in "compound barebow":
+                        warning_bowstyle = f"Note: Treating {bowstyle} as Compound for the purposes of classifications."
 
                     class_from_score = class_func.calculate_agb_indoor_classification(
                         round_codename,
@@ -205,13 +204,22 @@ def calculator():
                     results["classification"] = class_from_score
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
+                    # Handle non-field age groups
+                    if age.lower().replace(" ", "") in ("under16"):
+                        age_cat = "Under 18"
+                    elif age.lower().replace(" ", "") in ("under14"):
+                        age_cat = "Under 15"
+                    else:
+                        age_cat = age
+
                     class_from_score = class_func.calculate_agb_field_classification(
                         round_codename,
                         float(score),
                         bowstyle.lower(),
                         gender.lower(),
-                        age.lower(),
+                        age_cat.lower(),
                     )
+
                     results["classification"] = class_from_score
                     warning_handicap_round = "Note: This round is not officially recognised by Archery GB for the purposes of handicapping."
                 else:

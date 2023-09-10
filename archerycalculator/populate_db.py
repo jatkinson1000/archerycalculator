@@ -35,12 +35,6 @@ def load_bowstyles_to_db(db):
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item["bowstyle"], "TF"),
         )
-    # Additional AGB field bowstyles
-    for item in ["Traditional", "Flatbow"]:
-        db.execute(
-            "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
-            (item, "TF"),
-        )
     db.commit()
 
 
@@ -53,8 +47,17 @@ def load_genders_to_db(db):
 def load_ages_to_db(db):
     for item in ages:
         db.execute(
-            "INSERT INTO ages (age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);",
-            (item["age_group"], "AGB", item["male"][0], item["female"][0]),
+            "INSERT INTO ages (age_group,gov_body,male_dist,female_dist,red_dist_max,red_dist_min,blue_dist_max,blue_dist_min) VALUES (?,?,?,?,?,?,?,?);",
+            (
+                item["age_group"],
+                "AGB",
+                item["male"][0],
+                item["female"][0],
+                item["red"][1],
+                item["red"][0],
+                item["blue"][1],
+                item["blue"][0],
+            ),
         )
     db.commit()
 
