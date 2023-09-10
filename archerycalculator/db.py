@@ -1,3 +1,4 @@
+"""Definitions for database."""
 import sqlite3
 
 import click
@@ -18,30 +19,30 @@ def get_db():
     return g.db
 
 
-def close_db(e=None):
-    db = g.pop("db", None)
+def close_db(err=None):
+    database = g.pop("db", None)
 
-    if db is not None:
-        db.close()
+    if database is not None:
+        database.close()
 
 
 def init_db():
     # call the SQL functions in the schema.sql file to init the tables in db
-    db = get_db()
-    with current_app.open_resource("schema.sql") as f:
-        db.executescript(f.read().decode("utf8"))
-    populate_db.load_bowstyles_to_db(db)
-    populate_db.load_ages_to_db(db)
-    populate_db.load_genders_to_db(db)
-    populate_db.load_rounds_to_db(db)
-    populate_db.load_classes_to_db(db)
+    database = get_db()
+    with current_app.open_resource("schema.sql") as db_file:
+        database.executescript(db_file.read().decode("utf8"))
+    populate_db.load_bowstyles_to_db(database)
+    populate_db.load_ages_to_db(database)
+    populate_db.load_genders_to_db(database)
+    populate_db.load_rounds_to_db(database)
+    populate_db.load_classes_to_db(database)
 
 
 def query_db(query, args=(), one=False):
     cur = get_db().execute(query, args)
-    rv = cur.fetchall()
+    ret_vals = cur.fetchall()
     cur.close()
-    return (rv[0] if rv else None) if one else rv
+    return (ret_vals[0] if ret_vals else None) if one else ret_vals
 
 
 def sql_to_lod(sql_result):
@@ -51,8 +52,8 @@ def sql_to_lod(sql_result):
     try:
         unpacked = [{k: item[k] for k in item.keys()} for item in sql_result]
         return unpacked
-    except Exception as e:
-        # print(f"Failed to convert with error:{e}\n return empty list.")
+    except Exception as err:
+        # print(f"Failed to convert with error:{err}\n return empty list.")
         return []
 
 
@@ -66,8 +67,8 @@ def sql_to_dol(sql_result):
             k: [d[k] for d in sql_result if k in d.keys()] for k in sql_result[0].keys()
         }
         return unpacked
-    except Exception as e:
-        # print(f"Failed to convert with error:{e}\n return empty dict.")
+    except Exception as err:
+        # print(f"Failed to convert with error:{err}\n return empty dict.")
         return {}
 
 

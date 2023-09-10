@@ -1,3 +1,4 @@
+"""Module containing 'extras' for archerycalculator."""
 from flask import (
     Blueprint,
     render_template,
@@ -5,22 +6,20 @@ from flask import (
 )
 import numpy as np
 
-from archerycalculator.db import query_db, sql_to_dol
-
 from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 from archeryutils.handicaps import handicap_functions as hc_func
 
-from archerycalculator import ExtrasForm, utils
+from archerycalculator import extras_form, utils
+from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("extras", __name__, url_prefix="/extras")
 
 
 @bp.route("/groups", methods=("GET", "POST"))
 def groups():
-
     # Load form and set defaults
-    form = ExtrasForm.GroupForm(
+    form = extras_form.GroupForm(
         request.form,
     )
 
@@ -28,9 +27,7 @@ def groups():
     form.known_group_unit.choices = ["cm", "inches"]
     form.known_dist_unit.choices = ["metres", "yards"]
 
-    error = None
     if request.method == "POST" and form.validate():
-
         # Get essential form results
         known_group_size = float(request.form["known_group_size"])
         known_group_unit = request.form["known_group_unit"]
@@ -64,8 +61,8 @@ def groups():
         # Calculate the handicap
         known_sig_r = known_group_size * group_scale_factor / 2.0
 
-        def f_root(h, scheme, distance, hc_params):
-            val = hc_eq.sigma_r(h, scheme, distance, hc_params)
+        def f_root(hval, scheme, distance, hc_params):
+            val = hc_eq.sigma_r(hval, scheme, distance, hc_params)
             return val - known_sig_r
 
         # Rootfind value of sigma_r
@@ -77,13 +74,13 @@ def groups():
         sig_r = hc_eq.sigma_r(handicap, hc_scheme, dists * dist_scale_factor, hc_params)
 
         # Calculate group sizes
-        groups = 2.0 * sig_r
+        groupsize = 2.0 * sig_r
 
-        icons = [None] * len(groups)
-        for i, group in enumerate(groups):
+        icons = [None] * len(groupsize)
+        for i, group in enumerate(groupsize):
             icons[i] = utils.group_icons(group)
 
-        results = dict(zip(dists, zip(groups / group_scale_factor, icons)))
+        results = dict(zip(dists, zip(groupsize / group_scale_factor, icons)))
         print(results)
 
         # Return the results
@@ -105,9 +102,8 @@ def groups():
 
 @bp.route("/roundscomparison", methods=("GET", "POST"))
 def roundcomparison():
-
     # Load form and set defaults
-    form = ExtrasForm.RoundComparisonForm(
+    form = extras_form.RoundComparisonForm(
         request.form,
     )
 
@@ -120,7 +116,6 @@ def roundcomparison():
 
     error = None
     if request.method == "POST" and form.validate():
-
         # Get essential form results
         score = request.form["score"]
         roundname = request.form["roundname"]
@@ -208,7 +203,10 @@ def roundcomparison():
                 one=True,
             )
             if round_db_info is None:
-                error = f"Invalid round name '{roundname}'. Please start typing and select from dropdown."
+                error = (
+                    f"Invalid round name '{roundname}'. "
+                    f"Please start typing and select from dropdown."
+                )
             else:
                 round_codename = round_db_info["code_name"]
 
@@ -241,10 +239,11 @@ def roundcomparison():
                     )
 
                     results = {}
-                    for item in use_rounds:
-                        results_i = np.zeros(len(use_rounds[item]["code_name"]))
-                        for i, round_i in enumerate(use_rounds[item]["code_name"]):
-                            # Don't round up to avoid conflicts where score is different to that input
+                    for roundgroup, roundset in use_rounds.items():
+                        results_i = np.zeros(len(roundset["code_name"]))
+                        for i, round_i in enumerate(roundset["code_name"]):
+                            # Don't round up to avoid conflicts where score is
+                            # different to that input
                             results_i[i] = hc_eq.score_for_round(
                                 all_rounds_objs[round_i],
                                 hc_from_score,
@@ -252,8 +251,8 @@ def roundcomparison():
                                 hc_params,
                                 round_score_up=False,
                             )[0]
-                        results[item] = dict(
-                            zip(use_rounds[item]["round_name"], results_i)
+                        results[roundgroup] = dict(
+                            zip(roundset["round_name"], results_i)
                         )
 
                     # Return the results

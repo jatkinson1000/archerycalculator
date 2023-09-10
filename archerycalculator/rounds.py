@@ -1,3 +1,4 @@
+"""Module for running routines on 'rounds' page."""
 from flask import (
     Blueprint,
     render_template,
@@ -13,7 +14,6 @@ bp = Blueprint("rounds", __name__, url_prefix="/rounds")
 
 @bp.route("/", strict_slashes=False)
 def rounds_page():
-
     rounds = {}
 
     rounds["AGB Outdoor"] = utils.fetch_and_sort_rounds(location="outdoor", body="AGB")
@@ -42,17 +42,15 @@ def rounds_page():
         query_db("SELECT code_name,round_name FROM rounds WHERE body in ('custom')")
     )
 
-    for roundtype in rounds:
-        roundsdict = dict(
-            zip(rounds[roundtype]["code_name"], rounds[roundtype]["round_name"])
-        )
+    for roundfam, roundlist in rounds.items():
+        roundsdict = dict(zip(roundlist["code_name"], roundlist["round_name"]))
         noncompoundroundnames = utils.indoor_display_filter(roundsdict)
         codenames = [
             key
             for key in list(roundsdict.keys())
             if roundsdict[key] in noncompoundroundnames
         ]
-        rounds[roundtype] = {
+        rounds[roundfam] = {
             "code_name": codenames,
             "round_name": noncompoundroundnames,
         }

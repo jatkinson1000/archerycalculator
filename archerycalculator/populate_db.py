@@ -1,3 +1,4 @@
+"""Module of routined for populating the database with key data."""
 from archeryutils import load_rounds
 import archeryutils.classifications.classification_utils as class_func
 
@@ -28,61 +29,61 @@ rounds = load_rounds.read_json_to_round_dict(
 )
 
 
-def load_bowstyles_to_db(db):
+def load_bowstyles_to_db(database):
     # AGB Target bowstyles from file
     for item in bowstyles:
-        db.execute(
+        database.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item["bowstyle"], "TF"),
         )
     # Additional AGB field bowstyles
     for item in ["Traditional", "Flatbow"]:
-        db.execute(
+        database.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item, "TF"),
         )
-    db.commit()
+    database.commit()
 
 
-def load_genders_to_db(db):
+def load_genders_to_db(database):
     for item in genders:
-        db.execute("INSERT INTO genders (gender) VALUES (?);", [item])
-    db.commit()
+        database.execute("INSERT INTO genders (gender) VALUES (?);", [item])
+    database.commit()
 
 
-def load_ages_to_db(db):
+def load_ages_to_db(database):
     for item in ages:
-        db.execute(
+        database.execute(
             "INSERT INTO ages (age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);",
             (item["age_group"], "AGB", item["male"][0], item["female"][0]),
         )
-    db.commit()
+    database.commit()
 
 
-def load_rounds_to_db(db):
-    for item in rounds:
-        db.execute(
+def load_rounds_to_db(database):
+    for roundname, round_obj in rounds.items():
+        database.execute(
             "INSERT INTO rounds (round_name,code_name,body,location,family) VALUES (?,?,?,?,?);",
             (
-                rounds[item].name,
-                item,
-                rounds[item].body,
-                rounds[item].location,
-                rounds[item].family,
+                round_obj.name,
+                roundname,
+                round_obj.body,
+                round_obj.location,
+                round_obj.family,
             ),
         )
-    db.commit()
+    database.commit()
 
 
-def load_classes_to_db(db):
+def load_classes_to_db(database):
     for classes in [classes_in, classes_out]:
         for i, shortname in enumerate(classes["classes"]):
-            db.execute(
+            database.execute(
                 "INSERT INTO classes (shortname,longname,location) VALUES (?,?,?);",
                 (shortname, classes["classes_long"][i], classes["location"]),
             )
-        db.execute(
+        database.execute(
             "INSERT INTO classes (shortname,longname,location) VALUES (?,?,?);",
             ("UC", "Unclassified", classes["location"]),
         )
-        db.commit()
+        database.commit()

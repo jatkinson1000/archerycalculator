@@ -1,3 +1,4 @@
+"""Form definitions for main calculator page."""
 from wtforms import (
     Form,
     validators,

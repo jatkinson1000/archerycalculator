@@ -1,3 +1,4 @@
+"""Module of useful utilities for archerycalculator."""
 import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
@@ -148,13 +149,14 @@ def get_compound_codename(round_codenames):
     for i, codename in enumerate(round_codenames):
         if codename in convert_dict:
             round_codenames[i] = convert_dict[codename]
+
     if notlistflag:
         return round_codenames[0]
-    else:
-        return round_codenames
+
+    return round_codenames
 
 
-def check_alias(round_codename, age, gender, bowstyle):
+def check_alias(round_codename, gender, bowstyle):
     """
     select the 'appropriate' round from aliases
 
@@ -197,7 +199,7 @@ def check_alias(round_codename, age, gender, bowstyle):
     return round_codename
 
 
-def order_rounds(rounds, age=None, gender=None, bowstyle=None):
+def order_rounds(rounds):
     """
     Given an iterator of rounds, sort them into an approved order.
 
@@ -218,7 +220,7 @@ def order_rounds(rounds, age=None, gender=None, bowstyle=None):
     # TODO Easy way to do this with dict? Otherwise should we bother?
     # Just in case, check for aliases and filter
     # if not any(arg is None for arg in (age, gender, bowstyle)):
-    #     rounds = [check_alias(round, age, gender, bowstyle) for round in rounds]
+    #     rounds = [check_alias(round, gender, bowstyle) for round in rounds]
 
     # Sort by family - rounds should already sorted within families. and filtered.
     order = [
@@ -319,7 +321,9 @@ def fetch_and_sort_rounds(location, body):
 
     db_rounds = sql_to_dol(
         query_db(
-            f"""SELECT code_name,round_name,family FROM rounds WHERE location IN ('{"', '".join(location)}') AND body in ('{"', '".join(body)}')"""
+            f"""SELECT code_name,round_name,family FROM rounds """
+            f"""WHERE location IN ('{"', '".join(location)}') """
+            f"""AND body in ('{"', '".join(body)}')"""
         )
     )
 
@@ -357,10 +361,10 @@ def rootfinding(x_min, x_max, f_root, *args):
     ----------
     """
 
-    x = [x_min, x_max]
-    f = [
-        f_root(x[0], *args),
-        f_root(x[1], *args),
+    x_init = [x_min, x_max]
+    f_init = [
+        f_root(x_init[0], *args),
+        f_root(x_init[1], *args),
     ]
     xtol = 1.0e-16
     rtol = 0.00
@@ -372,37 +376,32 @@ def rootfinding(x_min, x_max, f_root, *args):
     dblk = 0.0
     stry = 0.0
 
-    if abs(f[1]) <= f[0]:
-        xcur = x[1]
-        xpre = x[0]
-        fcur = f[1]
-        fpre = f[0]
+    if abs(f_init[1]) <= f_init[0]:
+        xcur = x_init[1]
+        xpre = x_init[0]
+        fcur = f_init[1]
+        fpre = f_init[0]
     else:
-        xpre = x[1]
-        xcur = x[0]
-        fpre = f[1]
-        fcur = f[0]
+        xpre = x_init[1]
+        xcur = x_init[0]
+        fpre = f_init[1]
+        fcur = f_init[0]
 
-    for i in range(50):
+    for _ in range(50):
         if (fpre != 0.0) and (fcur != 0.0) and (np.sign(fpre) != np.sign(fcur)):
             xblk = xpre
             fblk = fpre
             spre = xcur - xpre
             scur = xcur - xpre
         if abs(fblk) < abs(fcur):
-            xpre = xcur
-            xcur = xblk
-            xblk = xpre
-
-            fpre = fcur
-            fcur = fblk
-            fblk = fpre
+            xpre, xcur, xblk = xcur, xblk, xpre
+            fpre, fcur, fblk = fcur, fblk, fpre
 
         delta = (xtol + rtol * abs(xcur)) / 2.0
         sbis = (xblk - xcur) / 2.0
 
         if (fcur == 0.0) or (abs(sbis) < delta):
-            hc = xcur
+            handicap = xcur
             break
 
         if (abs(spre) > delta) and (abs(fcur) < abs(fpre)):
@@ -436,36 +435,38 @@ def rootfinding(x_min, x_max, f_root, *args):
                 xcur -= delta
 
         fcur = f_root(xcur, *args)
-        hc = xcur
-    return hc
+        handicap = xcur
+    return handicap
 
 
 def group_icons(groupsize):
     if groupsize < 1.0e-2:
-        return "fa-solid fa-spider"
+        icon = "fa-solid fa-spider"
     elif groupsize < 2.5e-2:
-        return "fa-solid fa-eye"
+        icon = "fa-solid fa-eye"
     elif groupsize < 3.5e-2:
-        return "fa-solid fa-egg"
+        icon = "fa-solid fa-egg"
     elif groupsize < 5.0e-2:
-        return "fa-regular fa-lightbulb"
+        icon = "fa-regular fa-lightbulb"
     elif groupsize < 8.0e-2:
-        return "fa-solid fa-apple-whole"
+        icon = "fa-solid fa-apple-whole"
     elif groupsize < 23.0e-2:
-        return "fa-solid fa-volleyball"
+        icon = "fa-solid fa-volleyball"
     elif groupsize < 27.5e-2:
-        return "fa-solid fa-basketball"
+        icon = "fa-solid fa-basketball"
     elif groupsize < 35.0e-2:
-        return "fa-solid fa-record-vinyl"
+        icon = "fa-solid fa-record-vinyl"
     elif groupsize < 45.0e-2:
-        return "fa-solid fa-hat-wizard"
+        icon = "fa-solid fa-hat-wizard"
     elif groupsize < 55.0e-2:
-        return "fa-solid fa-guitar"
+        icon = "fa-solid fa-guitar"
     elif groupsize < 75.0e-2:
-        return "fa-brands fa-linux"
+        icon = "fa-brands fa-linux"
     elif groupsize < 122.0e-2:
-        return "fa-solid fa-bullseye"
+        icon = "fa-solid fa-bullseye"
     elif groupsize < 180.0e-2:
-        return "fa-solid fa-car"
+        icon = "fa-solid fa-car"
     else:
-        return "fa-solid fa-earth-americas"
+        icon = "fa-solid fa-earth-americas"
+
+    return icon

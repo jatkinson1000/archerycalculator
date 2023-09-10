@@ -1,3 +1,5 @@
+"""Module containing Form definitions for 'extras' pages."""
+
 from wtforms import (
     Form,
     validators,
