@@ -62,9 +62,19 @@ def load_ages_to_db(database):
         database.execute(
             (
                 "INSERT INTO ages "
-                "(age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);"
+                "(age_group,gov_body,male_dist,female_dist,"
+                "red_dist_max,red_dist_min,blue_dist_max,blue_dist_min) "
+                "VALUES (?,?,?,?,?,?,?,?);",
+            (
+                item["age_group"],
+                "AGB",
+                item["male"][0],
+                item["female"][0],
+                item["red"][1],
+                item["red"][0],
+                item["blue"][1],
+                item["blue"][0],
             ),
-            (item["age_group"], "AGB", item["male"][0], item["female"][0]),
         )
     database.commit()
 

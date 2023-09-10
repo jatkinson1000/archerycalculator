@@ -114,10 +114,16 @@ def calculator():
 
                 # Calculate the classification
                 if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
+                    # Handle non-outdoor bowstyles
                     # Warn about bowstyle (handled by archeryutils).
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = (
                             f"Note: Treating {bowstyle} as Barebow "
+                            "for the purposes of classifications."
+                        )
+                    elif bowstyle.lower() in "compound barebow":
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Compound "
                             "for the purposes of classifications."
                         )
 
@@ -142,6 +148,11 @@ def calculator():
                             f"Note: Treating {bowstyle} as Barebow "
                             "for the purposes of classifications."
                         )
+                    elif bowstyle.lower() in "compound barebow":
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Compound "
+                            "for the purposes of classifications."
+                        )
 
                     class_from_score = class_func.calculate_agb_indoor_classification(
                         float(score),
@@ -158,13 +169,22 @@ def calculator():
                     results["classification"] = class_from_score
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
+                    # Handle non-field age groups
+                    if age.lower().replace(" ", "") in ("under16"):
+                        age_cat = "Under 18"
+                    elif age.lower().replace(" ", "") in ("under14"):
+                        age_cat = "Under 15"
+                    else:
+                        age_cat = age
+
                     class_from_score = class_func.calculate_agb_field_classification(
                         float(score),
                         round_codename,
                         bowstyle.lower(),
                         gender.lower(),
-                        age.lower(),
+                        age_cat.lower(),
                     )
+
                     results["classification"] = class_from_score
                     warning_handicap_round = (
                         "Note: This round is not officially recognised by "
