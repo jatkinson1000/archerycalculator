@@ -12,15 +12,20 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     ----------
     roundlist : list
         list of archeryutils round codenames
+    age : str
+        age identifier
+    gender : str
+        gender identifier
+    bowstyle : str
+        bowstyle identifier
 
     Returns
     -------
-    list
-        filtered version of the input list
-
-    References
-    ----------
+    saferounds : list
+        filtered version of the input roundlist
     """
+    # Code follows a logical and readable structure but triggers 'too-many-branches'
+    # pylint: disable=too-many-branches
 
     blacklist = []
 
@@ -87,8 +92,7 @@ def check_blacklist(roundlist, age, gender, bowstyle):
 
 def indoor_display_filter(rounddict):
     """
-    Filter indoor rounds to remove any with compound scoring for the purposes of
-    display
+    Filter indoor rounds to remove any names with 'compound' for display.
 
     Parameters
     ----------
@@ -99,9 +103,6 @@ def indoor_display_filter(rounddict):
     -------
     list
         list of full round names from filtered version of the input dict
-
-    References
-    ----------
     """
     for roundname in list(rounddict.keys()):
         if "compound" in roundname:
@@ -111,7 +112,7 @@ def indoor_display_filter(rounddict):
 
 def get_compound_codename(round_codenames):
     """
-    convert any indoor rounds with special compound scoring to the compound format
+    Convert any indoor rounds with special compound scoring to the compound format.
 
     Parameters
     ----------
@@ -122,9 +123,6 @@ def get_compound_codename(round_codenames):
     -------
     round_codenames : str or list of str
         list of amended round codenames for compound
-
-    References
-    ----------
     """
     notlistflag = False
     if not isinstance(round_codenames, list):
@@ -216,11 +214,6 @@ def order_rounds(rounds):
     References
     ----------
     """
-
-    # TODO Easy way to do this with dict? Otherwise should we bother?
-    # Just in case, check for aliases and filter
-    # if not any(arg is None for arg in (age, gender, bowstyle)):
-    #     rounds = [check_alias(round, gender, bowstyle) for round in rounds]
 
     # Sort by family - rounds should already sorted within families. and filtered.
     order = [
@@ -359,7 +352,18 @@ def rootfinding(x_min, x_max, f_root, *args):
 
     References
     ----------
+    Brent's Method for Root Finding in Scipy
+    - https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html
+    - https://github.com/scipy/scipy/blob/dde39b7cc7dc231cec6bf5d882c8a8b5f40e73ad/
+      scipy/optimize/Zeros/brentq.c
+
     """
+    # The rootfinding algorithm here raises pylint errors for
+    # too many statements (64/50), branches (17/12), and variables(23/15).
+    # However, it is a single enclosed algorithm => disable
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
 
     x_init = [x_min, x_max]
     f_init = [
@@ -440,6 +444,19 @@ def rootfinding(x_min, x_max, f_root, *args):
 
 
 def group_icons(groupsize):
+    """
+    For bracket and function find the value such that f=0
+
+    Parameters
+    ----------
+    groupsize : float
+        size of group [m]
+
+    Returns
+    -------
+    icon : str
+        identifier for groupsize fontawesome icon
+    """
     if groupsize < 1.0e-2:
         icon = "fa-solid fa-spider"
     elif groupsize < 2.5e-2:

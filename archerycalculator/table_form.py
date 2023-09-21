@@ -1,7 +1,22 @@
+"""Module holding classes for table forms."""
 from wtforms import Form, validators, SelectField, BooleanField
 
 
 class HandicapTableForm(Form):
+    """
+    Class for handicap table form.
+
+    Attributes
+    ----------
+    roundn : SelectField
+        round n/7 to display handicaqp table for.
+    roundn_compound : BooleanField
+        use compound scoring for round n?
+    allowance : BooleanField
+        generate allowance tables instead of handicap tables?
+
+    """
+
     round1 = SelectField("Round1", [validators.InputRequired("Please provide.")])
     round1_compound = BooleanField(
         label="Use compound scoring", false_values=(False, "")
@@ -34,6 +49,22 @@ class HandicapTableForm(Form):
 
 
 class ClassificationTableForm(Form):
+    """
+    Class for classification table form.
+
+    Attributes
+    ----------
+    bowstyle : SelectField
+        bowstyle to use
+    gender : SelectField
+        gender to use
+    age : SelectField
+        age to use
+    discipline : SelectField
+        discipline to use
+
+    """
+
     bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
     gender = SelectField(
         "Gender under AGB", [validators.InputRequired("Please provide.")]
@@ -43,6 +74,20 @@ class ClassificationTableForm(Form):
 
 
 class EventTableForm(Form):
+    """
+    Class for classification by event table form.
+
+    Attributes
+    ----------
+    bowstyle : SelectField
+        bowstyle to use
+    roundfamily : SelectField
+        roundfamily to generate table for
+    restrict_to_named : BooleanField
+        restrict to named round or use full range of distances?
+
+    """
+
     bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
     roundfamily = SelectField("RoundFamily")
     restrict_to_named = BooleanField(

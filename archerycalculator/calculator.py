@@ -20,6 +20,19 @@ bp = Blueprint("calculator", __name__, url_prefix="/")
 # Single home page (for now)
 @bp.route("/", methods=("GET", "POST"))
 def calculator():
+    """
+    Generate the calculator page in the flask app.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the calculator page
+
+    """
     # Set form choices
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
@@ -207,6 +220,30 @@ def calculator():
 
 
 def check_inputs(results, bowstyle, gender, age, roundname):
+    """
+    Check inputs are valid and return in dict.
+
+    Parameters
+    ----------
+    results : Dict[]
+        Dict of results extracted from the form
+    bowstyle : str
+        bowstyle being used
+    gender : str
+        gender being used
+    age : str
+        age being used
+    roundname : str
+        name of round to use
+
+    Returns
+    -------
+    results : Dict[]
+        amended Dict of results extracted from the form
+    error : str or None
+        string containing en error message as appropriate
+
+    """
     # Check the inputs are all valid
     # No longer need to check dropdowns, but leave in case
     error = None
@@ -242,6 +279,28 @@ def check_inputs(results, bowstyle, gender, age, roundname):
 
 
 def load_round(roundname, bowstyle):
+    """
+    Check inputs are valid and return in dict.
+
+    Parameters
+    ----------
+    roundname : str
+        name of round to use
+    bowstyle : str
+        bowstyle being used
+
+    Returns
+    -------
+    round_obj : Round
+        Round object for the appropriate round
+    round_body : str
+        governing body for this round
+    round_codename : str
+        codename for this round
+    round_location : str
+        location for this round
+
+    """
     all_rounds_objs = load_rounds.read_json_to_round_dict(
         [
             "AGB_outdoor_imperial.json",
@@ -275,7 +334,28 @@ def load_round(roundname, bowstyle):
 
 
 def check_max_score(round_obj, roundname, score, results):
-    # Check score against maximum score and return error if inappropriate
+    """
+    Check score against maximum score and return error if inappropriate.
+
+    Parameters
+    ----------
+    round_obj : Round
+        Round object for the appropriate round
+    roundname : str
+        name of round
+    score : int
+        score input
+    results : Dict[str: Any]
+        Dict of results extracted from the form
+
+    Returns
+    -------
+    results : Dict[str: Any]
+        amended Dict of results extracted from the form
+    error : str or None
+        string containing en error message as appropriate
+
+    """
     error = None
 
     max_score = round_obj.max_score()

@@ -8,11 +8,25 @@ from archerycalculator import populate_db
 
 
 def get_db():
+    """
+    Makes a database connection and stores to globals.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    g.db : sqlite3.connect object
+        database connection
+
+    """
     # g is object for unique requests to the database
     if "db" not in g:
         g.db = sqlite3.connect(
             current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
         )
+
         # Return rows as dicts when using cursor
         g.db.row_factory = sqlite3.Row
 
@@ -20,6 +34,17 @@ def get_db():
 
 
 def close_db(err=None):
+    """
+    Close the database connection and remove from globals.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     database = g.pop("db", None)
 
     if database is not None:
@@ -27,6 +52,18 @@ def close_db(err=None):
 
 
 def init_db():
+    """
+    Initialise the database.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    """
     # call the SQL functions in the schema.sql file to init the tables in db
     database = get_db()
     with current_app.open_resource("schema.sql") as db_file:
@@ -39,6 +76,23 @@ def init_db():
 
 
 def query_db(query, args=(), one=False):
+    """
+    Query the database.
+
+    Parameters
+    ----------
+    query : str
+        SQL query to perform on the database
+    args : Tuple[Any]
+        arguments to pass to the
+    one : bool
+        return a single value?
+
+    Returns
+    -------
+    ret_vals :
+
+    """
     cur = get_db().execute(query, args)
     ret_vals = cur.fetchall()
     cur.close()

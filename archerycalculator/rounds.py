@@ -14,6 +14,19 @@ bp = Blueprint("rounds", __name__, url_prefix="/rounds")
 
 @bp.route("/", strict_slashes=False)
 def rounds_page():
+    """
+    Create a dictionary of families of rounds to compare to.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the rounds list page
+
+    """
     rounds = {}
 
     rounds["AGB Outdoor"] = utils.fetch_and_sort_rounds(location="outdoor", body="AGB")
@@ -28,8 +41,8 @@ def rounds_page():
 
     rounds["IFAA Field"] = utils.fetch_and_sort_rounds(location="field", body="IFAA")
 
-    # TODO These don't have a family allocated.
-    # Condiser doing so or extending fetch and sort function
+    # These don't have a family allocated.
+    # Consider doing so or extending fetch and sort function
     rounds["AGB VI"] = sql_to_dol(
         query_db("SELECT code_name,round_name FROM rounds WHERE body in ('AGB-VI')")
     )

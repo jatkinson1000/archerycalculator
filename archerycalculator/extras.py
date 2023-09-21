@@ -15,9 +15,25 @@ from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("extras", __name__, url_prefix="/extras")
 
+# handicap scheme info
+HC_PARAMS = hc_eq.HcParams()
+HC_SCHEME = "AGB"
+
 
 @bp.route("/groups", methods=("GET", "POST"))
 def groups():
+    """
+    Calculate comparative group sizes at different distances.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        call to html templating function
+    """
     # Load form and set defaults
     form = extras_form.GroupForm(
         request.form,
@@ -54,24 +70,23 @@ def groups():
             dist_scale_factor = 0.9144
             dist_unit = "yd"
 
-        # Generate the handicap params
-        hc_params = hc_eq.HcParams()
-        hc_scheme = "AGB"
-
         # Calculate the handicap
         known_sig_r = known_group_size * group_scale_factor / 2.0
 
-        def f_root(hval, scheme, distance, hc_params):
-            val = hc_eq.sigma_r(hval, scheme, distance, hc_params)
+        def f_root(hval, distance):
+            val = hc_eq.sigma_r(hval, HC_SCHEME, distance, HC_PARAMS)
             return val - known_sig_r
 
         # Rootfind value of sigma_r
         handicap = utils.rootfinding(
-            -75, 300, f_root, hc_scheme, known_dist * dist_scale_factor, hc_params
+            -75,
+            300,
+            f_root,
+            known_dist * dist_scale_factor,
         )
 
         # Map to other distances
-        sig_r = hc_eq.sigma_r(handicap, hc_scheme, dists * dist_scale_factor, hc_params)
+        sig_r = hc_eq.sigma_r(handicap, HC_SCHEME, dists * dist_scale_factor, HC_PARAMS)
 
         # Calculate group sizes
         groupsize = 2.0 * sig_r
@@ -81,7 +96,6 @@ def groups():
             icons[i] = utils.group_icons(group)
 
         results = dict(zip(dists, zip(groupsize / group_scale_factor, icons)))
-        print(results)
 
         # Return the results
         return render_template(
@@ -102,6 +116,18 @@ def groups():
 
 @bp.route("/roundscomparison", methods=("GET", "POST"))
 def roundcomparison():
+    """
+    Calculate comparative scores on other rounds.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        call to html templating function
+    """
     # Load form and set defaults
     form = extras_form.RoundComparisonForm(
         request.form,
@@ -111,73 +137,17 @@ def roundcomparison():
     roundnames = utils.indoor_display_filter(
         dict(zip(roundnames["code_name"], roundnames["round_name"]))
     )
-
     form.roundname.choices = [""] + roundnames
-
     error = None
+
+    # Process returned results
     if request.method == "POST" and form.validate():
         # Get essential form results
         score = request.form["score"]
         roundname = request.form["roundname"]
-        compound = False
-        if request.form.getlist("compound"):
-            compound = True
 
-        use_rounds = {}
-        if request.form.getlist("outdoor"):
-            use_rounds["Outdoor Target"] = utils.fetch_and_sort_rounds(
-                location="outdoor", body=["AGB", "WA"]
-            )
-
-        if request.form.getlist("indoor"):
-            indoor_rounds = utils.fetch_and_sort_rounds(
-                location="indoor", body=["AGB", "WA"]
-            )
-            # Deal with compound
-            roundsdicts = dict(
-                zip(indoor_rounds["code_name"], indoor_rounds["round_name"])
-            )
-            noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
-            codenames = [
-                key
-                for key in list(roundsdicts.keys())
-                if roundsdicts[key] in noncompoundroundnames
-            ]
-            if compound:
-                codenames = utils.get_compound_codename(codenames)
-            indoor_rounds = {
-                "code_name": codenames,
-                "round_name": noncompoundroundnames,
-            }
-            use_rounds["Indoor Target"] = indoor_rounds
-
-        if request.form.getlist("wafield"):
-            use_rounds["WA Field"] = utils.fetch_and_sort_rounds(
-                location="field", body=["AGB", "WA"]
-            )
-
-        if request.form.getlist("ifaafield"):
-            use_rounds["IFAA Field"] = utils.fetch_and_sort_rounds(
-                location="field", body="IFAA"
-            )
-
-        # TODO These don't use a location.
-        # Condiser doing so or extending fetch and sort function
-        if request.form.getlist("virounds"):
-            vi_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE body in ('AGB-VI','WA-VI')"
-                )
-            )
-            use_rounds["VI"] = vi_rounds
-
-        if request.form.getlist("unofficial"):
-            unofficial_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE body IN ('custom')"
-                )
-            )
-            use_rounds["Unofficial"] = unofficial_rounds
+        # Get dict of round groups we will compare to
+        use_rounds = get_rounds_dict(request.form)
 
         if len(use_rounds) == 0:
             error = "Please select one of more groups of rounds to compare to."
@@ -211,7 +181,7 @@ def roundcomparison():
                 round_codename = round_db_info["code_name"]
 
                 # Check if we need compound scoring
-                if compound:
+                if request.form.getlist("compound"):
                     round_codename = utils.get_compound_codename(round_codename)
                 round_obj = all_rounds_objs[round_codename]
 
@@ -225,35 +195,19 @@ def roundcomparison():
                         f"score of {int(max_score)} for a {roundname}."
                     )
 
-                # Generate the handicap params
-                hc_params = hc_eq.HcParams()
-
                 if error is None:
                     # Calculate the handicap
                     hc_from_score = hc_func.handicap_from_score(
                         float(score),
                         round_obj,
-                        "AGB",
-                        hc_params,
+                        HC_SCHEME,
+                        HC_PARAMS,
                         int_prec=False,
                     )
 
-                    results = {}
-                    for roundgroup, roundset in use_rounds.items():
-                        results_i = np.zeros(len(roundset["code_name"]))
-                        for i, round_i in enumerate(roundset["code_name"]):
-                            # Don't round up to avoid conflicts where score is
-                            # different to that input
-                            results_i[i] = hc_eq.score_for_round(
-                                all_rounds_objs[round_i],
-                                hc_from_score,
-                                "AGB",
-                                hc_params,
-                                round_score_up=False,
-                            )[0]
-                        results[roundgroup] = dict(
-                            zip(roundset["round_name"], results_i)
-                        )
+                    results = get_results_dict(
+                        use_rounds, hc_from_score, all_rounds_objs
+                    )
 
                     # Return the results
                     return render_template(
@@ -271,3 +225,109 @@ def roundcomparison():
         results=None,
         error=error,
     )
+
+
+def get_rounds_dict(form_results):
+    """
+    Create a dictionary of families of rounds to compare to.
+
+    Parameters
+    ----------
+    form_results :
+        results from the form stating what to compare to
+
+    Returns
+    -------
+    use_rounds : Dict[str : List[str]]
+        Dict of lists of rounds in each family
+
+    """
+    use_rounds = {}
+    if form_results.getlist("outdoor"):
+        use_rounds["Outdoor Target"] = utils.fetch_and_sort_rounds(
+            location="outdoor", body=["AGB", "WA"]
+        )
+
+    if form_results.getlist("indoor"):
+        indoor_rounds = utils.fetch_and_sort_rounds(
+            location="indoor", body=["AGB", "WA"]
+        )
+        # Deal with compound
+        roundsdicts = dict(zip(indoor_rounds["code_name"], indoor_rounds["round_name"]))
+        noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
+        codenames = [
+            key
+            for key in list(roundsdicts.keys())
+            if roundsdicts[key] in noncompoundroundnames
+        ]
+        if request.form.getlist("compound"):
+            codenames = utils.get_compound_codename(codenames)
+        indoor_rounds = {
+            "code_name": codenames,
+            "round_name": noncompoundroundnames,
+        }
+        use_rounds["Indoor Target"] = indoor_rounds
+
+    if form_results.getlist("wafield"):
+        use_rounds["WA Field"] = utils.fetch_and_sort_rounds(
+            location="field", body=["AGB", "WA"]
+        )
+
+    if form_results.getlist("ifaafield"):
+        use_rounds["IFAA Field"] = utils.fetch_and_sort_rounds(
+            location="field", body="IFAA"
+        )
+
+    # TODO These don't use a location.
+    # Condiser doing so or extending fetch and sort function
+    if form_results.getlist("virounds"):
+        vi_rounds = sql_to_dol(
+            query_db(
+                "SELECT code_name,round_name FROM rounds WHERE body in ('AGB-VI','WA-VI')"
+            )
+        )
+        use_rounds["VI"] = vi_rounds
+
+    if request.form.getlist("unofficial"):
+        unofficial_rounds = sql_to_dol(
+            query_db("SELECT code_name,round_name FROM rounds WHERE body IN ('custom')")
+        )
+        use_rounds["Unofficial"] = unofficial_rounds
+
+    return use_rounds
+
+
+def get_results_dict(use_rounds, hc_from_score, all_rounds_objs):
+    """
+    Calculate scores on the rounds we want to copare to.
+
+    Parameters
+    ----------
+    use_rounds : Dict[str: List[str]]
+        results from the form stating what to compare to
+    hc_from_score : float
+        handicap from input score
+    all_rounds_objs : Dict[str: Round]
+        dict of roundnames and Round objects
+
+    Returns
+    -------
+    results : Dict[str : Dict[str : int]]
+        Dict of Dicts of scores for each round in each family
+
+    """
+    results = {}
+    for roundgroup, roundset in use_rounds.items():
+        results_i = np.zeros(len(roundset["code_name"]))
+        for i, round_i in enumerate(roundset["code_name"]):
+            # Don't round up to avoid conflicts where score is
+            # different to that input
+            results_i[i] = hc_eq.score_for_round(
+                all_rounds_objs[round_i],
+                hc_from_score,
+                HC_SCHEME,
+                HC_PARAMS,
+                round_score_up=False,
+            )[0]
+        results[roundgroup] = dict(zip(roundset["round_name"], results_i))
+    return results

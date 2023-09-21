@@ -10,7 +10,7 @@ from archeryutils import load_rounds
 from archeryutils.handicaps import handicap_equations as hc_eq
 import archeryutils.classifications as class_func
 
-from archerycalculator import TableForm, utils
+from archerycalculator import table_form, utils
 from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("tables", __name__, url_prefix="/tables")
@@ -18,7 +18,20 @@ bp = Blueprint("tables", __name__, url_prefix="/tables")
 
 @bp.route("/handicap", methods=("GET", "POST"))
 def handicap_tables():
-    form = TableForm.HandicapTableForm(request.form)
+    """
+    Generate the handicap table page in the flask app.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the handicap table page
+
+    """
+    form = table_form.HandicapTableForm(request.form)
 
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
     all_rounds = utils.indoor_display_filter(
@@ -50,20 +63,7 @@ def handicap_tables():
             ]
         )
 
-        # Get form results
-        rounds_req = []
-        rounds_comp = []
-        for i in range(7):
-            if request.form[f"round{i+1}"]:
-                rounds_req.append(request.form[f"round{i+1}"])
-                if request.form.getlist(f"round{i+1}_compound"):
-                    rounds_comp.append(True)
-                else:
-                    rounds_comp.append(False)
-
-        allowance_table = False
-        if request.form.getlist("allowance"):
-            allowance_table = True
+        rounds_req, rounds_comp, allowance_table = get_hc_rounds(request.form)
 
         round_objs = []
         for round_i, comp_i in zip(rounds_req, rounds_comp):
@@ -93,28 +93,8 @@ def handicap_tables():
             # Get the appropriate rounds from the database
             round_objs.append(all_rounds_objs[round_codename])
 
-        # Generate the handicap params
-        hc_params = hc_eq.HcParams()
-
-        results = np.zeros([151, len(round_objs) + 1])
-        results[:, 0] = np.arange(0, 151).astype(np.int32)
-        for i, round_obj_i in enumerate(round_objs):
-            results[:, i + 1] = hc_eq.score_for_round(
-                round_obj_i, results[:, 0], "AGB", hc_params
-            )[0].astype(np.int32)
-
-        if allowance_table:
-            results[:, 1:] = 1440 - results[:, 1:]
-        else:
-            # Clean gaps where there are multiple HC for one score
-            # TODO: This assumes scores are running highest to lowest.
-            #  AA and AA2 will only work if hcs passed in reverse order (large to small)
-            # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
-            #  0, NaN, and None as the same thing. Consider finding better solution.
-            for irow, row in enumerate(results[:-1, 1:]):
-                for jscore in range(len(row)):
-                    if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
-                        results[irow, jscore + 1] = -9999
+        # Generate numerical table of results
+        results = generate_hc_table(round_objs, allowance_table)
 
         # Return the results
         return render_template(
@@ -132,8 +112,102 @@ def handicap_tables():
     )
 
 
+def get_hc_rounds(web_form):
+    """
+    Get the rounds requested from the web form.
+
+    Parameters
+    ----------
+    web_form : flask.request.form
+        request from the form with results
+
+    Returns
+    -------
+    rounds_req : List[str]
+        rounds for which to generate handicap table
+    rounds_comp : List[bool]
+        use compound scoring for round in rounds_req?
+    allowance_table : bool
+        generate table of allowances?
+
+    """
+    # Get form results
+    rounds_req = []
+    rounds_comp = []
+    allowance_table = False
+
+    for i in range(7):
+        if web_form[f"round{i+1}"]:
+            rounds_req.append(web_form[f"round{i+1}"])
+            if web_form.getlist(f"round{i+1}_compound"):
+                rounds_comp.append(True)
+            else:
+                rounds_comp.append(False)
+
+    if web_form.getlist("allowance"):
+        allowance_table = True
+
+    return rounds_req, rounds_comp, allowance_table
+
+
+def generate_hc_table(round_objs, allowance_table):
+    """
+    Generate the handicap table.
+
+    Parameters
+    ----------
+    round_objs : List[Round]
+        list of Round objects for the rounds in the table
+    allowance_table : bool
+        generate table of allowances?
+
+    Returns
+    -------
+    results : np.ndarray
+        array with numerical values for the handicap table
+
+    """
+    # Generate the handicap params
+    hc_params = hc_eq.HcParams()
+
+    results = np.zeros([151, len(round_objs) + 1])
+    results[:, 0] = np.arange(0, 151).astype(np.int32)
+    for i, round_obj_i in enumerate(round_objs):
+        results[:, i + 1] = hc_eq.score_for_round(
+            round_obj_i, results[:, 0], "AGB", hc_params
+        )[0].astype(np.int32)
+
+    if allowance_table:
+        results[:, 1:] = 1440 - results[:, 1:]
+    else:
+        # Clean gaps where there are multiple HC for one score
+        # TODO: This assumes scores are running highest to lowest.
+        #  AA and AA2 will only work if hcs passed in reverse order (large to small)
+        # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
+        #  0, NaN, and None as the same thing. Consider finding better solution.
+        for irow, row in enumerate(results[:-1, 1:]):
+            for jscore in range(len(row)):
+                if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
+                    results[irow, jscore + 1] = -9999
+
+    return results
+
+
 @bp.route("/classification", methods=("GET", "POST"))
 def classification_tables():
+    """
+    Generate the classification table page in the flask app.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the classification table page
+
+    """
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
     ]
@@ -141,7 +215,7 @@ def classification_tables():
     agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
     # Load form and set defaults
-    form = TableForm.ClassificationTableForm(
+    form = table_form.ClassificationTableForm(
         request.form, bowstyle=bowstylelist[1], gender=genderlist[1], age=agelist[1]
     )
     form.bowstyle.choices = bowstylelist
@@ -355,6 +429,19 @@ def classification_tables():
 
 @bp.route("/classbyevent", methods=("GET", "POST"))
 def event_tables():
+    """
+    Generate the classification table by event page in the flask app.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the classification table by event page
+
+    """
     roundfamilies = {
         "WA 1440/Metrics": ["wa1440", "metric1440"],
         "WA 720/Metrics": ["wa720", "metric720"],
@@ -375,7 +462,7 @@ def event_tables():
     ]
 
     # Load form and set defaults
-    form = TableForm.EventTableForm(request.form, bowstyle=bowstylelist[1])
+    form = table_form.EventTableForm(request.form, bowstyle=bowstylelist[1])
     form.bowstyle.choices = bowstylelist
 
     form.roundfamily.choices = list(roundfamilies.keys())

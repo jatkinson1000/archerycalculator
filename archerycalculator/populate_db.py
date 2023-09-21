@@ -30,6 +30,18 @@ rounds = load_rounds.read_json_to_round_dict(
 
 
 def load_bowstyles_to_db(database):
+    """
+    Load bowstyles into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+
+    Returns
+    -------
+    None
+    """
     # AGB Target bowstyles from file
     for item in bowstyles:
         database.execute(
@@ -46,12 +58,36 @@ def load_bowstyles_to_db(database):
 
 
 def load_genders_to_db(database):
+    """
+    Load genders into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+
+    Returns
+    -------
+    None
+    """
     for item in genders:
         database.execute("INSERT INTO genders (gender) VALUES (?);", [item])
     database.commit()
 
 
 def load_ages_to_db(database):
+    """
+    Load ages into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+
+    Returns
+    -------
+    None
+    """
     for item in ages:
         database.execute(
             "INSERT INTO ages (age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);",
@@ -61,6 +97,18 @@ def load_ages_to_db(database):
 
 
 def load_rounds_to_db(database):
+    """
+    Load rounds into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+
+    Returns
+    -------
+    None
+    """
     for roundname, round_obj in rounds.items():
         database.execute(
             "INSERT INTO rounds (round_name,code_name,body,location,family) VALUES (?,?,?,?,?);",
@@ -76,6 +124,18 @@ def load_rounds_to_db(database):
 
 
 def load_classes_to_db(database):
+    """
+    Load classes into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+
+    Returns
+    -------
+    None
+    """
     for classes in [classes_in, classes_out]:
         for i, shortname in enumerate(classes["classes"]):
             database.execute(

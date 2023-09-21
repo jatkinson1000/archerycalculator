@@ -7,6 +7,19 @@ from archerycalculator import db, calculator, tables, rounds, info, about, extra
 
 
 def create_app(test_config=None):
+    """
+    Create and initialise the main application.
+
+    Parameters
+    ----------
+    test_config : Mapping
+        manually provided config mapping
+
+    Returns
+    -------
+    app : Flask
+        a flask Flask housing the application
+    """
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
