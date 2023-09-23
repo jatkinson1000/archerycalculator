@@ -350,11 +350,9 @@ def classification_tables():
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
             )["shortname"]
 
-            # Handle age groups - field has 50+, U21, U18, U15, U12
-            if age.lower().replace(" ", "") in ("under16"):
-                age = "Under 18"
-            elif age.lower().replace(" ", "") in ("under14"):
-                age = "Under 15"
+            # Handle age groups - field has no U21
+            if age.lower().replace(" ", "") in ("under21"):
+                age = "Adult"
 
             use_rounds = sql_to_dol(
                 query_db(
@@ -607,7 +605,7 @@ def event_tables():
             # Select only AGB Field age groups
             agelist = sql_to_dol(
                 query_db(
-                    "SELECT age_group,red_dist_min,blue_dist_min FROM ages WHERE NOT (age_group LIKE '%16%' OR age_group LIKE '%14%')"
+                    "SELECT age_group,red_dist_min,blue_dist_min FROM ages WHERE NOT (age_group LIKE '%21%')"
                 )
             )
             classlist = sql_to_dol(

@@ -170,10 +170,8 @@ def calculator():
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
                     # Handle non-field age groups
-                    if age.lower().replace(" ", "") in ("under16"):
-                        age_cat = "Under 18"
-                    elif age.lower().replace(" ", "") in ("under14"):
-                        age_cat = "Under 15"
+                    if age.lower().replace(" ", "") in ("under21"):
+                        age_cat = "Adult"
                     else:
                         age_cat = age
 
