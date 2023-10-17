@@ -18,7 +18,6 @@ bp = Blueprint("tables", __name__, url_prefix="/tables")
 
 @bp.route("/handicap", methods=("GET", "POST"))
 def handicap_tables():
-
     form = TableForm.HandicapTableForm(request.form)
 
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
@@ -67,7 +66,7 @@ def handicap_tables():
             allowance_table = True
 
         round_objs = []
-        for (round_i, comp_i) in zip(rounds_req, rounds_comp):
+        for round_i, comp_i in zip(rounds_req, rounds_comp):
             round_query = query_db(
                 "SELECT code_name FROM rounds WHERE round_name IS (?)",
                 [round_i],
@@ -132,7 +131,6 @@ def handicap_tables():
 
 @bp.route("/classification", methods=("GET", "POST"))
 def classification_tables():
-
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
     ]
@@ -183,7 +181,6 @@ def classification_tables():
         results["age"] = age
 
         if discipline in ["outdoor"]:
-
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
             )["shortname"]
@@ -196,6 +193,8 @@ def classification_tables():
 
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
+            elif bowstyle.lower() in ["compound barebow"]:
+                bowstyle = "compound"
 
             # Perform filtering based upon category to make more aesthetic and avoid duplicates
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
@@ -245,6 +244,8 @@ def classification_tables():
 
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
+            elif bowstyle.lower() in ["compound barebow"]:
+                bowstyle = "compound"
 
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
 
@@ -264,7 +265,7 @@ def classification_tables():
             codenames = utils.check_blacklist(codenames, age, gender, bowstyle)
             noncompoundroundnames = [roundsdicts[codename] for codename in codenames]
             # Convert codenames to compound codename if required.
-            if bowstyle.lower() in ["compound"]:
+            if "compound" in bowstyle.lower():
                 codenames = utils.get_compound_codename(codenames)
             use_rounds = {"code_name": codenames, "round_name": noncompoundroundnames}
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
@@ -275,35 +276,19 @@ def classification_tables():
                     )
                 )
         elif discipline in ["field"]:
-            # TODO: This is a bodge - put field classes in database properly and fetch above!
-            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
 
-            if bowstyle.lower() in ["recurve", "compound"]:
-                use_rounds = {
-                    "code_name": [
-                        "wa_field_24_red_marked",
-                        "wa_field_24_red_unmarked",
-                        "wa_field_24_red_mixed",
-                    ],
-                    "round_name": [
-                        "WA Field 24 Red Marked",
-                        "WA Field 24 Red Unmarked",
-                        "WA Field 24 Red Mixed",
-                    ],
-                }
-            elif bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
-                use_rounds = {
-                    "code_name": [
-                        "wa_field_24_blue_marked",
-                        "wa_field_24_blue_unmarked",
-                        "wa_field_24_blue_mixed",
-                    ],
-                    "round_name": [
-                        "WA Field 24 Blue Marked",
-                        "WA Field 24 Blue Unmarked",
-                        "WA Field 24 Blue Mixed",
-                    ],
-                }
+            # Handle age groups - field has no U21
+            if age.lower().replace(" ", "") in ("under21"):
+                age = "Adult"
+
+            use_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA') AND NOT code_name LIKE '%12%'"
+                )
+            )
 
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
@@ -360,7 +345,6 @@ def classification_tables():
 
 @bp.route("/classbyevent", methods=("GET", "POST"))
 def event_tables():
-
     roundfamilies = {
         "WA 1440/Metrics": ["wa1440", "metric1440"],
         "WA 720/Metrics": ["wa720", "metric720"],
@@ -419,8 +403,10 @@ def event_tables():
                     "WA_outdoor.json",
                 ]
             )
-            if bowstyle.lower() in ["traditional", "flatbow"]:
+            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
+            elif bowstyle.lower() in ["compound barebow"]:
+                bowstyle = "compound"
 
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
             agelist = sql_to_dol(
@@ -444,7 +430,6 @@ def event_tables():
             results = {}
             for gender in genderlist:
                 for j, age_j in enumerate(agelist["age_group"]):
-
                     # Get appropriate round from distance
                     for i, rnd_i in enumerate(roundslist["code_name"]):
                         if all_rounds_objs[rnd_i].max_distance() >= min(
@@ -500,6 +485,8 @@ def event_tables():
             )
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
+            elif bowstyle.lower() in ["compound barebow"]:
+                bowstyle = "compound"
 
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
             agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))
@@ -541,13 +528,16 @@ def event_tables():
                 ]
             )
 
-            # Done manually for now, update in future
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = {"age_group": ["Adult", "Under 18"], "peg": ["red", "red"]}
-            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
-
-            if bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
-                agelist["peg"] = ["blue", "blue"]
+            # Select only AGB Field age groups
+            agelist = sql_to_dol(
+                query_db(
+                    "SELECT age_group,red_dist_min,blue_dist_min FROM ages WHERE NOT (age_group LIKE '%21%')"
+                )
+            )
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
 
             roundslist = {"code_name": [], "round_name": []}
             for family_i in roundfamilies[roundfamily]:
@@ -563,23 +553,37 @@ def event_tables():
             results = {}
             for gender in genderlist:
                 for j, age_j in enumerate(agelist["age_group"]):
-
                     # Get appropriate round from distance
                     age_app_rounds = []
+
+                    # Set appropriate pegs for ages/bowstyles
+                    # Use marked round for distance purposes
                     for i, rnd_i in enumerate(roundslist["code_name"]):
-                        if f"{agelist['peg'][j]}" in rnd_i:
+                        if bowstyle.lower() in ["compound", "recurve"]:
+                            min_dist = agelist["red_dist_min"][j]
+                        else:
+                            min_dist = agelist["blue_dist_min"][j]
+                        if all_rounds_objs[
+                            rnd_i.replace("unmarked", "marked").replace(
+                                "mixed", "marked"
+                            )
+                        ].max_distance() >= float(min_dist):
                             age_app_rounds.append(rnd_i)
 
                     # Ensure 24 target round, not 12 target unit and remove duplicates
                     age_app_rounds = list(
                         set([x.replace("12", "24") for x in age_app_rounds])
                     )
+                    age_app_rounds = sorted(
+                        age_app_rounds, key=lambda x: all_rounds_objs[x].max_distance()
+                    )
 
+                    # Use the shortest eligible round for each category
                     results[f"{age_j} {gender}"] = [
                         sql_to_dol(
                             query_db(
                                 "SELECT round_name FROM rounds WHERE code_name IN (?)",
-                                age_app_rounds,
+                                [age_app_rounds[0]],
                             )
                         )["round_name"][0]
                     ] + [

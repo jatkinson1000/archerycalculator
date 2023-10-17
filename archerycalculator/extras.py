@@ -18,7 +18,6 @@ bp = Blueprint("extras", __name__, url_prefix="/extras")
 
 @bp.route("/groups", methods=("GET", "POST"))
 def groups():
-
     # Load form and set defaults
     form = ExtrasForm.GroupForm(
         request.form,
@@ -30,7 +29,6 @@ def groups():
 
     error = None
     if request.method == "POST" and form.validate():
-
         # Get essential form results
         known_group_size = float(request.form["known_group_size"])
         known_group_unit = request.form["known_group_unit"]
@@ -105,7 +103,6 @@ def groups():
 
 @bp.route("/roundscomparison", methods=("GET", "POST"))
 def roundcomparison():
-
     # Load form and set defaults
     form = ExtrasForm.RoundComparisonForm(
         request.form,
@@ -120,7 +117,6 @@ def roundcomparison():
 
     error = None
     if request.method == "POST" and form.validate():
-
         # Get essential form results
         score = request.form["score"]
         roundname = request.form["roundname"]
