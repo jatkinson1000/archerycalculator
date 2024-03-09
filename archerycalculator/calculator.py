@@ -18,7 +18,6 @@ bp = Blueprint("calculator", __name__, url_prefix="/")
 # Single home page (for now)
 @bp.route("/", methods=("GET", "POST"))
 def calculator():
-
     # Set form choices
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
@@ -46,7 +45,6 @@ def calculator():
     warning_handicap_round = None
     warning_handicap_system = None
     if request.method == "POST" and form.validate():
-
         # Get essential form results
         bowstyle = request.form["bowstyle"]
         gender = request.form["gender"]
@@ -94,7 +92,6 @@ def calculator():
         results["roundname"] = roundname
 
         if error is None:
-
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
@@ -137,7 +134,6 @@ def calculator():
             results["maxscore"] = int(max_score)
 
             if error is None:
-
                 hc_scheme = hc.handicap_scheme(scheme)
 
                 # Calculate the handicap

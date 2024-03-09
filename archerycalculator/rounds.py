@@ -13,7 +13,6 @@ bp = Blueprint("rounds", __name__, url_prefix="/rounds")
 
 @bp.route("/", strict_slashes=False)
 def rounds_page():
-
     rounds = {}
 
     rounds["AGB Outdoor"] = utils.fetch_and_sort_rounds(location="outdoor", body="AGB")

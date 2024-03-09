@@ -18,7 +18,6 @@ bp = Blueprint("tables", __name__, url_prefix="/tables")
 
 @bp.route("/handicap", methods=("GET", "POST"))
 def handicap_tables():
-
     form = TableForm.HandicapTableForm(request.form)
 
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
@@ -67,7 +66,7 @@ def handicap_tables():
             allowance_table = True
 
         round_objs = []
-        for (round_i, comp_i) in zip(rounds_req, rounds_comp):
+        for round_i, comp_i in zip(rounds_req, rounds_comp):
             round_query = query_db(
                 "SELECT code_name FROM rounds WHERE round_name IS (?)",
                 [round_i],
@@ -96,7 +95,8 @@ def handicap_tables():
         hc_scheme = hc.handicap_scheme("AGB")
         for i, round_obj_i in enumerate(round_objs):
             results[:, i + 1] = hc_scheme.score_for_round(
-                 results[:, 0], round_obj_i,
+                results[:, 0],
+                round_obj_i,
             ).astype(np.int32)
 
         if allowance_table:
@@ -130,7 +130,6 @@ def handicap_tables():
 
 @bp.route("/classification", methods=("GET", "POST"))
 def classification_tables():
-
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
     ]
@@ -181,7 +180,6 @@ def classification_tables():
         results["age"] = age
 
         if discipline in ["outdoor"]:
-
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
             )["shortname"]
@@ -358,7 +356,6 @@ def classification_tables():
 
 @bp.route("/classbyevent", methods=("GET", "POST"))
 def event_tables():
-
     roundfamilies = {
         "WA 1440/Metrics": ["wa1440", "metric1440"],
         "WA 720/Metrics": ["wa720", "metric720"],
@@ -442,7 +439,6 @@ def event_tables():
             results = {}
             for gender in genderlist:
                 for j, age_j in enumerate(agelist["age_group"]):
-
                     # Get appropriate round from distance
                     for i, rnd_i in enumerate(roundslist["code_name"]):
                         if all_rounds_objs[rnd_i].max_distance() >= min(
@@ -561,7 +557,6 @@ def event_tables():
             results = {}
             for gender in genderlist:
                 for j, age_j in enumerate(agelist["age_group"]):
-
                     # Get appropriate round from distance
                     age_app_rounds = []
                     for i, rnd_i in enumerate(roundslist["code_name"]):
