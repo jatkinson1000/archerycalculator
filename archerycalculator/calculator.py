@@ -5,9 +5,8 @@ from flask import (
 )
 
 from archeryutils import load_rounds
-from archeryutils.handicaps import handicap_equations as hc_eq
-from archeryutils.handicaps import handicap_functions as hc_func
-import archeryutils.classifications as class_func
+from archeryutils import handicaps as hc
+from archeryutils import classifications as class_func
 
 from archerycalculator import HCForm, utils
 from archerycalculator.db import query_db, sql_to_dol
@@ -125,9 +124,6 @@ def calculator():
                 round_codename = utils.get_compound_codename(round_codename)
             round_obj = all_rounds_objs[round_codename]
 
-            # Generate the handicap params
-            hc_params = hc_eq.HcParams()
-
             # Check score against maximum score and return error if inappropriate
             max_score = round_obj.max_score()
             if int(score) <= 0:
@@ -141,23 +137,22 @@ def calculator():
             results["maxscore"] = int(max_score)
 
             if error is None:
+
+                hc_scheme = hc.handicap_scheme(scheme)
+
                 # Calculate the handicap
-                hc_from_score = hc_func.handicap_from_score(
+                hc_from_score = hc_scheme.handicap_from_score(
                     float(score),
                     round_obj,
-                    scheme,
-                    hc_params,
                     arw_d=diameter,
                     int_prec=True,
                 )
                 results["handicap"] = hc_from_score
 
                 if not integer_precision:
-                    decimal_hc_from_score = hc_func.handicap_from_score(
+                    decimal_hc_from_score = hc_scheme.handicap_from_score(
                         float(score),
                         round_obj,
-                        scheme,
-                        hc_params,
                         arw_d=diameter,
                         int_prec=integer_precision,
                     )
@@ -171,8 +166,8 @@ def calculator():
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
                     class_from_score = class_func.calculate_agb_outdoor_classification(
-                        round_codename,
                         float(score),
+                        round_codename,
                         bowstyle.lower(),
                         gender.lower(),
                         age.lower(),
@@ -191,8 +186,8 @@ def calculator():
                         warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
 
                     class_from_score = class_func.calculate_agb_indoor_classification(
-                        round_codename,
                         float(score),
+                        round_codename,
                         bowstyle.lower(),
                         gender.lower(),
                         age.lower(),
@@ -206,8 +201,8 @@ def calculator():
 
                 elif round_location in ["field"] and round_body in ["AGB", "WA"]:
                     class_from_score = class_func.calculate_agb_field_classification(
-                        round_codename,
                         float(score),
+                        round_codename,
                         bowstyle.lower(),
                         gender.lower(),
                         age.lower(),
@@ -220,10 +215,10 @@ def calculator():
 
                 # Other stats
                 RAD2DEG = 57.295779513
-                sig_t = hc_eq.sigma_t(hc_from_score, scheme, 0.0, hc_params)
-                sig_r_18 = hc_eq.sigma_r(hc_from_score, scheme, 18.0, hc_params)
-                sig_r_50 = hc_eq.sigma_r(hc_from_score, scheme, 50.0, hc_params)
-                sig_r_70 = hc_eq.sigma_r(hc_from_score, scheme, 70.0, hc_params)
+                sig_t = hc_scheme.sigma_t(hc_from_score, 0.0)
+                sig_r_18 = hc_scheme.sigma_r(hc_from_score, 18.0)
+                sig_r_50 = hc_scheme.sigma_r(hc_from_score, 50.0)
+                sig_r_70 = hc_scheme.sigma_r(hc_from_score, 70.0)
 
                 # Perform calculations and return the results
                 return render_template(
