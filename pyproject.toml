@@ -51,34 +51,36 @@ find = {}
 #exclude = ["archerycalculator.tests*"]  # exclude packages matching these glob patterns (empty by default)
 #namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
-[tool.flake8]
-# ignore = ['E231', 'E241']
-per-file-ignores = [
-    '__init__.py:F401',
-]
-max-line-length = 88
-count = true
+[tool.ruff]
+# Run linting and formatting on notebooks
+extend-include = ["*.ipynb"]
 
-[tool.black]
-line-length = 88
-target-version = ['py37']
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.eggs         # exclude a few common directories in the
-    | \.git          # root of the project
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-  | foo.py           # also separately exclude a file named foo.py in
-                     # the root of the project
-)
-'''
+[tool.ruff.format]
+docstring-code-format = true
 
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules for full details of each ruleset.
+
+# Enable:  D: `pydocstyle`, PL: `pylint`, I: `isort`, W: `pycodestyle whitespace`
+#          NPY: `numpy`, FLY: `flynt`, RUF: `ruff`
+#          From flake8: "ARG", "SLF", "S", "BLE", "B", "A", "C4", "EM", "ICN",
+#                       "PIE", "Q", "RSE", "SIM", "TID"
+select = ["D", "PL", "I", "E", "W", "NPY", "FLY", "RUF",
+          "ARG", "SLF", "S", "BLE","B", "A", "C4", "EM", "ICN", "PIE", "Q", "RSE",
+          "SIM", "TID"]
+
+# Enable D417 (Missing argument description) on top of the NumPy convention.
+extend-select = ["D417"]
+
+# Ignore SIM108 (use ternary instead of if-else) as I think it can obscure intent.
+# Ignore RUF002 (ambiguous characters) as it does not allow apostrophes in strings.
+ignore = ["SIM108", "RUF002"]
+
+[tool.ruff.lint.pydocstyle]
+# Use NumPy convention for checking docstrings
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore S101 (use of assert) in tests
+# Ignore PLR2004 (magic values) in tests as we regularly want to compare to a numerical value
+"**/tests/*" = ["S101", "PLR2004"]
