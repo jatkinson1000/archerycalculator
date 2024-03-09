@@ -8,8 +8,8 @@ import numpy as np
 from archerycalculator.db import query_db, sql_to_dol
 
 from archeryutils import load_rounds
-from archeryutils.handicaps import handicap_equations as hc_eq
-import archeryutils.classifications as class_func
+from archeryutils import handicaps as hc
+from archeryutils import classifications as class_func
 
 from archerycalculator import TableForm, utils
 
@@ -91,15 +91,13 @@ def handicap_tables():
             # Get the appropriate rounds from the database
             round_objs.append(all_rounds_objs[round_codename])
 
-        # Generate the handicap params
-        hc_params = hc_eq.HcParams()
-
         results = np.zeros([151, len(round_objs) + 1])
         results[:, 0] = np.arange(0, 151).astype(np.int32)
+        hc_scheme = hc.handicap_scheme("AGB")
         for i, round_obj_i in enumerate(round_objs):
-            results[:, i + 1] = hc_eq.score_for_round(
-                round_obj_i, results[:, 0], "AGB", hc_params
-            )[0].astype(np.int32)
+            results[:, i + 1] = hc_scheme.score_for_round(
+                 results[:, 0], round_obj_i,
+            ).astype(np.int32)
 
         if allowance_table:
             results[:, 1:] = 1440 - results[:, 1:]

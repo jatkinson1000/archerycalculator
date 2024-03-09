@@ -68,7 +68,7 @@ def load_rounds_to_db(db):
                 item,
                 rounds[item].body,
                 rounds[item].location,
-                rounds[item].family,
+                (rounds[item].family if rounds[item].family else ""),
             ),
         )
     db.commit()

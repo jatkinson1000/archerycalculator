@@ -8,8 +8,7 @@ import numpy as np
 from archerycalculator.db import query_db, sql_to_dol
 
 from archeryutils import load_rounds
-from archeryutils.handicaps import handicap_equations as hc_eq
-from archeryutils.handicaps import handicap_functions as hc_func
+from archeryutils import handicaps as hc
 
 from archerycalculator import ExtrasForm, utils
 
@@ -28,7 +27,6 @@ def groups():
     form.known_group_unit.choices = ["cm", "inches"]
     form.known_dist_unit.choices = ["metres", "yards"]
 
-    error = None
     if request.method == "POST" and form.validate():
 
         # Get essential form results
@@ -57,24 +55,22 @@ def groups():
             dist_scale_factor = 0.9144
             dist_unit = "yd"
 
-        # Generate the handicap params
-        hc_params = hc_eq.HcParams()
-        hc_scheme = "AGB"
+        hc_scheme = hc.handicap_scheme("AGB")
 
         # Calculate the handicap
         known_sig_r = known_group_size * group_scale_factor / 2.0
 
-        def f_root(h, scheme, distance, hc_params):
-            val = hc_eq.sigma_r(h, scheme, distance, hc_params)
+        def f_root(h, scheme, distance):
+            val = scheme.sigma_r(h, distance)
             return val - known_sig_r
 
         # Rootfind value of sigma_r
         handicap = utils.rootfinding(
-            -75, 300, f_root, hc_scheme, known_dist * dist_scale_factor, hc_params
+            -75, 300, f_root, hc_scheme, known_dist * dist_scale_factor
         )
 
         # Map to other distances
-        sig_r = hc_eq.sigma_r(handicap, hc_scheme, dists * dist_scale_factor, hc_params)
+        sig_r = hc_scheme.sigma_r(handicap, dists * dist_scale_factor)
 
         # Calculate group sizes
         groups = 2.0 * sig_r
@@ -227,16 +223,13 @@ def roundcomparison():
                         f"score of {int(max_score)} for a {roundname}."
                     )
 
-                # Generate the handicap params
-                hc_params = hc_eq.HcParams()
+                hc_scheme = hc.handicap_scheme("AGB")
 
                 if error is None:
                     # Calculate the handicap
-                    hc_from_score = hc_func.handicap_from_score(
+                    hc_from_score = hc_scheme.handicap_from_score(
                         float(score),
                         round_obj,
-                        "AGB",
-                        hc_params,
                         int_prec=False,
                     )
 
@@ -245,13 +238,11 @@ def roundcomparison():
                         results_i = np.zeros(len(use_rounds[item]["code_name"]))
                         for i, round_i in enumerate(use_rounds[item]["code_name"]):
                             # Don't round up to avoid conflicts where score is different to that input
-                            results_i[i] = hc_eq.score_for_round(
-                                all_rounds_objs[round_i],
+                            results_i[i] = hc_scheme.score_for_round(
                                 hc_from_score,
-                                "AGB",
-                                hc_params,
-                                round_score_up=False,
-                            )[0]
+                                all_rounds_objs[round_i],
+                                rounded_score=False,
+                            )
                         results[item] = dict(
                             zip(use_rounds[item]["round_name"], results_i)
                         )
