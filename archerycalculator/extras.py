@@ -1,22 +1,23 @@
+"""Code for 'extra' functionalities on archerycalculator."""
+
+import numpy as np
+from archeryutils import handicaps as hc
+from archeryutils import load_rounds
 from flask import (
     Blueprint,
     render_template,
     request,
 )
-import numpy as np
-
-from archerycalculator.db import query_db, sql_to_dol
-
-from archeryutils import load_rounds
-from archeryutils import handicaps as hc
 
 from archerycalculator import ExtrasForm, utils
+from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("extras", __name__, url_prefix="/extras")
 
 
 @bp.route("/groups", methods=("GET", "POST"))
 def groups():
+    """Generate group size comparisons page."""
     # Load form and set defaults
     form = ExtrasForm.GroupForm(
         request.form,
@@ -99,6 +100,7 @@ def groups():
 
 @bp.route("/roundscomparison", methods=("GET", "POST"))
 def roundcomparison():
+    """Generate round comparisons page."""
     # Load form and set defaults
     form = ExtrasForm.RoundComparisonForm(
         request.form,
@@ -109,7 +111,7 @@ def roundcomparison():
         dict(zip(roundnames["code_name"], roundnames["round_name"]))
     )
 
-    form.roundname.choices = [""] + roundnames
+    form.roundname.choices = ["", *roundnames]
 
     error = None
     if request.method == "POST" and form.validate():
@@ -163,7 +165,8 @@ def roundcomparison():
         if request.form.getlist("virounds"):
             vi_rounds = sql_to_dol(
                 query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE body in ('AGB-VI','WA-VI')"
+                    "SELECT code_name,round_name FROM rounds "
+                    "WHERE body in ('AGB-VI','WA-VI')"
                 )
             )
             use_rounds["VI"] = vi_rounds
@@ -200,7 +203,10 @@ def roundcomparison():
                 one=True,
             )
             if round_db_info is None:
-                error = f"Invalid round name '{roundname}'. Please start typing and select from dropdown."
+                error = (
+                    f"Invalid round name '{roundname}'. "
+                    "Please start typing and select from dropdown."
+                )
             else:
                 round_codename = round_db_info["code_name"]
 
@@ -233,7 +239,8 @@ def roundcomparison():
                     for item in use_rounds:
                         results_i = np.zeros(len(use_rounds[item]["code_name"]))
                         for i, round_i in enumerate(use_rounds[item]["code_name"]):
-                            # Don't round up to avoid conflicts where score is different to that input
+                            # Don't round up to avoid conflicts where score is different
+                            # to that input
                             results_i[i] = hc_scheme.score_for_round(
                                 hc_from_score,
                                 all_rounds_objs[round_i],

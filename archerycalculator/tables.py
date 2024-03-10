@@ -1,23 +1,24 @@
+"""Generate table pages on archerycalculator."""
+
+import numpy as np
+from archeryutils import classifications as class_func
+from archeryutils import handicaps as hc
+from archeryutils import load_rounds
 from flask import (
     Blueprint,
     render_template,
     request,
 )
-import numpy as np
-
-from archerycalculator.db import query_db, sql_to_dol
-
-from archeryutils import load_rounds
-from archeryutils import handicaps as hc
-from archeryutils import classifications as class_func
 
 from archerycalculator import TableForm, utils
+from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("tables", __name__, url_prefix="/tables")
 
 
 @bp.route("/handicap", methods=("GET", "POST"))
 def handicap_tables():
+    """Generate handicap tables page."""
     form = TableForm.HandicapTableForm(request.form)
 
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
@@ -26,13 +27,14 @@ def handicap_tables():
     )
 
     # Set defaults
-    form.round1.choices = [""] + all_rounds
-    form.round2.choices = [""] + all_rounds
-    form.round3.choices = [""] + all_rounds
-    form.round4.choices = [""] + all_rounds
-    form.round5.choices = [""] + all_rounds
-    form.round6.choices = [""] + all_rounds
-    form.round7.choices = [""] + all_rounds
+    all_rounds_list = ["", *all_rounds]
+    form.round1.choices = all_rounds_list
+    form.round2.choices = all_rounds_list
+    form.round3.choices = all_rounds_list
+    form.round4.choices = all_rounds_list
+    form.round5.choices = all_rounds_list
+    form.round6.choices = all_rounds_list
+    form.round7.choices = all_rounds_list
 
     if request.method == "POST" and form.validate():
         error = None
@@ -73,7 +75,10 @@ def handicap_tables():
                 one=True,
             )
             if round_query is None:
-                error = f"Invalid round name '{round_i}'. Please start typing and select from dropdown."
+                error = (
+                    f"Invalid round name '{round_i}'. "
+                    "Please start typing and select from dropdown."
+                )
                 # If errors reload default with error message
                 return render_template(
                     "handicap_tables.html",
@@ -104,11 +109,12 @@ def handicap_tables():
         else:
             # Clean gaps where there are multiple HC for one score
             # TODO: This assumes scores are running highest to lowest.
-            #  AA and AA2 will only work if hcs passed in reverse order (large to small)
-            # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
-            #  0, NaN, and None as the same thing. Consider finding better solution.
+            # AA and AA2 will only work if hcs passed in reverse order (large to small)
+            # TODO: setting fill to -9999 is a bit hacky to get around jinja
+            # interpreting 0, NaN, and None as the same thing. Consider finding better
+            # solution.
             for irow, row in enumerate(results[:-1, 1:]):
-                for jscore, score in enumerate(row):
+                for jscore, _ in enumerate(row):
                     if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
                         results[irow, jscore + 1] = -9999
 
@@ -130,6 +136,7 @@ def handicap_tables():
 
 @bp.route("/classification", methods=("GET", "POST"))
 def classification_tables():
+    """Generate classification tables page."""
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
     ]
@@ -186,14 +193,15 @@ def classification_tables():
 
             use_rounds = sql_to_dol(
                 query_db(
-                    "SELECT code_name,round_name,family FROM rounds WHERE location IN ('outdoor') AND body in ('AGB','WA')"
+                    "SELECT code_name,round_name,family FROM rounds "
+                    "WHERE location IN ('outdoor') AND body in ('AGB','WA')"
                 )
             )
 
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
 
-            # Perform filtering based upon category to make more aesthetic and avoid duplicates
+            # Filter based on category to make more aesthetic and avoid duplicates
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
 
             filtered_names = utils.check_blacklist(
@@ -235,7 +243,8 @@ def classification_tables():
 
             use_rounds = sql_to_dol(
                 query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('indoor') AND body in ('AGB','WA')"
+                    "SELECT code_name,round_name FROM rounds "
+                    "WHERE location IN ('indoor') AND body in ('AGB','WA')"
                 )
             )
 
@@ -271,7 +280,7 @@ def classification_tables():
                     )
                 )
         elif discipline in ["field"]:
-            # TODO: This is a bodge - put field classes in database properly and fetch above!
+            # TODO: This is a bodge - put field classes in database and fetch above!
             classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
 
             if bowstyle.lower() in ["recurve", "compound"]:
@@ -310,7 +319,8 @@ def classification_tables():
                 )
         else:
             # Should never get here... placeholder for field...
-            # use_rounds = sql_to_dol(query_db("SELECT code_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA')"))
+            # use_rounds = sql_to_dol(query_db("SELECT code_name FROM rounds "
+            # "WHERE location IN ('field') AND body in ('AGB','WA')"))
             # results = np.zeros([len(use_rounds["codename"]), len(classlist) - 1])
             # for i, round_i in enumerate(use_rounds["codename"]):
             #     results[i, :] = np.asarray(
@@ -320,7 +330,7 @@ def classification_tables():
             pass
 
         # Add roundnames on to the end then flip for printing
-        roundnames = [round_i for round_i in use_rounds["round_name"]]
+        roundnames = list(use_rounds["round_name"])
         results = np.flip(
             np.concatenate(
                 (results.astype(int), np.asarray(roundnames)[:, None]), axis=1
@@ -356,6 +366,7 @@ def classification_tables():
 
 @bp.route("/classbyevent", methods=("GET", "POST"))
 def event_tables():
+    """Generate classification tables by event page."""
     roundfamilies = {
         "WA 1440/Metrics": ["wa1440", "metric1440"],
         "WA 720/Metrics": ["wa720", "metric720"],
@@ -505,7 +516,7 @@ def event_tables():
 
             results = {}
             for gender in genderlist:
-                for j, age_j in enumerate(agelist["age_group"]):
+                for age_j in agelist["age_group"]:
                     # Check for Compound round
                     if bowstyle.lower() in ["compound"]:
                         age_round = round_codename + "_compound"
@@ -559,13 +570,13 @@ def event_tables():
                 for j, age_j in enumerate(agelist["age_group"]):
                     # Get appropriate round from distance
                     age_app_rounds = []
-                    for i, rnd_i in enumerate(roundslist["code_name"]):
+                    for rnd_i in roundslist["code_name"]:
                         if f"{agelist['peg'][j]}" in rnd_i:
                             age_app_rounds.append(rnd_i)
 
                     # Ensure 24 target round, not 12 target unit and remove duplicates
                     age_app_rounds = list(
-                        set([x.replace("12", "24") for x in age_app_rounds])
+                        {x.replace("12", "24") for x in age_app_rounds}
                     )
 
                     results[f"{age_j} {gender}"] = [

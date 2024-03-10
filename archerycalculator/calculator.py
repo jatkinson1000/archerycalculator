@@ -1,16 +1,16 @@
+"""Main calculator page."""
+
+from archeryutils import classifications as class_func
+from archeryutils import handicaps as hc
+from archeryutils import load_rounds
 from flask import (
     Blueprint,
     render_template,
     request,
 )
 
-from archeryutils import load_rounds
-from archeryutils import handicaps as hc
-from archeryutils import classifications as class_func
-
 from archerycalculator import HCForm, utils
 from archerycalculator.db import query_db, sql_to_dol
-
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
 
@@ -18,6 +18,7 @@ bp = Blueprint("calculator", __name__, url_prefix="/")
 # Single home page (for now)
 @bp.route("/", methods=("GET", "POST"))
 def calculator():
+    """Generate info for main calculator function."""
     # Set form choices
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
@@ -35,10 +36,10 @@ def calculator():
     )
 
     # Set form choices
-    form.bowstyle.choices = [""] + bowstylelist
-    form.gender.choices = [""] + genderlist
-    form.age.choices = [""] + agelist
-    form.roundname.choices = [""] + roundnames
+    form.bowstyle.choices = ["", *bowstylelist]
+    form.gender.choices = ["", *genderlist]
+    form.age.choices = ["", *agelist]
+    form.roundname.choices = ["", *roundnames]
 
     error = None
     warning_bowstyle = None
@@ -88,7 +89,10 @@ def calculator():
             "SELECT * FROM rounds WHERE round_name IS (?)", [roundname], one=True
         )
         if roundcheck is None:
-            error = f"Invalid round name '{roundname}'. Please start typing and select from dropdown."
+            error = (
+                f"Invalid round name '{roundname}'. "
+                "Please start typing and select from dropdown."
+            )
         results["roundname"] = roundname
 
         if error is None:
@@ -159,7 +163,10 @@ def calculator():
                     # TODO: Consider re-assigning bowstyle here for cleaner code,
                     #   rather than in archeryutils?
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                        warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Barebow "
+                            "for the purposes of classifications."
+                        )
 
                     class_from_score = class_func.calculate_agb_outdoor_classification(
                         float(score),
@@ -179,7 +186,10 @@ def calculator():
                     # TODO: Consider re-assigning bowstyle here for cleaner code,
                     #   rather than in archeryutils?
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                        warning_bowstyle = f"Note: Treating {bowstyle} as Barebow for the purposes of classifications."
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Barebow "
+                            "for the purposes of classifications."
+                        )
 
                     class_from_score = class_func.calculate_agb_indoor_classification(
                         float(score),
@@ -204,10 +214,16 @@ def calculator():
                         age.lower(),
                     )
                     results["classification"] = class_from_score
-                    warning_handicap_round = "Note: This round is not officially recognised by Archery GB for the purposes of handicapping."
+                    warning_handicap_round = (
+                        "Note: This round is not officially recognised by "
+                        "Archery GB for the purposes of handicapping."
+                    )
                 else:
                     results["classification"] = "not currently available"
-                    warning_handicap_round = "Note: This round is not officially recognised by Archery GB for the purposes of handicapping."
+                    warning_handicap_round = (
+                        "Note: This round is not officially recognised by "
+                        "Archery GB for the purposes of handicapping."
+                    )
 
                 # Other stats
                 RAD2DEG = 57.295779513

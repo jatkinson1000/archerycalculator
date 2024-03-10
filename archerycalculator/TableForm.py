@@ -1,7 +1,11 @@
-from wtforms import Form, validators, SelectField, BooleanField
+"""Forms for tables functionalities coded using wtforms."""
+
+from wtforms import BooleanField, Form, SelectField, validators
 
 
 class HandicapTableForm(Form):
+    """Class for handicap tables form."""
+
     round1 = SelectField("Round1", [validators.InputRequired("Please provide.")])
     round1_compound = BooleanField(
         label="Use compound scoring", false_values=(False, "")
@@ -34,6 +38,8 @@ class HandicapTableForm(Form):
 
 
 class ClassificationTableForm(Form):
+    """Class for classification tables form."""
+
     bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
     gender = SelectField(
         "Gender under AGB", [validators.InputRequired("Please provide.")]
@@ -43,6 +49,8 @@ class ClassificationTableForm(Form):
 
 
 class EventTableForm(Form):
+    """Class for classification tables by event form."""
+
     bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
     roundfamily = SelectField("RoundFamily")
     restrict_to_named = BooleanField(
