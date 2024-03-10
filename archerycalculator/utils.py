@@ -11,16 +11,19 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     ----------
     roundlist : list
         list of archeryutils round codenames
+    age : str
+        string descriptor of age category
+    gender : str
+        string descriptor of gender category
+    bowstyle : str
+        string descriptor of bowstyle category
 
     Returns
     -------
-    list
+    saferounds : list
         filtered version of the input list
 
-    References
-    ----------
     """
-
     blacklist = []
 
     blacklist.append("wa1440_90_small")
@@ -86,8 +89,7 @@ def check_blacklist(roundlist, age, gender, bowstyle):
 
 def indoor_display_filter(rounddict):
     """
-    Filter indoor rounds to remove any with compound scoring for the purposes of
-    display
+    Filter indoor rounds to remove compound subscript for the purposes of display.
 
     Parameters
     ----------
@@ -99,8 +101,6 @@ def indoor_display_filter(rounddict):
     list
         list of full round names from filtered version of the input dict
 
-    References
-    ----------
     """
     for roundname in list(rounddict.keys()):
         if "compound" in roundname:
@@ -110,7 +110,7 @@ def indoor_display_filter(rounddict):
 
 def get_compound_codename(round_codenames):
     """
-    convert any indoor rounds with special compound scoring to the compound format
+    Convert any indoor rounds with special compound scoring to the compound format.
 
     Parameters
     ----------
@@ -122,8 +122,6 @@ def get_compound_codename(round_codenames):
     round_codenames : str or list of str
         list of amended round codenames for compound
 
-    References
-    ----------
     """
     notlistflag = False
     if not isinstance(round_codenames, list):
@@ -156,20 +154,24 @@ def get_compound_codename(round_codenames):
 
 def check_alias(round_codename, age, gender, bowstyle):
     """
-    select the 'appropriate' round from aliases
+    select the 'appropriate' round from aliases.
 
     Parameters
     ----------
     round_codename : str
         str round codename to check
+    age : str
+        string descriptor of age category
+    gender : str
+        string descriptor of gender category
+    bowstyle : str
+        string descriptor of bowstyle category
 
     Returns
     -------
     round_codename : str
         amended round codenames
 
-    References
-    ----------
     """
     # York, Hereford, Bristols
     if (round_codename == "hereford") and (gender.lower() == "male"):
@@ -197,7 +199,7 @@ def check_alias(round_codename, age, gender, bowstyle):
     return round_codename
 
 
-def order_rounds(rounds, age=None, gender=None, bowstyle=None):
+def order_rounds(rounds):
     """
     Given an iterator of rounds, sort them into an approved order.
 
@@ -211,15 +213,7 @@ def order_rounds(rounds, age=None, gender=None, bowstyle=None):
     sorted_rounds : dict of str:str
         dict of sorted rounds input dict
 
-    References
-    ----------
     """
-
-    # TODO Easy way to do this with dict? Otherwise should we bother?
-    # Just in case, check for aliases and filter
-    # if not any(arg is None for arg in (age, gender, bowstyle)):
-    #     rounds = [check_alias(round, age, gender, bowstyle) for round in rounds]
-
     # Sort by family - rounds should already sorted within families. and filtered.
     order = [
         # OUTDOOR
@@ -291,7 +285,7 @@ def order_rounds(rounds, age=None, gender=None, bowstyle=None):
             )
 
     # Catch any rounds in the list that are not included in the families listed above
-    sorted_rounds.update({codename: rounds[codename] for codename in rounds.keys()})
+    sorted_rounds.update({codename: rounds[codename] for codename in rounds})
 
     return sorted_rounds
 
@@ -311,7 +305,6 @@ def fetch_and_sort_rounds(location, body):
     -------
     sorted : dict of str: str
     """
-
     if not isinstance(location, list):
         location = [location]
     if not isinstance(body, list):
@@ -319,7 +312,9 @@ def fetch_and_sort_rounds(location, body):
 
     db_rounds = sql_to_dol(
         query_db(
-            f"""SELECT code_name,round_name,family FROM rounds WHERE location IN ('{"', '".join(location)}') AND body in ('{"', '".join(body)}')"""
+            "SELECT code_name,round_name,family FROM rounds "
+            f"WHERE location IN ('{"', '".join(location)}') "
+            f"AND body in ('{"', '".join(body)}')"
         )
     )
 
@@ -337,12 +332,14 @@ def fetch_and_sort_rounds(location, body):
 
 def rootfinding(x_min, x_max, f_root, *args):
     """
-    For bracket and function find the value such that f=0
+    For bracket and function find the value such that f=0.
 
     Parameters
     ----------
-    x_min, xmax : float
-        bounds of the search bracket
+    x_min : float
+        lower bound of the search bracket
+    x_max : float
+        upper bound of the search bracket
     f_root : function
         function to minimise
     args :
@@ -353,10 +350,7 @@ def rootfinding(x_min, x_max, f_root, *args):
     hc : float
         root of function
 
-    References
-    ----------
     """
-
     x = [x_min, x_max]
     f = [
         f_root(x[0], *args),
@@ -383,7 +377,7 @@ def rootfinding(x_min, x_max, f_root, *args):
         fpre = f[1]
         fcur = f[0]
 
-    for i in range(50):
+    for _ in range(50):
         if (fpre != 0.0) and (fcur != 0.0) and (np.sign(fpre) != np.sign(fcur)):
             xblk = xpre
             fblk = fpre
@@ -429,11 +423,10 @@ def rootfinding(x_min, x_max, f_root, *args):
         fpre = fcur
         if abs(scur) > delta:
             xcur += scur
+        elif sbis > 0:
+            xcur += delta
         else:
-            if sbis > 0:
-                xcur += delta
-            else:
-                xcur -= delta
+            xcur -= delta
 
         fcur = f_root(xcur, *args)
         hc = xcur

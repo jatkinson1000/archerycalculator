@@ -1,3 +1,5 @@
+"""Generate and populate the database used by archerycalculator."""
+
 import sqlite3
 
 import click
@@ -7,6 +9,7 @@ from archerycalculator import populate_db
 
 
 def get_db():
+    """Open a connection to the database."""
     # g is object for unique requests to the database
     if "db" not in g:
         g.db = sqlite3.connect(
@@ -19,6 +22,7 @@ def get_db():
 
 
 def close_db(e=None):
+    """Close connection to the database."""
     db = g.pop("db", None)
 
     if db is not None:
@@ -26,7 +30,7 @@ def close_db(e=None):
 
 
 def init_db():
-    # call the SQL functions in the schema.sql file to init the tables in db
+    """Call the SQL functions in the schema.sql file to init the tables in db."""
     db = get_db()
     with current_app.open_resource("schema.sql") as f:
         db.executescript(f.read().decode("utf8"))
@@ -38,6 +42,7 @@ def init_db():
 
 
 def query_db(query, args=(), one=False):
+    """Execute a query to the database and return the result."""
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
     cur.close()
@@ -46,7 +51,17 @@ def query_db(query, args=(), one=False):
 
 def sql_to_lod(sql_result):
     """
-    Converts the results of fetch one or fetch all to a list of dicts
+    Convert the results of fetch one or fetch all to a list of dicts.
+
+    Takes each item in the sql result and turns into a list of:
+    {key : item[key]} for every key in item.
+
+    E.g. query_db("SELECT age_group FROM ages") will return a list of sqlite objects
+    of the form:
+        [<age_group - 50+>, <age_group - adult>, <age_group - U21>, ...]
+    This function will transform this into:
+        [{"age_group" : "50+"}, {"age_group" : "adult"}, {"age_group" : "U21"}, ...]
+
     """
     try:
         unpacked = [{k: item[k] for k in item.keys()} for item in sql_result]
@@ -58,7 +73,17 @@ def sql_to_lod(sql_result):
 
 def sql_to_dol(sql_result):
     """
-    Converts the results of fetch one or fetch all to a single dict of lists
+    Convert the results of fetch one or fetch all to a single dict of lists.
+
+    Takes each item in the sql result and turns into a list of:
+    {key : item[key]} for every key in item.
+
+    E.g. query_db("SELECT age_group FROM ages") will return a list of sqlite objects
+    of the form:
+        [<age_group - 50+>, <age_group - adult>, <age_group - U21>, ...]
+    This function will transform this into:
+        {"age_group" : ["50+", "adult", "U21", ...]}
+
     """
     try:
         # unpacked = {k: [d[k] for d in sql_result] for k in sql_result[0].keys()}
@@ -80,7 +105,8 @@ def init_db_command():
 
 
 def init_app(app):
-    # close database when app is shut
+    """Close database when app is shut."""
     app.teardown_appcontext(close_db)
+
     # add init_db_command to be called from flask app
     app.cli.add_command(init_db_command)

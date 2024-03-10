@@ -1,18 +1,19 @@
+"""Lists of all rounds available on archerycalculator."""
+
 from flask import (
     Blueprint,
     render_template,
 )
 
-from archerycalculator.db import query_db, sql_to_dol
-
 from archerycalculator import utils
-
+from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("rounds", __name__, url_prefix="/rounds")
 
 
 @bp.route("/", strict_slashes=False)
 def rounds_page():
+    """Generate rounds listings page."""
     rounds = {}
 
     rounds["AGB Outdoor"] = utils.fetch_and_sort_rounds(location="outdoor", body="AGB")

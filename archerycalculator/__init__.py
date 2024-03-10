@@ -1,3 +1,6 @@
+"""Web app for archerycalculator."""
+
+import contextlib
 import os
 
 from flask import Flask
@@ -6,7 +9,7 @@ from archerycalculator import db
 
 
 def create_app(test_config=None):
-    # create and configure the app
+    """Create and configure the app."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="dev",
@@ -21,10 +24,8 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     # ensure the instance folder exists
-    try:
+    with contextlib.suppress(OSError):
         os.makedirs(app.instance_path)
-    except OSError:
-        pass
 
     from archerycalculator import calculator
 

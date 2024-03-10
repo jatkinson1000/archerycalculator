@@ -1,13 +1,17 @@
+"""Forms for 'extra' functionalities coded using wtforms."""
+
 from wtforms import (
+    BooleanField,
     Form,
-    validators,
     IntegerField,
     SelectField,
-    BooleanField,
+    validators,
 )
 
 
 class GroupForm(Form):
+    """Class for groupsize form."""
+
     known_group_size = IntegerField("", [validators.InputRequired("please provide.")])
     known_group_unit = SelectField("", [validators.InputRequired("please provide.")])
     known_dist = IntegerField("", [validators.InputRequired("please provide.")])
@@ -15,6 +19,8 @@ class GroupForm(Form):
 
 
 class RoundComparisonForm(Form):
+    """Class for round comparisons form."""
+
     roundname = SelectField("Round", [validators.InputRequired("Please provide.")])
     score = IntegerField("Score", [validators.InputRequired("Please provide.")])
     compound = BooleanField(label="Compound bow", false_values=(False, ""))

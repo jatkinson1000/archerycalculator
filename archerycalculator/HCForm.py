@@ -1,14 +1,18 @@
+"""Form for main calculator coded using wtforms."""
+
 from wtforms import (
-    Form,
-    validators,
-    IntegerField,
-    DecimalField,
-    SelectField,
     BooleanField,
+    DecimalField,
+    Form,
+    IntegerField,
+    SelectField,
+    validators,
 )
 
 
 class HCForm(Form):
+    """Class for main calculator form."""
+
     bowstyle = SelectField(
         label="Bowstyle", validators=[validators.InputRequired("Please provide.")]
     )
