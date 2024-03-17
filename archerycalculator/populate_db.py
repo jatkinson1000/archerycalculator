@@ -4,48 +4,80 @@ import archeryutils.classifications.classification_utils as class_func
 from archeryutils import load_rounds
 
 
-def load_bowstyles_to_db(db):
-    """Load AGB Target bowstyles from file plus any field ones."""
+def load_bowstyles_to_db(database):
+    """
+    Load bowstyles into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+
+    Returns
+    -------
+    None
+    """
     bowstyles = class_func.read_bowstyles_json()
     for item in bowstyles:
-        db.execute(
+        database.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item["bowstyle"], "TF"),
         )
 
     # Additional AGB field bowstyles
     for item in ["Traditional", "Flatbow"]:
-        db.execute(
+        database.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item, "TF"),
         )
-    db.commit()
+    database.commit()
 
 
-def load_genders_to_db(db):
-    """Load AGB genders from file."""
+def load_genders_to_db(database):
+    """
+    Load AGB genders from file into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+    """
     genders = class_func.read_genders_json()
     for item in genders:
-        db.execute("INSERT INTO genders (gender) VALUES (?);", [item])
-    db.commit()
+        database.execute("INSERT INTO genders (gender) VALUES (?);", [item])
+    database.commit()
 
 
-def load_ages_to_db(db):
-    """Load AGB ages from file."""
+def load_ages_to_db(database):
+    """
+    Load AGB ages from file into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+    """
     ages = class_func.read_ages_json()
     for item in ages:
-        db.execute(
+        database.execute(
             (
                 "INSERT INTO ages "
                 "(age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);"
             ),
             (item["age_group"], "AGB", item["male"][0], item["female"][0]),
         )
-    db.commit()
+    database.commit()
 
 
-def load_rounds_to_db(db):
-    """Load rounds from file."""
+def load_rounds_to_db(database):
+    """
+    Load rounds from file into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+    """
     rounds = load_rounds.read_json_to_round_dict(
         [
             "AGB_outdoor_imperial.json",
@@ -61,34 +93,41 @@ def load_rounds_to_db(db):
         ]
     )
 
-    for item in rounds:
-        db.execute(
+    for roundname, round_obj in rounds.items():
+        database.execute(
             "INSERT INTO rounds (round_name,code_name,body,location,family) "
             "VALUES (?,?,?,?,?);",
             (
-                rounds[item].name,
-                item,
-                rounds[item].body,
-                rounds[item].location,
-                (rounds[item].family if rounds[item].family else ""),
+                round_obj.name,
+                roundname,
+                round_obj.body,
+                round_obj.location,
+                round_obj.family,
             ),
         )
-    db.commit()
+    database.commit()
 
 
-def load_classes_to_db(db):
-    """Load AGB indoor and outdoor classes from file."""
+def load_classes_to_db(database):
+    """
+    Load AGB indoor and outdoor classes from file into database.
+
+    Parameters
+    ----------
+    database :
+        sqlite database connection
+    """
     classes_in = class_func.read_classes_json("agb_indoor")
     classes_out = class_func.read_classes_json("agb_outdoor")
 
     for classes in [classes_in, classes_out]:
         for i, shortname in enumerate(classes["classes"]):
-            db.execute(
+            database.execute(
                 "INSERT INTO classes (shortname,longname,location) VALUES (?,?,?);",
                 (shortname, classes["classes_long"][i], classes["location"]),
             )
-        db.execute(
+        database.execute(
             "INSERT INTO classes (shortname,longname,location) VALUES (?,?,?);",
             ("UC", "Unclassified", classes["location"]),
         )
-        db.commit()
+        database.commit()

@@ -1,3 +1,5 @@
+"""Module of useful utilities for archerycalculator."""
+
 import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
@@ -148,8 +150,7 @@ def get_compound_codename(round_codenames):
             round_codenames[i] = convert_dict[codename]
     if notlistflag:
         return round_codenames[0]
-    else:
-        return round_codenames
+    return round_codenames
 
 
 def check_alias(round_codename, age, gender, bowstyle):
@@ -350,6 +351,13 @@ def rootfinding(x_min, x_max, f_root, *args):
     hc : float
         root of function
 
+    References
+    ----------
+    Brent's Method for Root Finding in Scipy
+    - https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brentq.html
+    - https://github.com/scipy/scipy/blob/dde39b7cc7dc231cec6bf5d882c8a8b5f40e73ad/
+      scipy/optimize/Zeros/brentq.c
+
     """
     x = [x_min, x_max]
     f = [
@@ -434,31 +442,46 @@ def rootfinding(x_min, x_max, f_root, *args):
 
 
 def group_icons(groupsize):
+    """
+    Return a fontawesome icon id corresponding to group size.
+
+    Parameters
+    ----------
+    groupsize : float
+        size of group [m]
+
+    Returns
+    -------
+    icon : str
+        identifier for groupsize fontawesome icon
+    """
     if groupsize < 1.0e-2:
-        return "fa-solid fa-spider"
+        icon = "fa-solid fa-spider"
     elif groupsize < 2.5e-2:
-        return "fa-solid fa-eye"
+        icon = "fa-solid fa-eye"
     elif groupsize < 3.5e-2:
-        return "fa-solid fa-egg"
+        icon = "fa-solid fa-egg"
     elif groupsize < 5.0e-2:
-        return "fa-regular fa-lightbulb"
+        icon = "fa-regular fa-lightbulb"
     elif groupsize < 8.0e-2:
-        return "fa-solid fa-apple-whole"
+        icon = "fa-solid fa-apple-whole"
     elif groupsize < 23.0e-2:
-        return "fa-solid fa-volleyball"
+        icon = "fa-solid fa-volleyball"
     elif groupsize < 27.5e-2:
-        return "fa-solid fa-basketball"
+        icon = "fa-solid fa-basketball"
     elif groupsize < 35.0e-2:
-        return "fa-solid fa-record-vinyl"
+        icon = "fa-solid fa-record-vinyl"
     elif groupsize < 45.0e-2:
-        return "fa-solid fa-hat-wizard"
+        icon = "fa-solid fa-hat-wizard"
     elif groupsize < 55.0e-2:
-        return "fa-solid fa-guitar"
+        icon = "fa-solid fa-guitar"
     elif groupsize < 75.0e-2:
-        return "fa-brands fa-linux"
+        icon = "fa-brands fa-linux"
     elif groupsize < 122.0e-2:
-        return "fa-solid fa-bullseye"
+        icon = "fa-solid fa-bullseye"
     elif groupsize < 180.0e-2:
-        return "fa-solid fa-car"
+        icon = "fa-solid fa-car"
     else:
-        return "fa-solid fa-earth-americas"
+        icon = "fa-solid fa-earth-americas"
+
+    return icon

@@ -11,7 +11,14 @@ bp = Blueprint("info", __name__, url_prefix="/info")
 # Single page (for now)
 @bp.route("/", strict_slashes=False)
 def info():
-    """Generate info page."""
+    """
+    Generate the info page in the flask app.
+
+    Returns
+    -------
+    html template :
+        template for the info page
+    """
     return render_template(
         "info.html",
     )

@@ -4,7 +4,19 @@ from wtforms import BooleanField, Form, SelectField, validators
 
 
 class HandicapTableForm(Form):
-    """Class for handicap tables form."""
+    """
+    Class for handicap table form.
+
+    Attributes
+    ----------
+    roundn : SelectField
+        round n/7 to display handicaqp table for.
+    roundn_compound : BooleanField
+        use compound scoring for round n?
+    allowance : BooleanField
+        generate allowance tables instead of handicap tables?
+
+    """
 
     round1 = SelectField("Round1", [validators.InputRequired("Please provide.")])
     round1_compound = BooleanField(
@@ -38,7 +50,21 @@ class HandicapTableForm(Form):
 
 
 class ClassificationTableForm(Form):
-    """Class for classification tables form."""
+    """
+    Class for classification table form.
+
+    Attributes
+    ----------
+    bowstyle : SelectField
+        bowstyle to use
+    gender : SelectField
+        gender to use
+    age : SelectField
+        age to use
+    discipline : SelectField
+        discipline to use
+
+    """
 
     bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
     gender = SelectField(
@@ -49,7 +75,19 @@ class ClassificationTableForm(Form):
 
 
 class EventTableForm(Form):
-    """Class for classification tables by event form."""
+    """
+    Class for classification by event table form.
+
+    Attributes
+    ----------
+    bowstyle : SelectField
+        bowstyle to use
+    roundfamily : SelectField
+        roundfamily to generate table for
+    restrict_to_named : BooleanField
+        restrict to named round or use full range of distances?
+
+    """
 
     bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
     roundfamily = SelectField("RoundFamily")
