@@ -102,7 +102,7 @@ def load_rounds_to_db(database):
                 roundname,
                 round_obj.body,
                 round_obj.location,
-                round_obj.family,
+                (round_obj.family if round_obj.family else ""),
             ),
         )
     database.commit()
