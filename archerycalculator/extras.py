@@ -312,10 +312,10 @@ def get_results_dict(use_rounds, hc_from_score, all_rounds_objs):
             # Don't round up to avoid conflicts where score is
             # different to that input
             results_i[i] = hc.score_for_round(
-                all_rounds_objs[round_i],
                 hc_from_score,
+                all_rounds_objs[round_i],
                 HC_SCHEME,
                 rounded_score=False,
-            )[0]
+            )
         results[roundgroup] = dict(zip(roundset["round_name"], results_i))
     return results
