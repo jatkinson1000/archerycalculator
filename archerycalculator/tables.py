@@ -161,15 +161,15 @@ def generate_hc_table(round_objs, allowance_table):
     results : np.ndarray
         array with numerical values for the handicap table
     """
-    # Generate the handicap params
-    hc_params = hc_eq.HcParams()
-
     results = np.zeros([151, len(round_objs) + 1])
     results[:, 0] = np.arange(0, 151).astype(np.int32)
+    hc_scheme = hc.handicap_scheme("AGB")
+
     for i, round_obj_i in enumerate(round_objs):
-        results[:, i + 1] = hc_eq.score_for_round(
-            round_obj_i, results[:, 0], "AGB", hc_params
-        )[0].astype(np.int32)
+        results[:, i + 1] = hc_scheme.score_for_round(
+            results[:, 0],
+            round_obj_i,
+        ).astype(np.int32)
 
     if allowance_table:
         results[:, 1:] = 1440 - results[:, 1:]
@@ -386,7 +386,10 @@ def classification_tables():
 
         # Add roundnames on to the end and flip for printing
         results = np.flip(
-            (results.astype(int), np.asarray(use_rounds["round_name"])[:, None]),
+            np.concatenate(
+                (results.astype(int), np.asarray(use_rounds["round_name"])[:, None]),
+                axis=1,
+            ),
             axis=1,
         )
         classes = classlist[-2::-1]
