@@ -9,7 +9,18 @@ from archerycalculator import populate_db
 
 
 def get_db():
-    """Open a connection to the database."""
+    """
+    Make a database connection and store globals.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    g.db : sqlite3.connect object
+        database connection
+    """
     # g is object for unique requests to the database
     if "db" not in g:
         g.db = sqlite3.connect(
@@ -21,32 +32,56 @@ def get_db():
     return g.db
 
 
-def close_db(e=None):
-    """Close connection to the database."""
-    db = g.pop("db", None)
+def close_db(err=None):
+    """
+    Close the database connection and remove from globals.
 
-    if db is not None:
-        db.close()
+    Parameters
+    ----------
+    err : None
+        required argument for function
+
+    """
+    database = g.pop("db", None)
+
+    if database is not None:
+        database.close()
 
 
 def init_db():
     """Call the SQL functions in the schema.sql file to init the tables in db."""
-    db = get_db()
-    with current_app.open_resource("schema.sql") as f:
-        db.executescript(f.read().decode("utf8"))
-    populate_db.load_bowstyles_to_db(db)
-    populate_db.load_ages_to_db(db)
-    populate_db.load_genders_to_db(db)
-    populate_db.load_rounds_to_db(db)
-    populate_db.load_classes_to_db(db)
+    database = get_db()
+    with current_app.open_resource("schema.sql") as db_file:
+        database.executescript(db_file.read().decode("utf8"))
+    populate_db.load_bowstyles_to_db(database)
+    populate_db.load_ages_to_db(database)
+    populate_db.load_genders_to_db(database)
+    populate_db.load_rounds_to_db(database)
+    populate_db.load_classes_to_db(database)
 
 
 def query_db(query, args=(), one=False):
-    """Execute a query to the database and return the result."""
+    """
+    Execute a query to the database and return the result.
+
+    Parameters
+    ----------
+    query : str
+        SQL query to perform on the database
+    args : Tuple[Any]
+        arguments to pass to the
+    one : bool
+        return a single value?
+
+    Returns
+    -------
+    ret_vals :
+
+    """
     cur = get_db().execute(query, args)
-    rv = cur.fetchall()
+    ret_vals = cur.fetchall()
     cur.close()
-    return (rv[0] if rv else None) if one else rv
+    return (ret_vals[0] if ret_vals else None) if one else ret_vals
 
 
 def sql_to_lod(sql_result):
@@ -66,8 +101,8 @@ def sql_to_lod(sql_result):
     try:
         unpacked = [{k: item[k] for k in item.keys()} for item in sql_result]
         return unpacked
-    except Exception as e:
-        # print(f"Failed to convert with error:{e}\n return empty list.")
+    except Exception as err:
+        # print(f"Failed to convert with error:{err}\n return empty list.")
         return []
 
 
@@ -91,8 +126,8 @@ def sql_to_dol(sql_result):
             k: [d[k] for d in sql_result if k in d.keys()] for k in sql_result[0].keys()
         }
         return unpacked
-    except Exception as e:
-        # print(f"Failed to convert with error:{e}\n return empty dict.")
+    except Exception as err:
+        # print(f"Failed to convert with error:{err}\n return empty dict.")
         return {}
 
 

@@ -10,7 +10,7 @@ from flask import (
     request,
 )
 
-from archerycalculator import TableForm, utils
+from archerycalculator import table_form, utils
 from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("tables", __name__, url_prefix="/tables")
@@ -18,8 +18,16 @@ bp = Blueprint("tables", __name__, url_prefix="/tables")
 
 @bp.route("/handicap", methods=("GET", "POST"))
 def handicap_tables():
-    """Generate handicap tables page."""
-    form = TableForm.HandicapTableForm(request.form)
+    """
+    Generate the handicap table page in the flask app.
+
+    Returns
+    -------
+    html template :
+        template for the handicap table page
+
+    """
+    form = table_form.HandicapTableForm(request.form)
 
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
     all_rounds = utils.indoor_display_filter(
@@ -52,20 +60,7 @@ def handicap_tables():
             ]
         )
 
-        # Get form results
-        rounds_req = []
-        rounds_comp = []
-        for i in range(7):
-            if request.form[f"round{i+1}"]:
-                rounds_req.append(request.form[f"round{i+1}"])
-                if request.form.getlist(f"round{i+1}_compound"):
-                    rounds_comp.append(True)
-                else:
-                    rounds_comp.append(False)
-
-        allowance_table = False
-        if request.form.getlist("allowance"):
-            allowance_table = True
+        rounds_req, rounds_comp, allowance_table = get_hc_rounds(request.form)
 
         round_objs = []
         for round_i, comp_i in zip(rounds_req, rounds_comp):
@@ -85,8 +80,7 @@ def handicap_tables():
                     form=form,
                     error=error,
                 )
-            else:
-                round_codename = round_query["code_name"]
+            round_codename = round_query["code_name"]
 
             # Check if we need compound scoring
             if comp_i:
@@ -95,28 +89,8 @@ def handicap_tables():
             # Get the appropriate rounds from the database
             round_objs.append(all_rounds_objs[round_codename])
 
-        results = np.zeros([151, len(round_objs) + 1])
-        results[:, 0] = np.arange(0, 151).astype(np.int32)
-        hc_scheme = hc.handicap_scheme("AGB")
-        for i, round_obj_i in enumerate(round_objs):
-            results[:, i + 1] = hc_scheme.score_for_round(
-                results[:, 0],
-                round_obj_i,
-            ).astype(np.int32)
-
-        if allowance_table:
-            results[:, 1:] = 1440 - results[:, 1:]
-        else:
-            # Clean gaps where there are multiple HC for one score
-            # TODO: This assumes scores are running highest to lowest.
-            # AA and AA2 will only work if hcs passed in reverse order (large to small)
-            # TODO: setting fill to -9999 is a bit hacky to get around jinja
-            # interpreting 0, NaN, and None as the same thing. Consider finding better
-            # solution.
-            for irow, row in enumerate(results[:-1, 1:]):
-                for jscore, _ in enumerate(row):
-                    if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
-                        results[irow, jscore + 1] = -9999
+        # Generate numerical table of results
+        results = generate_hc_table(round_objs, allowance_table)
 
         # Return the results
         return render_template(
@@ -134,9 +108,96 @@ def handicap_tables():
     )
 
 
+def get_hc_rounds(web_form):
+    """
+    Get the rounds requested from the web form.
+
+    Parameters
+    ----------
+    web_form : flask.request.form
+        request from the form with results
+
+    Returns
+    -------
+    rounds_req : List[str]
+        rounds for which to generate handicap table
+    rounds_comp : List[bool]
+        use compound scoring for round in rounds_req?
+    allowance_table : bool
+        generate table of allowances?
+    """
+    # Get form results
+    rounds_req = []
+    rounds_comp = []
+    allowance_table = False
+
+    for i in range(7):
+        if web_form[f"round{i+1}"]:
+            rounds_req.append(web_form[f"round{i+1}"])
+            if web_form.getlist(f"round{i+1}_compound"):
+                rounds_comp.append(True)
+            else:
+                rounds_comp.append(False)
+
+    if web_form.getlist("allowance"):
+        allowance_table = True
+
+    return rounds_req, rounds_comp, allowance_table
+
+
+def generate_hc_table(round_objs, allowance_table):
+    """
+    Generate the handicap table.
+
+    Parameters
+    ----------
+    round_objs : List[Round]
+        list of Round objects for the rounds in the table
+    allowance_table : bool
+        generate table of allowances?
+
+    Returns
+    -------
+    results : np.ndarray
+        array with numerical values for the handicap table
+    """
+    # Generate the handicap params
+    hc_params = hc_eq.HcParams()
+
+    results = np.zeros([151, len(round_objs) + 1])
+    results[:, 0] = np.arange(0, 151).astype(np.int32)
+    for i, round_obj_i in enumerate(round_objs):
+        results[:, i + 1] = hc_eq.score_for_round(
+            round_obj_i, results[:, 0], "AGB", hc_params
+        )[0].astype(np.int32)
+
+    if allowance_table:
+        results[:, 1:] = 1440 - results[:, 1:]
+    else:
+        # Clean gaps where there are multiple HC for one score
+        # TODO: This assumes scores are running highest to lowest.
+        #  AA and AA2 will only work if hcs passed in reverse order (large to small)
+        # TODO: setting fill to -9999 is a bit hacky to get around jinja interpreting
+        #  0, NaN, and None as the same thing. Consider finding better solution.
+        for irow, row in enumerate(results[:-1, 1:]):
+            for jscore in range(len(row)):
+                if results[irow, jscore + 1] == results[irow + 1, jscore + 1]:
+                    results[irow, jscore + 1] = -9999
+
+    return results
+
+
 @bp.route("/classification", methods=("GET", "POST"))
 def classification_tables():
-    """Generate classification tables page."""
+    """
+    Generate classification tables page.
+
+    Returns
+    -------
+    html template :
+        template for the classification table pages
+
+    """
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
     ]
@@ -144,7 +205,7 @@ def classification_tables():
     agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
     # Load form and set defaults
-    form = TableForm.ClassificationTableForm(
+    form = table_form.ClassificationTableForm(
         request.form, bowstyle=bowstylelist[1], gender=genderlist[1], age=agelist[1]
     )
     form.bowstyle.choices = bowstylelist
@@ -236,6 +297,7 @@ def classification_tables():
                         round_i, bowstyle, gender, age
                     )
                 )
+
         elif discipline in ["indoor"]:
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
@@ -256,7 +318,6 @@ def classification_tables():
             # Filter out:
             #   - compound rounds for non-recurve and vice versa
             #   - triple spot rounds for all
-            # TODO: This is pretty horrible... is there a better way?
             # Get rid of all compound rounds
             noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
             codenames = [
@@ -279,6 +340,7 @@ def classification_tables():
                         round_i, bowstyle, gender, age
                     )
                 )
+
         elif discipline in ["field"]:
             # TODO: This is a bodge - put field classes in database and fetch above!
             classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
@@ -317,24 +379,14 @@ def classification_tables():
                         round_i, bowstyle, gender, age
                     )
                 )
+
         else:
-            # Should never get here... placeholder for field...
-            # use_rounds = sql_to_dol(query_db("SELECT code_name FROM rounds "
-            # "WHERE location IN ('field') AND body in ('AGB','WA')"))
-            # results = np.zeros([len(use_rounds["codename"]), len(classlist) - 1])
-            # for i, round_i in enumerate(use_rounds["codename"]):
-            #     results[i, :] = np.asarray(
-            #         class_func.AGB_field_classification_scores(
-            #             round_i, bowstyle, gender, age
-            #         )
+            # Should never get here... placeholder for next classification system.
             pass
 
-        # Add roundnames on to the end then flip for printing
-        roundnames = list(use_rounds["round_name"])
+        # Add roundnames on to the end and flip for printing
         results = np.flip(
-            np.concatenate(
-                (results.astype(int), np.asarray(roundnames)[:, None]), axis=1
-            ),
+            (results.astype(int), np.asarray(use_rounds["round_name"])[:, None]),
             axis=1,
         )
         classes = classlist[-2::-1]
@@ -348,13 +400,13 @@ def classification_tables():
                 results=results.astype(str),
                 classes=classes,
             )
-        else:
-            # If errors reload default with error message
-            return render_template(
-                "classification_tables.html",
-                form=form,
-                error=error,
-            )
+
+        # If errors reload default with error message
+        return render_template(
+            "classification_tables.html",
+            form=form,
+            error=error,
+        )
 
     # If first visit load the default form with no inputs
     return render_template(
@@ -366,7 +418,15 @@ def classification_tables():
 
 @bp.route("/classbyevent", methods=("GET", "POST"))
 def event_tables():
-    """Generate classification tables by event page."""
+    """
+    Generate classification tables by event page.
+
+    Returns
+    -------
+    html template :
+        template for the classification table by event page
+
+    """
     roundfamilies = {
         "WA 1440/Metrics": ["wa1440", "metric1440"],
         "WA 720/Metrics": ["wa720", "metric720"],
@@ -387,7 +447,7 @@ def event_tables():
     ]
 
     # Load form and set defaults
-    form = TableForm.EventTableForm(request.form, bowstyle=bowstylelist[1])
+    form = table_form.EventTableForm(request.form, bowstyle=bowstylelist[1])
     form.bowstyle.choices = bowstylelist
 
     form.roundfamily.choices = list(roundfamilies.keys())
@@ -402,7 +462,7 @@ def event_tables():
         # If restricting to named round set max dist as 60
         if (
             request.form.getlist("restrict_to_named")
-            and roundfamily in list(roundfamilies.keys())[3:7]
+            and roundfamily in list(roundfamilies)[3:7]
         ):
             max_dist = 60
         else:
@@ -417,7 +477,7 @@ def event_tables():
 
         # Account for nuances in each discipline and generate results
         # Target outdoor:
-        if roundfamily in list(roundfamilies.keys())[:7]:
+        if roundfamily in list(roundfamilies)[:7]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
@@ -458,7 +518,7 @@ def event_tables():
                             age_round = roundslist["code_name"][i]
 
                     # Check for 720 based on bowstyle
-                    if roundfamily in list(roundfamilies.keys())[1]:
+                    if roundfamily in list(roundfamilies)[1]:
                         if bowstyle.lower() in ["compound"]:
                             age_round = age_round.replace("122", "80")
                             age_round = age_round.replace("70", "50_c")
@@ -496,7 +556,7 @@ def event_tables():
             classes = classlist[-2::-1]
 
         # Target indoor:
-        if roundfamily in list(roundfamilies.keys())[7:9]:
+        if roundfamily in list(roundfamilies)[7:9]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_indoor.json",
@@ -539,7 +599,7 @@ def event_tables():
             classes = classlist[-2::-1]
 
         # Field:
-        elif roundfamily in list(roundfamilies.keys())[9:]:
+        elif roundfamily in list(roundfamilies)[9:]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",
@@ -603,13 +663,13 @@ def event_tables():
                 results=results,
                 classes=classes,
             )
-        else:
-            # If errors reload default with error message
-            return render_template(
-                "event_tables.html",
-                form=form,
-                error=error,
-            )
+
+        # If errors reload default with error message
+        return render_template(
+            "event_tables.html",
+            form=form,
+            error=error,
+        )
 
     # If first visit load the default form with no inputs
     return render_template(

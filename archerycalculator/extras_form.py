@@ -10,7 +10,20 @@ from wtforms import (
 
 
 class GroupForm(Form):
-    """Class for groupsize form."""
+    """
+    Class for classification by event table form.
+
+    Attributes
+    ----------
+    known_group_size : IntegerField
+        input group size
+    known_group_unit : SelectField
+        input group size unit of measurement
+    known_dist : IntegerField
+        input distance
+    known_dist_unit : SelectField
+        input distance unit of measurement
+    """
 
     known_group_size = IntegerField("", [validators.InputRequired("please provide.")])
     known_group_unit = SelectField("", [validators.InputRequired("please provide.")])
@@ -19,7 +32,30 @@ class GroupForm(Form):
 
 
 class RoundComparisonForm(Form):
-    """Class for round comparisons form."""
+    """
+    Class for classification by event table form.
+
+    Attributes
+    ----------
+    roundname : SelectField
+        round to compare to
+    score : IntegerField
+        score to compare to
+    compound : BooleanField
+        perform analysis for compound bow?
+    outdoor : BooleanField
+        use outdoor rounds?
+    indoor : BooleanField
+        use indoor rounds?
+    wafield : BooleanField
+        use wa field rounds?
+    ifaafield : BooleanField
+        use ifaa field rounds?
+    virounds : BooleanField
+        use vi rounds?
+    unofficial : BooleanField
+        use unofficial rounds?
+    """
 
     roundname = SelectField("Round", [validators.InputRequired("Please provide.")])
     score = IntegerField("Score", [validators.InputRequired("Please provide.")])

@@ -9,7 +9,7 @@ from flask import (
     request,
 )
 
-from archerycalculator import HCForm, utils
+from archerycalculator import hc_form, utils
 from archerycalculator.db import query_db, sql_to_dol
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
@@ -18,7 +18,18 @@ bp = Blueprint("calculator", __name__, url_prefix="/")
 # Single home page (for now)
 @bp.route("/", methods=("GET", "POST"))
 def calculator():
-    """Generate info for main calculator function."""
+    """
+    Generate the calculator page in the flask app.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the calculator page
+    """
     # Set form choices
     bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
         "bowstyle"
@@ -31,7 +42,7 @@ def calculator():
     agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
     # Load form and set defaults
-    form = HCForm.HCForm(
+    form = hc_form.HCForm(
         request.form,
     )
 
@@ -41,6 +52,7 @@ def calculator():
     form.age.choices = ["", *agelist]
     form.roundname.choices = ["", *roundnames]
 
+    # Initialise any errors or warnings
     error = None
     warning_bowstyle = None
     warning_handicap_round = None
@@ -67,75 +79,16 @@ def calculator():
             diameter = None
 
         # Check the inputs are all valid
-        # No longer need to check dropdowns, but leave in case
-        bowstylecheck = query_db(
-            "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
-        )
-        if len(bowstylecheck) == 0:
-            error = "Invalid bowstyle. Please select from dropdown."
-        results["bowstyle"] = bowstyle
-
-        gendercheck = query_db("SELECT id FROM genders WHERE gender IS (?)", [gender])
-        if len(gendercheck) == 0:
-            error = "Please select gender from dropdown options."
-        results["gender"] = gender
-
-        agecheck = query_db("SELECT id FROM ages WHERE age_group IS (?)", [age])
-        if len(agecheck) == 0:
-            error = "Invalid age group. Please select from dropdown."
-        results["age"] = age
-
-        roundcheck = query_db(
-            "SELECT * FROM rounds WHERE round_name IS (?)", [roundname], one=True
-        )
-        if roundcheck is None:
-            error = (
-                f"Invalid round name '{roundname}'. "
-                "Please start typing and select from dropdown."
-            )
-        results["roundname"] = roundname
+        results, error = check_inputs(results, bowstyle, gender, age, roundname)
 
         if error is None:
-            all_rounds_objs = load_rounds.read_json_to_round_dict(
-                [
-                    "AGB_outdoor_imperial.json",
-                    "AGB_outdoor_metric.json",
-                    "AGB_indoor.json",
-                    "WA_outdoor.json",
-                    "WA_indoor.json",
-                    "WA_field.json",
-                    "IFAA_field.json",
-                    "AGB_VI.json",
-                    "WA_VI.json",
-                    "Custom.json",
-                ]
+            # Get round info
+            round_obj, round_codename, round_location, round_body = load_round(
+                roundname, bowstyle
             )
-            # Get the appropriate round from the database
-            round_db_info = query_db(
-                "SELECT * FROM rounds WHERE round_name IS (?)",
-                [roundname],
-                one=True,
-            )
-            round_codename = round_db_info["code_name"]
-            round_location = round_db_info["location"]
-            round_body = round_db_info["body"]
 
-            # Check if we need compound scoring
-            if bowstyle.lower() in ["compound"]:
-                round_codename = utils.get_compound_codename(round_codename)
-            round_obj = all_rounds_objs[round_codename]
-
-            # Check score against maximum score and return error if inappropriate
-            max_score = round_obj.max_score()
-            if int(score) <= 0:
-                error = "A score of 0 or less is not valid."
-            elif int(score) > max_score:
-                error = (
-                    f"{score} is larger than the maximum possible "
-                    f"score of {int(max_score)} for a {roundname}."
-                )
-            results["score"] = score
-            results["maxscore"] = int(max_score)
+            # Check for valid input score
+            results, error = check_max_score(round_obj, roundname, score, results)
 
             if error is None:
                 hc_scheme = hc.handicap_scheme(scheme)
@@ -149,6 +102,7 @@ def calculator():
                 )
                 results["handicap"] = hc_from_score
 
+                # If decimal requested calculate and return
                 if not integer_precision:
                     decimal_hc_from_score = hc_scheme.handicap_from_score(
                         float(score),
@@ -160,8 +114,7 @@ def calculator():
 
                 # Calculate the classification
                 if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
-                    # TODO: Consider re-assigning bowstyle here for cleaner code,
-                    #   rather than in archeryutils?
+                    # Warn about bowstyle (handled by archeryutils).
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = (
                             f"Note: Treating {bowstyle} as Barebow "
@@ -183,8 +136,7 @@ def calculator():
                     results["classification"] = class_from_score
 
                 elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
-                    # TODO: Consider re-assigning bowstyle here for cleaner code,
-                    #   rather than in archeryutils?
+                    # Warn about bowstyle (handled by archeryutils).
                     if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                         warning_bowstyle = (
                             f"Note: Treating {bowstyle} as Barebow "
@@ -254,3 +206,153 @@ def calculator():
         results=None,
         error=error,
     )
+
+
+def check_inputs(results, bowstyle, gender, age, roundname):
+    """
+    Check inputs are valid and return in dict.
+
+    Parameters
+    ----------
+    results : Dict[]
+        Dict of results extracted from the form
+    bowstyle : str
+        bowstyle being used
+    gender : str
+        gender being used
+    age : str
+        age being used
+    roundname : str
+        name of round to use
+
+    Returns
+    -------
+    results : Dict[]
+        amended Dict of results extracted from the form
+    error : str or None
+        string containing en error message as appropriate
+    """
+    # Check the inputs are all valid
+    # No longer need to check dropdowns, but leave in case
+    error = None
+
+    bowstylecheck = query_db(
+        "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
+    )
+    if len(bowstylecheck) == 0:
+        error = "Invalid bowstyle. Please select from dropdown."
+    results["bowstyle"] = bowstyle
+
+    gendercheck = query_db("SELECT id FROM genders WHERE gender IS (?)", [gender])
+    if len(gendercheck) == 0:
+        error = "Please select gender from dropdown options."
+    results["gender"] = gender
+
+    agecheck = query_db("SELECT id FROM ages WHERE age_group IS (?)", [age])
+    if len(agecheck) == 0:
+        error = "Invalid age group. Please select from dropdown."
+    results["age"] = age
+
+    roundcheck = query_db(
+        "SELECT * FROM rounds WHERE round_name IS (?)", [roundname], one=True
+    )
+    if roundcheck is None:
+        error = (
+            f"Invalid round name '{roundname}'. "
+            f"Please start typing and select from dropdown."
+        )
+    results["roundname"] = roundname
+
+    return results, error
+
+
+def load_round(roundname, bowstyle):
+    """
+    Check inputs are valid and return in dict.
+
+    Parameters
+    ----------
+    roundname : str
+        name of round to use
+    bowstyle : str
+        bowstyle being used
+
+    Returns
+    -------
+    round_obj : Round
+        Round object for the appropriate round
+    round_body : str
+        governing body for this round
+    round_codename : str
+        codename for this round
+    round_location : str
+        location for this round
+    """
+    all_rounds_objs = load_rounds.read_json_to_round_dict(
+        [
+            "AGB_outdoor_imperial.json",
+            "AGB_outdoor_metric.json",
+            "AGB_indoor.json",
+            "WA_outdoor.json",
+            "WA_indoor.json",
+            "WA_field.json",
+            "IFAA_field.json",
+            "AGB_VI.json",
+            "WA_VI.json",
+            "Custom.json",
+        ]
+    )
+    # Get the appropriate round from the database
+    round_db_info = query_db(
+        "SELECT * FROM rounds WHERE round_name IS (?)",
+        [roundname],
+        one=True,
+    )
+    round_codename = round_db_info["code_name"]
+    round_location = round_db_info["location"]
+    round_body = round_db_info["body"]
+
+    # Check if we need compound scoring
+    if bowstyle.lower() in ["compound"]:
+        round_codename = utils.get_compound_codename(round_codename)
+    round_obj = all_rounds_objs[round_codename]
+
+    return round_obj, round_codename, round_location, round_body
+
+
+def check_max_score(round_obj, roundname, score, results):
+    """
+    Check score against maximum score and return error if inappropriate.
+
+    Parameters
+    ----------
+    round_obj : Round
+        Round object for the appropriate round
+    roundname : str
+        name of round
+    score : int
+        score input
+    results : Dict[str: Any]
+        Dict of results extracted from the form
+
+    Returns
+    -------
+    results : Dict[str: Any]
+        amended Dict of results extracted from the form
+    error : str or None
+        string containing en error message as appropriate
+    """
+    error = None
+
+    max_score = round_obj.max_score()
+    if int(score) <= 0:
+        error = "A score of 0 or less is not valid."
+    elif int(score) > max_score:
+        error = (
+            f"{score} is larger than the maximum possible "
+            f"score of {int(max_score)} for a {roundname}."
+        )
+    results["score"] = score
+    results["maxscore"] = int(max_score)
+
+    return results, error
