@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Example New Field Classifications{% endblock %}</h1>
+{% endblock %}
+
+
+{% block meta %}
+    <meta name="description" content="App to generate classification tables for Archery GB and World Archery indoor, outdoor, and field rounds using UK archery classification system.">
+    <meta property="og:title" content="Archery Classification Table Generator - ArcheryCalculator.co.uk">
+    <meta property="og:description" content="App to generate classification tables for Archery GB and World Archery indoor, outdoor, and field rounds using UK archery classification system.">
+    <meta property="og:url" content="https://archerycalculator.co.uk">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://archerycalculator.co.uk/static/image.png">
+    <link rel="canonical" href="https://archerycalculator.co.uk/tables/classification">
+    <!-- <link rel="icon" href="url_to_image" sizes="ssxss"> -->
+{% endblock %}
+
+
+{% block content %}
+
+  <p>
+  Generate classification tables using the Archery GB classification schemes.
+  <br>
+  For a summary of the various classification schemes see the <a href="/info">information page</a>.
+  Full regulations can be found in the <a href="https://archerygb.org/resources/find-a-document", target="blank">Shooting Administration Procedures (SAP7)</a>.
+  </p>
+
+  {% if tables is defined %}
+  {% for key, value in tables.items() %}
+  <h3>{{ key }}</h3>
+  <br>
+    {% from "_formhelpers.html" import render_classification_table %}
+    {{ render_classification_table(classes, roundnames, value) }}
+    <br>
+    <br>
+  {% endfor %}
+  {% endif %}
+
+{% endblock %}
