@@ -56,7 +56,7 @@ def handicap_tables():
                 "WA_indoor.json",
                 "WA_field.json",
                 "IFAA_field.json",
-                "Custom.json",
+                "Miscellaneous.json",
             ]
         )
 

@@ -99,7 +99,7 @@ def load_rounds_to_db(database):
             "WA_VI.json",
             "WA_field.json",
             "IFAA_field.json",
-            "Custom.json",
+            "Miscellaneous.json",
         ]
     )
 
