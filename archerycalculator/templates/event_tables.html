@@ -37,6 +37,7 @@
     {{ render_select2_field(form.roundfamily) }}
     {{ render_box(form.restrict_to_named, "By default rounds will be shown based on longest distance. Select this to restrict all adults to shooting the named round (e.g. National).") }}
     <input type=submit value=Generate>
+  </form>
 
   {% if error %}
   <p style="color: red;">{{ error }}</p>
