@@ -314,8 +314,8 @@ def fetch_and_sort_rounds(location, body):
     db_rounds = sql_to_dol(
         query_db(
             "SELECT code_name,round_name,family FROM rounds "
-            f"WHERE location IN ('{"', '".join(location)}') "
-            f"AND body in ('{"', '".join(body)}')"
+            f"""WHERE location IN ('{"', '".join(location)}') """
+            f"""AND body in ('{"', '".join(body)}')"""
         )
     )
 
