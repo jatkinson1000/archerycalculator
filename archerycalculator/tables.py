@@ -346,27 +346,67 @@ def classification_tables():
                 )
 
         elif discipline in ["field"]:
-            classlist = sql_to_dol(
-                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
-            )["shortname"]
+            # TODO: This is a bodge - put field classes in database and fetch above!
+            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
 
-            # Handle age groups - field has no U21
-            if age.lower().replace(" ", "") in ("under21"):
-                age = "Adult"
-
-            use_rounds = sql_to_dol(
-                query_db(
-                    "SELECT code_name,round_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA') AND NOT code_name LIKE '%12%'"
-                )
-            )
+            if bowstyle.lower() in ["recurve", "compound"]:
+                use_rounds = {
+                    "code_name": [
+                        "wa_field_24_red_marked",
+                        "wa_field_24_red_unmarked",
+                        "wa_field_24_red_mixed",
+                    ],
+                    "round_name": [
+                        "WA Field 24 Red Marked",
+                        "WA Field 24 Red Unmarked",
+                        "WA Field 24 Red Mixed",
+                    ],
+                }
+            elif bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
+                use_rounds = {
+                    "code_name": [
+                        "wa_field_24_blue_marked",
+                        "wa_field_24_blue_unmarked",
+                        "wa_field_24_blue_mixed",
+                    ],
+                    "round_name": [
+                        "WA Field 24 Blue Marked",
+                        "WA Field 24 Blue Unmarked",
+                        "WA Field 24 Blue Mixed",
+                    ],
+                }
 
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.agb_field_classification_scores(
+                    class_func.old_agb_field_classification_scores(
                         round_i, bowstyle, gender, age
                     )
                 )
+
+
+
+#             classlist = sql_to_dol(
+#                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+#             )["shortname"]
+# 
+#             # Handle age groups - field has no U21
+#             if age.lower().replace(" ", "") in ("under21"):
+#                 age = "Adult"
+# 
+#             use_rounds = sql_to_dol(
+#                 query_db(
+#                     "SELECT code_name,round_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA') AND NOT code_name LIKE '%12%'"
+#                 )
+#             )
+# 
+#             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
+#             for i, round_i in enumerate(use_rounds["code_name"]):
+#                 results[i, :] = np.asarray(
+#                     class_func.agb_field_classification_scores(
+#                         round_i, bowstyle, gender, age
+#                     )
+#                 )
 
         else:
             # Should never get here... placeholder for next classification system.
@@ -505,7 +545,7 @@ def event_tables():
                 for j, age_j in enumerate(agelist["age_group"]):
                     # Get appropriate round from distance
                     for i, rnd_i in enumerate(roundslist["code_name"]):
-                        if all_rounds_objs[rnd_i].max_distance() >= min(
+                        if all_rounds_objs[rnd_i].max_distance().value >= min(
                             max_dist, int(agelist[f"{gender.lower()}_dist"][j])
                         ):
                             age_round = roundslist["code_name"][i]
@@ -601,16 +641,13 @@ def event_tables():
                 ]
             )
 
+            # Done manually for now, update in future
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            # Select only AGB Field age groups
-            agelist = sql_to_dol(
-                query_db(
-                    "SELECT age_group,red_dist_min,blue_dist_min FROM ages WHERE NOT (age_group LIKE '%21%')"
-                )
-            )
-            classlist = sql_to_dol(
-                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
-            )["shortname"]
+            agelist = {"age_group": ["Adult", "Under 18"], "peg": ["red", "red"]}
+            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
+
+            if bowstyle.lower() in ["barebow", "longbow", "traditional", "flatbow"]:
+                agelist["peg"] = ["blue", "blue"]
 
             roundslist = {"code_name": [], "round_name": []}
             for family_i in roundfamilies[roundfamily]:
@@ -628,44 +665,95 @@ def event_tables():
                 for j, age_j in enumerate(agelist["age_group"]):
                     # Get appropriate round from distance
                     age_app_rounds = []
-
-                    # Set appropriate pegs for ages/bowstyles
-                    # Use marked round for distance purposes
-                    for i, rnd_i in enumerate(roundslist["code_name"]):
-                        if bowstyle.lower() in ["compound", "recurve"]:
-                            min_dist = agelist["red_dist_min"][j]
-                        else:
-                            min_dist = agelist["blue_dist_min"][j]
-                        if all_rounds_objs[
-                            rnd_i.replace("unmarked", "marked").replace(
-                                "mixed", "marked"
-                            )
-                        ].max_distance() >= float(min_dist):
+                    for rnd_i in roundslist["code_name"]:
+                        if f"{agelist['peg'][j]}" in rnd_i:
                             age_app_rounds.append(rnd_i)
 
                     # Ensure 24 target round, not 12 target unit and remove duplicates
                     age_app_rounds = list(
                         {x.replace("12", "24") for x in age_app_rounds}
                     )
-                    age_app_rounds = sorted(
-                        age_app_rounds, key=lambda x: all_rounds_objs[x].max_distance()
-                    )
 
-                    # Use the shortest eligible round for each category
                     results[f"{age_j} {gender}"] = [
                         sql_to_dol(
                             query_db(
                                 "SELECT round_name FROM rounds WHERE code_name IN (?)",
-                                [age_app_rounds[0]],
+                                age_app_rounds,
                             )
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.agb_field_classification_scores(
+                        for i in class_func.old_agb_field_classification_scores(
                             age_app_rounds[0], bowstyle, gender, age_j
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
+
+#             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+#             # Select only AGB Field age groups
+#             agelist = sql_to_dol(
+#                 query_db(
+#                     "SELECT age_group,red_dist_min,blue_dist_min FROM ages WHERE NOT (age_group LIKE '%21%')"
+#                 )
+#             )
+#             classlist = sql_to_dol(
+#                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+#             )["shortname"]
+# 
+#             roundslist = {"code_name": [], "round_name": []}
+#             for family_i in roundfamilies[roundfamily]:
+#                 roundslist_i = sql_to_dol(
+#                     query_db(
+#                         "SELECT code_name,round_name FROM rounds WHERE family IN (?)",
+#                         [family_i],
+#                     )
+#                 )
+#                 for k in roundslist:
+#                     roundslist[k] = roundslist[k] + roundslist_i[k]
+# 
+#             results = {}
+#             for gender in genderlist:
+#                 for j, age_j in enumerate(agelist["age_group"]):
+#                     # Get appropriate round from distance
+#                     age_app_rounds = []
+# 
+#                     # Set appropriate pegs for ages/bowstyles
+#                     # Use marked round for distance purposes
+#                     for i, rnd_i in enumerate(roundslist["code_name"]):
+#                         if bowstyle.lower() in ["compound", "recurve"]:
+#                             min_dist = agelist["red_dist_min"][j]
+#                         else:
+#                             min_dist = agelist["blue_dist_min"][j]
+#                         if all_rounds_objs[
+#                             rnd_i.replace("unmarked", "marked").replace(
+#                                 "mixed", "marked"
+#                             )
+#                         ].max_distance().value >= float(min_dist):
+#                             age_app_rounds.append(rnd_i)
+# 
+#                     # Ensure 24 target round, not 12 target unit and remove duplicates
+#                     age_app_rounds = list(
+#                         {x.replace("12", "24") for x in age_app_rounds}
+#                     )
+#                     age_app_rounds = sorted(
+#                         age_app_rounds, key=lambda x: all_rounds_objs[x].max_distance()
+#                     )
+# 
+#                     # Use the shortest eligible round for each category
+#                     results[f"{age_j} {gender}"] = [
+#                         sql_to_dol(
+#                             query_db(
+#                                 "SELECT round_name FROM rounds WHERE code_name IN (?)",
+#                                 [age_app_rounds[0]],
+#                             )
+#                         )["round_name"][0]
+#                     ] + [
+#                         str(int(i))
+#                         for i in class_func.agb_field_classification_scores(
+#                             age_app_rounds[0], bowstyle, gender, age_j
+#                         )[-1::-1]
+#                     ]
+#             classes = classlist[-2::-1]
 
         if error is None:
             # Return the results
