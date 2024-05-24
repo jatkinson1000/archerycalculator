@@ -60,11 +60,7 @@ def load_ages_to_db(database):
     ages = class_func.read_ages_json()
     for item in ages:
         database.execute(
-            (
-                "INSERT INTO ages "
-                "(age_group,gov_body,male_dist,female_dist,"
-                "red_dist_max,red_dist_min,blue_dist_max,blue_dist_min) "
-                "VALUES (?,?,?,?,?,?,?,?);",
+            "INSERT INTO ages (age_group,gov_body,male_dist,female_dist,red_dist_max,red_dist_min,blue_dist_max,blue_dist_min) VALUES (?,?,?,?,?,?,?,?);",
             (
                 item["age_group"],
                 "AGB",
