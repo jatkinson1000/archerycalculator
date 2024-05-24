@@ -176,12 +176,14 @@ def calculator():
                         age_cat = age
 
                     # class_from_score = class_func.calculate_agb_field_classification(
-                    class_from_score = class_func.calculate_old_agb_field_classification(
-                        round_codename,
-                        float(score),
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age_cat.lower(),
+                    class_from_score = (
+                        class_func.calculate_old_agb_field_classification(
+                            round_codename,
+                            float(score),
+                            bowstyle.lower(),
+                            gender.lower(),
+                            age_cat.lower(),
+                        )
                     )
 
                     results["classification"] = class_from_score
