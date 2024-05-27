@@ -24,14 +24,6 @@ def load_bowstyles_to_db(database):
             (item["bowstyle"], "TF"),
         )
 
-    # Additional AGB field bowstyles
-    for item in ["Traditional", "Flatbow"]:
-        database.execute(
-            "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
-            (item, "TF"),
-        )
-    database.commit()
-
 
 def load_genders_to_db(database):
     """
