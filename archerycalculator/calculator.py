@@ -377,3 +377,218 @@ def check_max_score(round_obj, roundname, score, results):
     results["maxscore"] = int(max_score)
 
     return results, error
+
+
+# Future home page with new field
+@bp.route("/new-calculator", methods=("GET", "POST"))
+def new_calculator():
+    """
+    Generate the calculator page in the flask app.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    html template :
+        template for the calculator page
+    """
+    # Set form choices
+    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
+        "bowstyle"
+    ]
+    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+    roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
+    roundnames = utils.indoor_display_filter(
+        dict(zip(roundnames["code_name"], roundnames["round_name"]))
+    )
+    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
+
+    # Load form and set defaults
+    form = hc_form.HCForm(
+        request.form,
+    )
+
+    # Set form choices
+    form.bowstyle.choices = ["", *bowstylelist]
+    form.gender.choices = ["", *genderlist]
+    form.age.choices = ["", *agelist]
+    form.roundname.choices = ["", *roundnames]
+
+    # Initialise any errors or warnings
+    error = None
+    warning_bowstyle = None
+    warning_handicap_round = None
+    warning_handicap_system = None
+    if request.method == "POST" and form.validate():
+        # Get essential form results
+        bowstyle = request.form["bowstyle"]
+        gender = request.form["gender"]
+        age = request.form["age"]
+        roundname = request.form["roundname"]
+        score = request.form["score"]
+
+        resultskeys = ["bowstyle", "gender", "age", "roundname", "score"]
+        results = dict(zip(resultskeys, [None] * len(resultskeys)))
+
+        # advanced options
+        diameter = float(request.form["diameter"]) * 1.0e-3
+        scheme = request.form["scheme"]
+        integer_precision = True
+        if request.form.getlist("decimalHC"):
+            integer_precision = False
+            results["decimalHC"] = True
+        if diameter == 0.0:
+            diameter = None
+
+        # Check the inputs are all valid
+        results, error = check_inputs(results, bowstyle, gender, age, roundname)
+
+        if error is None:
+            # Get round info
+            round_obj, round_codename, round_location, round_body = load_round(
+                roundname, bowstyle
+            )
+
+            # Check for valid input score
+            results, error = check_max_score(round_obj, roundname, score, results)
+
+            if error is None:
+                hc_scheme = hc.handicap_scheme(scheme)
+
+                # Calculate the handicap
+                hc_from_score = hc_scheme.handicap_from_score(
+                    float(score),
+                    round_obj,
+                    arw_d=diameter,
+                    int_prec=True,
+                )
+                results["handicap"] = hc_from_score
+
+                # If decimal requested calculate and return
+                if not integer_precision:
+                    decimal_hc_from_score = hc_scheme.handicap_from_score(
+                        float(score),
+                        round_obj,
+                        arw_d=diameter,
+                        int_prec=integer_precision,
+                    )
+                    results["decimal_handicap"] = decimal_hc_from_score
+
+                # Calculate the classification
+                if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
+                    # Handle non-outdoor bowstyles
+                    # Warn about bowstyle (handled by archeryutils).
+                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Barebow "
+                            "for the purposes of classifications."
+                        )
+                    elif bowstyle.lower() in "compound barebow":
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Compound "
+                            "for the purposes of classifications."
+                        )
+
+                    class_from_score = class_func.calculate_agb_outdoor_classification(
+                        float(score),
+                        round_codename,
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age.lower(),
+                    )
+                    class_from_score = query_db(
+                        "SELECT longname FROM classes WHERE shortname IS (?)",
+                        [class_from_score],
+                        one=True,
+                    )["longname"]
+                    results["classification"] = class_from_score
+
+                elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
+                    # Warn about bowstyle (handled by archeryutils).
+                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Barebow "
+                            "for the purposes of classifications."
+                        )
+                    elif bowstyle.lower() in "compound barebow":
+                        warning_bowstyle = (
+                            f"Note: Treating {bowstyle} as Compound "
+                            "for the purposes of classifications."
+                        )
+
+                    class_from_score = class_func.calculate_agb_indoor_classification(
+                        float(score),
+                        round_codename,
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age.lower(),
+                    )
+                    class_from_score = query_db(
+                        "SELECT longname FROM classes WHERE shortname IS (?)",
+                        [class_from_score],
+                        one=True,
+                    )["longname"]
+                    results["classification"] = class_from_score
+
+                elif round_location in ["field"] and round_body in ["AGB", "WA"]:
+                    # Handle non-field age groups
+                    if age.lower().replace(" ", "") in ("under21"):
+                        age_cat = "Adult"
+                    else:
+                        age_cat = age
+
+                    class_from_score = (
+                        class_func.calculate_agb_field_classification(
+                            float(score),
+                            round_codename,
+                            bowstyle.lower(),
+                            gender.lower(),
+                            age_cat.lower(),
+                        )
+                    )
+
+                    results["classification"] = class_from_score
+                    warning_handicap_round = (
+                        "Note: This round is not officially recognised by "
+                        "Archery GB for the purposes of handicapping."
+                    )
+                else:
+                    results["classification"] = "not currently available"
+                    warning_handicap_round = (
+                        "Note: This round is not officially recognised by "
+                        "Archery GB for the purposes of handicapping."
+                    )
+
+                # Other stats
+                RAD2DEG = 57.295779513
+                sig_t = hc_scheme.sigma_t(hc_from_score, 0.0)
+                sig_r_18 = hc_scheme.sigma_r(hc_from_score, 18.0)
+                sig_r_50 = hc_scheme.sigma_r(hc_from_score, 50.0)
+                sig_r_70 = hc_scheme.sigma_r(hc_from_score, 70.0)
+
+                # Perform calculations and return the results
+                return render_template(
+                    "calculator.html",
+                    form=form,
+                    results=results,
+                    sig_t=2.0 * RAD2DEG * sig_t,
+                    sig_r_18=2.0 * 100.0 * sig_r_18,
+                    sig_r_50=2.0 * 100.0 * sig_r_50,
+                    sig_r_70=2.0 * 100.0 * sig_r_70,
+                    warning_bowstyle=warning_bowstyle,
+                    warning_handicap_round=warning_handicap_round,
+                    warning_handicap_system=warning_handicap_system,
+                )
+
+    # If errors reload page with error reports
+    # If first visit load the default form with no inputs
+    return render_template(
+        "calculator.html",
+        form=form,
+        results=None,
+        error=error,
+    )
+
+

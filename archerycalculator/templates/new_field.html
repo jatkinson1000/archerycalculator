@@ -6,8 +6,7 @@
 
 
 {% block meta %}
-    <meta name="description" content="App to generate classification tables for Archery GB and World Archery indoor, outdoor, and field rounds using UK archery classification system.">
-    <meta property="og:title" content="Archery Classification Table Generator - ArcheryCalculator.co.uk">
+    <meta property="og:title" content="Archery New Field Classification Templates - ArcheryCalculator.co.uk">
     <meta property="og:description" content="App to generate classification tables for Archery GB and World Archery indoor, outdoor, and field rounds using UK archery classification system.">
     <meta property="og:url" content="https://archerycalculator.co.uk">
     <meta property="og:type" content="website">
@@ -20,11 +19,78 @@
 {% block content %}
 
   <p>
-  Generate classification tables using the Archery GB classification schemes.
+  This page is a preview of the "new" Archery GB field classifications for iteration of score boundaries and rules prior to final release.
+  <br><br>
+  Questions:
+  <ul>
+    <li>Have the rounds been appropriately assigned for the updated bowstyes and age groups?</li>
+      <ul>
+        <li>Should Archer tier be made available on shorter peg, "novice", rounds?</li>
+      </ul><br>
+    <li>Should there be separate scores for Marked, Unmarked, and Mixed, or just one?</li>
+      <ul>
+        <li>My feeling is that a single score for all rounds simplifies things.</li>
+      </ul><br>
+    <li>Should there be an U21 category?</li>
+      <ul>
+        <li>WA operates U21 and it exists for target classifications.</li>
+      </ul><br>
+    <li>Should it be restricted to 24 target rounds?</li>
+      <ul>
+        <li>Archer tier could be made available on 12-target passes. This would help with engagement, which is a key focus of the archer tier.</li>
+      </ul><br>
+    <li>Should there be a restriction on number of courses?</li>
+      <ul>
+        <li>Probably at MB level. How many places?</li>
+        <li>Should it be 'events' rather than courses, as many WA re-set between events?</li>
+        <li>From personal exp[erience it is restrictive if you live in certain locations.</li>
+        <li>Remove the ABO rule as has been same course twice in recent years?</li>
+      </ul><br>
+    <li>Should AGB administer the highest level of awards?</li>
+  </ul>
   <br>
-  For a summary of the various classification schemes see the <a href="/info">information page</a>.
-  Full regulations can be found in the <a href="https://archerygb.org/resources/find-a-document", target="blank">Shooting Administration Procedures (SAP7)</a>.
+  The rules could be summarised in the following table:
   </p>
+  <table class="infoclasstable">
+    <thead>
+      <tr>
+        <th>Class</th>
+        <th>Sub-tiers</th>
+        <th>From rounds totalling</th>
+        <th>Rounds</th>
+        <th>Type of event</th>
+        <th>Administered by</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+          <td>Archer</td>
+          <td>Archer 3rd Class<br>Archer 2nd Class<br>Archer 1st Class</td>
+          <td>2 Rounds</td>
+          <td rowspan="3">Any appropriate round</td>
+          <td>Any event</td>
+          <td rowspan="2">Clubs</td>
+      </tr>
+      <tr>
+          <td>Bowman</td>
+          <td>Bowman 3rd Class<br>Bowman 2nd Class<br>Bowman 1st Class</td>
+          <td rowspan="2">3 Rounds</td>
+          <!-- Merged above -->
+          <td>Any competitive event</td>
+          <!-- Merged above -->
+      </tr>
+      <tr>
+          <td>Master Bowman</td>
+          <td>Master Bowman<br>Grand Master Bowman<br>Elite Master Bowman</td>
+          <!-- Merged above -->
+          <!-- Merged above -->
+          <td>Any record status competition</td>
+          <td rowspan=>Archery GB</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
 
   {% if tables is defined %}
   {% for key, value in tables.items() %}
