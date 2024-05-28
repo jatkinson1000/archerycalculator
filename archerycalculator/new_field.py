@@ -55,7 +55,7 @@ def rounds_page():
             for age in [
                 "50+",
                 "adult",
-                "under21",
+                # "under21",
                 "under18",
                 "under16",
                 "under15",
