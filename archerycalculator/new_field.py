@@ -50,6 +50,8 @@ def rounds_page():
         "traditional",
         "flatbow",
         "longbow",
+        "compound limited",
+        "compound barebow",
     ]:
         for gender in ["male", "female"]:
             for age in [
