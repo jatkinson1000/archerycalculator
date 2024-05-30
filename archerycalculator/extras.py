@@ -154,7 +154,7 @@ def roundcomparison():
                     "IFAA_field.json",
                     "AGB_VI.json",
                     "WA_VI.json",
-                    "Custom.json",
+                    "Miscellaneous.json",
                 ]
             )
             # Get the appropriate round from the database

@@ -5,7 +5,16 @@ import os
 
 from flask import Flask
 
-from archerycalculator import about, calculator, db, extras, info, rounds, tables
+from archerycalculator import (
+    about,
+    calculator,
+    db,
+    extras,
+    info,
+    rounds,
+    tables,
+    new_field,
+)
 
 
 def create_app(test_config=None):
@@ -54,6 +63,8 @@ def create_app(test_config=None):
     app.register_blueprint(about.bp)
 
     app.register_blueprint(extras.bp)
+
+    app.register_blueprint(new_field.bp)
 
     db.init_app(app)
 

@@ -282,7 +282,7 @@ input[type=submit]:hover {
 /* ----------------------- */
 
 table{
-  table-layout: fixed;
+  table-layout: auto;
   border-collapse: collapse;
 }
 
@@ -316,12 +316,14 @@ th, td {
 
 /* Classification and EventClassification Table*/
 .classtable, .eventtable {
+  width: 100%;
   text-align: center;
   font-size: min(calc(5px + 0.8vw), 1em);
 }
 
 .classtable th:first-child, .classtable td:first-child,
 .eventtable th:first-child, .eventtable td:first-child {
+  white-space: nowrap;
   font-weight: bold;
   text-align: right;
 }

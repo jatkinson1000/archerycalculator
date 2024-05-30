@@ -24,14 +24,6 @@ def load_bowstyles_to_db(database):
             (item["bowstyle"], "TF"),
         )
 
-    # Additional AGB field bowstyles
-    for item in ["Traditional", "Flatbow"]:
-        database.execute(
-            "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
-            (item, "TF"),
-        )
-    database.commit()
-
 
 def load_genders_to_db(database):
     """
@@ -60,11 +52,17 @@ def load_ages_to_db(database):
     ages = class_func.read_ages_json()
     for item in ages:
         database.execute(
+            "INSERT INTO ages (age_group,gov_body,male_dist,female_dist,red_dist_max,red_dist_min,blue_dist_max,blue_dist_min) VALUES (?,?,?,?,?,?,?,?);",
             (
-                "INSERT INTO ages "
-                "(age_group,gov_body,male_dist,female_dist) VALUES (?,?,?,?);"
+                item["age_group"],
+                "AGB",
+                item["male"][0],
+                item["female"][0],
+                item["red"][1],
+                item["red"][0],
+                item["blue"][1],
+                item["blue"][0],
             ),
-            (item["age_group"], "AGB", item["male"][0], item["female"][0]),
         )
     database.commit()
 
@@ -89,7 +87,7 @@ def load_rounds_to_db(database):
             "WA_VI.json",
             "WA_field.json",
             "IFAA_field.json",
-            "Custom.json",
+            "Miscellaneous.json",
         ]
     )
 
