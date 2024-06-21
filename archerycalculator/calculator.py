@@ -121,7 +121,7 @@ def calculator():
                             f"Note: Treating {bowstyle} as Barebow "
                             "for the purposes of classifications."
                         )
-                    elif bowstyle.lower() in "compound barebow":
+                    elif bowstyle.lower() == "compound barebow":
                         warning_bowstyle = (
                             f"Note: Treating {bowstyle} as Compound "
                             "for the purposes of classifications."
