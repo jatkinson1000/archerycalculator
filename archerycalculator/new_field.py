@@ -37,11 +37,7 @@ def rounds_page():
         query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
     )["shortname"]
 
-    use_rounds = sql_to_dol(
-        query_db(
-            "SELECT code_name,round_name FROM rounds WHERE location IN ('field') AND body in ('AGB','WA') AND NOT code_name LIKE '%12%'"
-        )
-    )
+    use_rounds = utils.fetch_and_sort_rounds(location="field", body=['AGB','WA'])
 
     for bowstyle in [
         "compound",

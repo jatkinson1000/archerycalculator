@@ -234,7 +234,12 @@ def order_rounds(rounds):
         "metricshort",
         # INDOOR
         # FIELD
-        "wafield",
+        "wafield_24_marked",
+        "wafield_24_unmarked",
+        "wafield_24_mixed",
+        "wafield_12_marked",
+        "wafield_12_unmarked",
+        "wafield_12_mixed",
         "ifaafield",
     ]
 
@@ -269,11 +274,6 @@ def order_rounds(rounds):
                     for (key, value) in rounds.items()
                     if value == "metric720" and "metric_80" in key
                 }
-            )
-        elif family == "wafield":
-            # Select 24 target rounds first, then 12 target units
-            sorted_rounds.update(
-                {key: value for (key, value) in rounds.items() if "24" in key}
             )
         elif family == "ifaafield":
             # Select full rounds first, then units
