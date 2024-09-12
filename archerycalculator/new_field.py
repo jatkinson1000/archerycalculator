@@ -1,5 +1,6 @@
 """New field classification webpage."""
 
+import copy
 import numpy as np
 
 from flask import (
@@ -37,7 +38,29 @@ def rounds_page():
         query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
     )["shortname"]
 
-    use_rounds = utils.fetch_and_sort_rounds(location="field", body=['AGB','WA'])
+    # use_rounds = utils.fetch_and_sort_rounds(location="field", body=['AGB','WA'])
+    field_rounds = {
+        "code_name": [
+            "wa_field_24_red_marked",
+            "wa_field_24_blue_marked",
+            "wa_field_24_yellow_marked",
+            "wa_field_24_white_marked",
+            "wa_field_12_red_marked",
+            "wa_field_12_blue_marked",
+            "wa_field_12_yellow_marked",
+            "wa_field_12_white_marked",
+        ],
+        "round_name": [
+            "WA Field 24 Red",
+            "WA Field 24 Blue",
+            "WA Field 24 Yellow",
+            "WA Field 24 White",
+            "WA Field 12 Red",
+            "WA Field 12 Blue",
+            "WA Field 12 Yellow",
+            "WA Field 12 White",
+        ],
+    }
 
     for bowstyle in [
         "compound",
@@ -49,6 +72,13 @@ def rounds_page():
         "compound limited",
         "compound barebow",
     ]:
+        use_rounds = copy.deepcopy(field_rounds)
+        if bowstyle.lower().replace(" ", "") in ["barebow", "longbow", "traditional", "flatbow", "compoundbarebow"]:
+            use_rounds["code_name"].pop(0)
+            use_rounds["round_name"].pop(0)
+            use_rounds["code_name"].pop(3)
+            use_rounds["round_name"].pop(3)
+
         for gender in ["male", "female"]:
             for age in [
                 "50+",
