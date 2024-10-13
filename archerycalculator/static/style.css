@@ -292,6 +292,16 @@ th, td {
     overflow: hidden;
 }
 
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.column {
+  padding: 1%;
+}
+
+
 /* Handicap Table*/
 .hctable {
   text-align: right;
@@ -308,40 +318,92 @@ th, td {
   text-align: center;
 }
 
-.classtable tbody tr:nth-child(odd), .hctable tbody tr:nth-child(odd), .comparetable tbody tr:nth-child(odd),
-.eventtable tbody tr:nth-child(odd) {
-  background-color: #eee;
+/* Set header shading, and alternate shading each row */
+.classtable th,
+.hctable th,
+.comparetable th,
+.eventtable th {
+  background-color: #D9D9D9;
+}
+.classtable tbody tr:nth-child(even),
+.hctable tbody tr:nth-child(even),
+.comparetable tbody tr:nth-child(even),
+.eventtable tbody tr:nth-child(even) {
+  background-color: #EEEEEE;
 }
 
 
-/* Classification and EventClassification Table*/
-.classtable, .eventtable {
+/* Classification and EventClassification Table */
+.classtable, .eventtable, .fieldtable {
   width: 100%;
   text-align: center;
   font-size: min(calc(5px + 0.8vw), 1em);
 }
 
 .classtable th:first-child, .classtable td:first-child,
-.eventtable th:first-child, .eventtable td:first-child {
+.eventtable th:first-child, .eventtable td:first-child,
+.fieldtable th:first-child, .fieldtable td:first-child {
   white-space: nowrap;
   font-weight: bold;
   text-align: right;
 }
 
+/* Fancy Formatting for classification Tables
+ * Color each class a different colour
+ * Headers are darker than bulk of table
+ * Alternate shade line-by-line
+*/
+/* Archer Class - blue */
+.classtable th:nth-child(n+2):nth-child(-n+4),
+.eventtable th:nth-child(n+3):nth-child(-n+5){
+    background-color: #5D69D8;
+    color: #FFFFFF;
+}
+.classtable tr:nth-child(odd) td:nth-child(n+2):nth-child(-n+4):not(:empty),
+.eventtable tr:nth-child(odd) td:nth-child(n+3):nth-child(-n+5):not(:empty){
+    background-color: #A1AFFF;
+}
+.classtable tr:nth-child(even) td:nth-child(n+2):nth-child(-n+4):not(:empty),
+.eventtable tr:nth-child(even) td:nth-child(n+3):nth-child(-n+5):not(:empty){
+    background-color: #919FEE;
+}
+/* Bowman Class - red */
+.classtable th:nth-child(n+5):nth-child(-n+7),
+.eventtable th:nth-child(n+6):nth-child(-n+8){
+    background-color: #C75D6B;
+    color: #FFFFFF;
+}
+.classtable tr:nth-child(odd) td:nth-child(n+5):nth-child(-n+7):not(:empty),
+.eventtable tr:nth-child(odd) td:nth-child(n+6):nth-child(-n+8):not(:empty){
+    background-color: #E0A2AB;
+}
+.classtable tr:nth-child(even) td:nth-child(n+5):nth-child(-n+7):not(:empty),
+.eventtable tr:nth-child(even) td:nth-child(n+6):nth-child(-n+8):not(:empty){
+    background-color: #D0929B;
+}
+/* Master Bowman Class - grey */
+.classtable th:nth-child(n+8):nth-child(-n+10),
+.eventtable th:nth-child(n+9):nth-child(-n+11){
+    background-color: #D9D9D9;
+}
+.classtable tr:nth-child(odd) td:nth-child(n+8):nth-child(-n+10):not(:empty),
+.eventtable tr:nth-child(odd) td:nth-child(n+9):nth-child(-n+11):not(:empty){
+    background-color: #E7E7E7;
+}
+.classtable tr:nth-child(even) td:nth-child(n+8):nth-child(-n+10):not(:empty),
+.eventtable tr:nth-child(even) td:nth-child(n+9):nth-child(-n+11):not(:empty){
+    background-color: #D7D7D7;
+}
+
+
+/* Event Classification Table */
 .eventtable th:nth-child(2), .eventtable td:nth-child(2) {
   text-align: left;
   padding-left: 10px
 }
 
 
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.column {
-  padding: 1%;
-}
+/* Comparison Tables */
 .comparetable {
   box-sizing: border-box;
   text-align: left;
@@ -357,8 +419,7 @@ th, td {
 }
 
 
-
-/* Info Page Classification Table*/
+/* Classification Information Table */
 .infoclasstable {
   width: 100%;
   text-align: center;
