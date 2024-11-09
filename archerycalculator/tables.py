@@ -362,7 +362,15 @@ def classification_tables():
                         "WA Field 24 Red Mixed",
                     ],
                 }
-            elif bowstyle.lower().replace(" ", "") in ["barebow", "longbow", "traditional", "flatbow", "compoundlimited", "compoundbarebow"]:
+            elif bowstyle.lower().replace(" ", "") in [
+                "barebow",
+                "longbow",
+                "englishlongbow",
+                "traditional",
+                "flatbow",
+                "compoundlimited",
+                "compoundbarebow",
+            ]:
                 use_rounds = {
                     "code_name": [
                         "wa_field_24_blue_marked",
@@ -644,7 +652,15 @@ def event_tables():
             agelist = {"age_group": ["Adult", "Under 18"], "peg": ["red", "red"]}
             classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
 
-            if bowstyle.lower().replace(" ", "") in ["barebow", "longbow", "traditional", "flatbow", "compoundlimited", "compoundbarebow"]:
+            if bowstyle.lower().replace(" ", "") in [
+                "barebow",
+                "longbow",
+                "englishlongbow",
+                "traditional",
+                "flatbow",
+                "compoundlimited",
+                "compoundbarebow",
+            ]:
                 agelist["peg"] = ["blue", "blue"]
 
             roundslist = {"code_name": [], "round_name": []}

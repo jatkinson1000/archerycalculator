@@ -19,6 +19,10 @@ def load_bowstyles_to_db(database):
     """
     bowstyles = class_func.read_bowstyles_json()
     for item in bowstyles:
+        # Hardcode "Longbow" from archeryutils to "English Longbow" for display
+        if item["bowstyle"] == "Longbow":
+            item["bowstyle"] = "English Longbow"
+
         database.execute(
             "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
             (item["bowstyle"], "TF"),
