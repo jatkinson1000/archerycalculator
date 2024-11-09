@@ -1,0 +1,48 @@
+<svg version="1.1"
+     baseProfile="full"
+	 style="shape-rendering:geometricPrecision;" 
+	 viewBox="-40 -40 80 80"
+     xmlns="http://www.w3.org/2000/svg">
+  <metadata xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+          xmlns:dcterms="http://purl.org/dc/terms/" 
+          xmlns:dc11="http://purl.org/dc/elements/1.1/"
+          xmlns:cc="http://creativecommons.org/ns#" 
+          xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" >
+  <rdf:RDF>
+    <cc:Work rdf:about="">
+      <dc11:format>image/svg+xml</dc11:format>
+      <dc11:type    rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      <cc:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/" />
+      <cc:license rdf:resource="http://opendatacommons.org/licenses/odbl/1.0/"  />
+      <cc:attributionName>ArcheryGeekery</cc:attributionName>
+      <cc:attributionURL  rdf:resource="http://archerygeekery.co.uk" />
+    </cc:Work>
+    <cc:License    rdf:about="http://creativecommons.org/licenses/by-sa/4.0/">
+      <cc:permits  rdf:resource="http://creativecommons.org/ns#Reproduction" />
+      <cc:permits  rdf:resource="http://creativecommons.org/ns#Distribution" />
+      <cc:permits  rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      <cc:requires rdf:resource="http://creativecommons.org/ns#Notice" />
+      <cc:requires rdf:resource="http://creativecommons.org/ns#Attribution" />
+      <cc:requires rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+    </cc:License>
+    <cc:License rdf:about="http://opendatacommons.org/licenses/odbl/1.0/" >
+      <cc:legalcode rdf:resource="http://opendatacommons.org/licenses/odbl/1.0/index.html" />
+      <dcterms:isVersionOf rdf:resource="http://opendatacommons.org/licenses/odbl/" />
+    </cc:License>
+  </rdf:RDF>
+</metadata>
+
+
+	<g stroke-width="0.1" cx="0" cy="0" stroke="white">
+		<circle r="39.5" fill="black" />
+		<circle r="31.2" fill="black"  />
+		<circle r="23.5" fill="black" />
+		<circle r="15.5" fill="black" />
+		<circle r="7.5" fill="#FFE552" stroke="none" />
+		<circle r="3.5" fill="none" stroke="black" />
+	</g>
+
+  
+  <line x1="0" y1="-0.2" x2="0" y2="0.2" stroke="black" stroke-width="0.1" />
+  <line x1="-0.2" y1="0" x2="0.2" y2="0" stroke="black" stroke-width="0.1" />
+</svg>

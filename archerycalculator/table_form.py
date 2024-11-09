@@ -74,6 +74,25 @@ class ClassificationTableForm(Form):
     discipline = SelectField("Discipline")
 
 
+class PrintClassificationTableForm(Form):
+    """
+    Class for classification table printing form.
+
+    Attributes
+    ----------
+    discipline : SelectField
+        discipline to use
+    bowstyle : SelectField
+        bowstyle to use
+
+    """
+
+    discipline = SelectField(
+        "Discipline", [validators.InputRequired("Please provide.")]
+    )
+    bowstyle = SelectField("Bowstyle", [validators.InputRequired("Please provide.")])
+
+
 class EventTableForm(Form):
     """
     Class for classification by event table form.

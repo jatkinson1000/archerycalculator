@@ -453,6 +453,287 @@ def classification_tables():
     )
 
 
+@bp.route("/print", methods=("GET", "POST"))
+def print_classification_tables():
+    """
+    Generate classification tables page to print.
+
+    Returns
+    -------
+    html template :
+        template for the classification table pages that is print-friendly
+
+    """
+    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
+        "bowstyle"
+    ]
+    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
+    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
+
+    # Load form and set defaults
+    form = table_form.PrintClassificationTableForm(
+        request.form,
+        bowstyle=bowstylelist[1],
+    )
+    form.bowstyle.choices = bowstylelist
+    form.discipline.choices = [
+        ("outdoor", "Target Outdoor"),
+        ("indoor", "Target Indoor"),
+        ("field", "Field"),
+    ]
+
+    if request.method == "POST" and form.validate():
+        error = None
+
+        # Get form results and store for return
+        discipline = request.form["discipline"]
+        bowstyle = request.form["bowstyle"]
+
+        # Check the inputs are all valid
+        bowstylecheck = query_db(
+            "SELECT id FROM bowstyles WHERE bowstyle IS (?)", [bowstyle]
+        )
+        if len(bowstylecheck) == 0:
+            error = "Invalid bowstyle. Please select from dropdown."
+
+        tables = {}
+
+        if discipline in ["indoor"]:
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
+            )["shortname"]
+
+            use_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name FROM rounds "
+                    "WHERE location IN ('indoor') AND body in ('AGB','WA')"
+                )
+            )
+
+            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                bowstyle = "Barebow"
+            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
+                bowstyle = "Compound"
+
+            roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+
+            # Loop over all categories to appear in tables and generate each table.
+            for gender in genderlist:
+                for age in agelist:
+                    # Filter out inappropriate rounds:
+                    #   - compound rounds for non-recurve and vice versa
+                    #   - triple spot rounds for all
+                    # Get rid of all compound rounds
+                    noncompoundroundnames = utils.indoor_display_filter(roundsdicts)
+                    codenames = [
+                        key
+                        for key in list(roundsdicts.keys())
+                        if roundsdicts[key] in noncompoundroundnames
+                    ]
+                    # Filter out triple-spot rounds using blacklist function and get
+                    # corresponding reduced set of 'non-compound' roundnames.
+                    codenames = utils.check_blacklist(codenames, age, gender, bowstyle)
+                    noncompoundroundnames = [
+                        roundsdicts[codename] for codename in codenames
+                    ]
+                    # Convert codenames to compound codename if required.
+                    if "compound" in bowstyle.lower():
+                        codenames = utils.get_compound_codename(codenames)
+                    use_rounds = {
+                        "code_name": codenames,
+                        "round_name": noncompoundroundnames,
+                    }
+
+                    results = np.zeros(
+                        [len(use_rounds["code_name"]), len(classlist) - 1]
+                    )
+                    for i, round_i in enumerate(use_rounds["code_name"]):
+                        results[i, :] = np.asarray(
+                            class_func.agb_indoor_classification_scores(
+                                round_i, bowstyle, gender, age
+                            )
+                        )
+                    results = np.flip(
+                        np.concatenate(
+                            (
+                                results.astype(int),
+                                np.asarray(use_rounds["round_name"])[:, None],
+                            ),
+                            axis=1,
+                        ),
+                        axis=1,
+                    )
+
+                    tables[f"{bowstyle} {age} {gender}"] = results.astype(str)
+
+        elif discipline in ["outdoor"]:
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
+
+            use_rounds = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name,family FROM rounds "
+                    "WHERE location IN ('outdoor') AND body in ('AGB','WA')"
+                )
+            )
+
+            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+                bowstyle = "Barebow"
+            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
+                bowstyle = "Compound"
+
+            roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+
+            # Loop over all categories to appear in tables and generate each table.
+            for gender in genderlist:
+                for age in agelist:
+
+                    filtered_names = utils.check_blacklist(
+                        use_rounds["code_name"], age, gender, bowstyle
+                    )
+
+                    # Sort filtered rounds into the order desired for outputting
+                    rounds_families = {
+                        codename: family
+                        for (codename, family) in dict(
+                            zip(use_rounds["code_name"], use_rounds["family"])
+                        ).items()
+                        if codename in filtered_names
+                    }
+                    ordered_names = list(utils.order_rounds(rounds_families).keys())
+
+                    # Get list of actual names for pretty output
+                    # round_names = [
+                    #    roundsdicts[key]
+                    #    for key in list(roundsdicts.keys())
+                    #    if key in ordered_names
+                    # ]
+                    round_names = [roundsdicts[codename] for codename in ordered_names]
+
+                    # Final dict of rounds to use
+                    filtered_rounds = {"code_name": ordered_names, "round_name": round_names}
+
+                    results = np.zeros(
+                        [len(filtered_rounds["code_name"]), len(classlist) - 1]
+                    )
+                    for i, round_i in enumerate(filtered_rounds["code_name"]):
+                        results[i, :] = np.asarray(
+                            class_func.agb_outdoor_classification_scores(
+                                round_i, bowstyle, gender, age
+                            )
+                        )
+                    results = np.flip(
+                        np.concatenate(
+                            (
+                                results.astype(int),
+                                np.asarray(filtered_rounds["round_name"])[:, None],
+                            ),
+                            axis=1,
+                        ),
+                        axis=1,
+                    )
+
+                    tables[f"{bowstyle} {age} {gender}"] = results.astype(str)
+
+        elif discipline in ["field"]:
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
+            agelist.remove("Under 21")
+
+            use_rounds = {
+                "code_name": [
+                    "wa_field_24_red_marked",
+                    "wa_field_24_blue_marked",
+                    "wa_field_24_yellow_marked",
+                    "wa_field_24_white_marked",
+                    "wa_field_12_red_marked",
+                    "wa_field_12_blue_marked",
+                    "wa_field_12_yellow_marked",
+                    "wa_field_12_white_marked",
+                ],
+                "round_name": [
+                    "WA Field 24 Red",
+                    "WA Field 24 Blue",
+                    "WA Field 24 Yellow",
+                    "WA Field 24 White",
+                    "WA Field 12 Red",
+                    "WA Field 12 Blue",
+                    "WA Field 12 Yellow",
+                    "WA Field 12 White",
+                ],
+            }
+
+            if bowstyle.lower().replace(" ", "") in [
+                "barebow",
+                "longbow",
+                "englishlongbow",
+                "traditional",
+                "flatbow",
+                "compoundbarebow",
+            ]:
+                use_rounds["code_name"].pop(0)
+                use_rounds["round_name"].pop(0)
+                use_rounds["code_name"].pop(3)
+                use_rounds["round_name"].pop(3)
+
+            for gender in genderlist:
+                for age in agelist:
+                    results = np.zeros(
+                        [len(use_rounds["code_name"]), len(classlist) - 1]
+                    )
+                    for i, round_i in enumerate(use_rounds["code_name"]):
+                        results[i, :] = np.asarray(
+                            class_func.agb_field_classification_scores(
+                                round_i, bowstyle, gender, age
+                            )
+                        )
+
+                    results = np.flip(
+                        np.concatenate(
+                            (
+                                results.astype(int),
+                                np.asarray(use_rounds["round_name"])[:, None],
+                            ),
+                            axis=1,
+                        ),
+                        axis=1,
+                    )
+
+                    tables[f"{bowstyle} {age} {gender}"] = results.astype(str)
+
+        else:
+            # Should never get here... placeholder for next classification system.
+            pass
+
+        classes = classlist[-2::-1]
+
+        if error is None:
+            # Return the results
+            # Flip array so lowest class on left for printing
+            return render_template(
+                "print_classification_tables_out.html",
+                tables=tables,
+                classes=classes,
+                discipline=discipline,
+            )
+
+        # If errors reload default with error message
+        return render_template(
+            "print_classification_tables.html",
+            form=form,
+            error=error,
+        )
+
+    # If first visit load the default form with no inputs
+    return render_template(
+        "print_classification_tables.html",
+        form=form,
+        error=None,
+    )
+
+
 @bp.route("/classbyevent", methods=("GET", "POST"))
 def event_tables():
     """

@@ -32,6 +32,17 @@ hr {
   padding: 0 0.5rem;
 }
 
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 1em;
+}
+.column {
+    flex: 1;
+    margin: 0;
+    border: 0;
+    font-size: min(calc(10px + 0.8vw), 0.75em);
+}
 
 
 
@@ -421,7 +432,9 @@ th, td {
 
 /* Classification Information Table */
 .infoclasstable {
-  width: 100%;
+  width: 96%;
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
   font-size: min(calc(6px + 0.8vw), 1em);
 }
@@ -436,4 +449,186 @@ th, td {
 
 .infoclasstable th:nth-child(2), .infoclasstable td:nth-child(2){
  width: 20%;
+}
+
+/* Apply colouring */
+.infoclasstable th{
+    background-color: #C60029;
+    color: #FFFFFF;
+}
+/* Set colours: Archer, Bowman, MB */
+.infoclasstable tr:nth-child(1) td:nth-child(1),
+.infoclasstable tr:nth-child(2) td:nth-child(1),
+.infoclasstable tr:nth-child(3) td:nth-child(1) {
+    background-color: #15224A;
+    color: #FFFFFF;
+    border-top: 1px solid #FFFFFF;
+    font-weight: bold;
+}
+.infoclasstable tr:nth-child(1) td:nth-child(1),
+.infoclasstable tr:nth-child(2) td:nth-child(1) {
+    border-bottom: 1px solid #FFFFFF;
+}
+.infoclasstable tr:nth-child(1) td:nth-child(2) {
+    background-color: #5D69D8;
+    color: #FFFFFF;
+}
+.infoclasstable tr:nth-child(2) td:nth-child(2) {
+    background-color: #C75D6B;
+    color: #FFFFFF;
+}
+.infoclasstable tr:nth-child(3) td:nth-child(2) {
+    background-color: #D9D9D9;
+}
+
+
+/* Field Rounds Information Table */
+.fieldroundtable {
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-size: min(calc(6px + 0.8vw), 1em);
+}
+.fieldroundtable th, .fieldroundtable td{
+  border: 1px solid black;
+}
+.fieldroundtable tr:nth-child(n+1):nth-child(-n+4) td {
+    background-color: #EE0000;
+    color: #FFFFFF;
+}
+.fieldroundtable tr:nth-child(n+5):nth-child(-n+8) td {
+    background-color: #0000EE;
+    color: #FFFFFF;
+}
+.fieldroundtable tr:nth-child(n+9):nth-child(-n+12) td {
+    background-color: #EEEE00;
+}
+
+
+
+
+/* Printing */
+
+@media print {
+    @page {
+        size: landscape;
+    }
+    html {
+      font-family: sans-serif;
+      font-size: min(calc(10px + 0.8vw), 1em);
+      background: white;
+      color: #333333;
+    }
+    {
+      background: white;
+      display: flex;
+      align-items: center;
+      padding: 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      color: #333333;
+    }
+    h2 {
+      padding-top: 3em
+    }
+    body {
+        width: 100%;
+        background: white;
+    }
+    .pagebreak {
+        clear: both;
+        page-break-after: always;
+    }
+
+    /* Style for the centered item */
+    .table-cover {
+        height: 80vw;            /* Full viewport height */
+        width: 100%;             /* Full viewport width */
+        text-align: left;        /* Center text */
+        font-size: 3em;
+    }
+    .title {
+        position: absolute;
+        top: 65%;
+        left: 5%;
+    }
+    .table-cover h1 {
+          padding: 0;
+          color: #C60029;
+        }
+    .table-cover h2, .table-cover h3 {
+          padding: 0;
+          color: #15224A;
+        }
+    .table-cover img {
+        height: 10%;
+        position: absolute;
+        top: 85%;
+        left: 5%; /* Shift the image to the left */
+    }
+    .tablename {
+        position: absolute;
+        bottom: 2%;
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%); /* Adjust for centering */
+        justify-content: center; /* Center text horizontally */
+        text-align: center;      /* Center text within the div */
+        font-size: 1em;
+    }
+    .rectangle {
+        transform: skew(25deg);     /* Skew the rectangles */
+        transform-origin: top left;  /* Set the origin for the skew transformation */
+    }
+    .blue-rectangle {
+        position: absolute;
+        top: 0;
+        left: 25%; /* Center horizontally */
+        background-color: #15224A;
+        width: 25%;
+        height: 50%;
+    }
+    .red-rectangle {
+        position: absolute;
+        top: 0;
+        left: 40%; /* Center horizontally */
+        background-color: #C60029;
+        width: 35%;
+        height: 65%;
+        opacity: 0.75;
+    }
+}
+
+
+
+
+.class-table-header {
+    display: flex;
+    justify-content: space-between; /* Space between the h2 and the image */
+    align-items: center;            /* Align items vertically centered */
+    padding: 10px;                  /* Optional padding */
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column; /* Stack h2 and h3 vertically */
+}
+
+.class-table-header h2,
+.class-table-header h3 {
+    margin: 0; /* Remove default margin */
+}
+
+.class-table-header img {
+    width: 20%; /* Adjust as needed */
+    height: auto;     /* Maintain aspect ratio */
+}
+
+.table-cover .faded-image {
+    width: 50%; /* Double the width to ensure 50% is shown */
+    height: auto;
+    position: absolute;
+    top: 15%;
+    left: 75%; /* Shift the image to the left */
+    opacity: 0.25;
 }
