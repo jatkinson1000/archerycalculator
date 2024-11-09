@@ -68,12 +68,19 @@ def rounds_page():
         "barebow",
         "traditional",
         "flatbow",
-        "longbow",
+        "english longbow",
         "compound limited",
         "compound barebow",
     ]:
         use_rounds = copy.deepcopy(field_rounds)
-        if bowstyle.lower().replace(" ", "") in ["barebow", "longbow", "traditional", "flatbow", "compoundbarebow"]:
+        if bowstyle.lower().replace(" ", "") in [
+            "barebow",
+            "longbow",
+            "englishlongbow",
+            "traditional",
+            "flatbow",
+            "compoundbarebow",
+        ]:
             use_rounds["code_name"].pop(0)
             use_rounds["round_name"].pop(0)
             use_rounds["code_name"].pop(3)
