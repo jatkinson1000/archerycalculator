@@ -1,0 +1,496 @@
+<!doctype html>
+
+<head>
+    <!-- <title>Archery Handicap and Classification Calculator archerycalculator.co.uk</title> -->
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/5e18878647.js" crossorigin="anonymous"></script>
+    <!-- Select2 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // In your Javascript (external .js resource or <script> tag)
+        $(document).ready(function() {
+            $('.select2-js-basic').select2({
+                placeholder: "Select",
+            });
+            $(".select2-js-basic-hide-search").select2({
+                minimumResultsForSearch: Infinity,
+                placeholder: "Select",
+            });
+        });
+
+        $(document).on('select2:open', () => {
+            document.querySelector('.select2-search__field').focus();
+        });
+
+
+    </script>
+    
+    <!-- Language -->
+    <meta http-equiv='content-language' content='en-gb'>
+    
+    <!-- User -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page specific attributes -->
+    <title>ArcheryCalculator.co.uk</title>
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+
+    <meta name="theme-color" content="#3bf">
+</head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WW52R2Y5K4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-WW52R2Y5K4');
+
+  {% block head %}{% endblock %}
+
+</script>
+
+
+<body>
+
+<section class="content">
+
+  <!-- Set up cover page -->
+
+  <div class="table-cover">
+      <div class="rectangle blue-rectangle"></div>
+      <div class="rectangle red-rectangle"></div>
+      <!-- Get bowstyle from table dict keys -->
+      {% set firstkey =  tables.keys() | first %}
+      {% set bowstyle = " ".join(firstkey.split(" ")[0:-2]) %}
+      {% if discipline == "indoor" %}
+        <div class="title">
+          <h1><b>Indoor Classification Tables</b><h1>
+          <h2>{{ bowstyle }}</h2>
+        </div>
+          <div class="tablename"><b>Table 28-{% if bowstyle == "Recurve" %}1{% elif bowstyle == "Compound" %}2{% elif bowstyle == "Barebow" %}3{% elif bowstyle == "English Longbow" %}4{% endif %}</b></div>
+      {% elif discipline == "outdoor" %}
+        <div class="title">
+          <h1><b>Outdoor Classification Tables</b><h1>
+          <h2>{{ bowstyle }}</h2>
+        </div>
+          <div class="tablename"><b>Table 9-{% if bowstyle == "Recurve" %}1{% elif bowstyle == "Compound" %}2{% elif bowstyle == "Barebow" %}3{% elif bowstyle == "English Longbow" %}4{% endif %}</b></div>
+      {% elif discipline == "field" %}
+        <div class="title">
+          <h1><b>Field Classification Tables</b></h1>
+          <h2>{{ bowstyle }}</h2>
+        </div>
+          <div class="tablename"><b>Table 1-{% if bowstyle == "Recurve" %}1{% elif bowstyle == "Compound" %}2{% elif bowstyle == "Barebow" %}3{% elif bowstyle == "English Longbow" %}4{% elif bowstyle == "Flatbow" %}5{% elif bowstyle == "Traditional" %}6{% elif bowstyle == "Compound Limited" %}7{% elif bowstyle == "Compound Barebow" %}8{% endif %}</b></div>
+        <img src="{{ url_for('static', filename='fieldface.svg') }}" alt="Field archery target" class="faded-image">
+      {% endif %}
+      <img src="{{ url_for('static', filename='archery_gb_logo.png') }}" alt="ArcheryGB logo">
+  </div>
+  <div class="pagebreak"> </div>
+
+  <!-- Set up info page -->
+  <div class="class-table-header">
+    <div class="text-container">
+      {% if discipline == "indoor" %}
+        <h2>Indoor Classifications - Quick Reference</h2>
+      {% elif discipline == "outdoor" %}
+        <h2>Outdoor Classifications - Quick Reference</h2>
+      {% elif discipline == "field" %}
+        <h2>Field Classifications - Quick Reference</h2>
+      {% endif %}
+      <h3>For full details see the Archery GB Shooting Administrative Procedures (SAP 7).</h3>
+    </div>
+    <img src="{{ url_for('static', filename='archery_gb_logo.png') }}" alt="ArcheryGB logo">
+  </div>
+
+  {% if discipline == "indoor" %}
+  <div class="container">
+      <div class="column">
+          <h3>Overview</h3>
+              <p>The ArcheryGB indoor classification system consists of 8 different
+              awards that recognise progression through various milestones.
+              The 8 awards are split into three tiers -</p>
+              <ul>
+                <li>The <b>Archer Tier</b> is aimed at a wide range of club-level archers</li>
+                <li>The <b>Bowman Tier</b> is aimed at archers who are at the level where they
+                    might choose to enter competitions, right the way from club-level
+                    events to national level events.</li>
+                <li>The <b>Master Bowman Tier</b> is aimed archers competing at the highest levels of the sport.</li>
+              </ul>
+      </div>
+      <div class="column">
+          <h3>Claiming a Classification</h3>
+          <p>To claim a classification, you need to shoot rounds
+             totalling a set number of arrows above a threshold
+             score. The total amount of arrows changes as you
+             move up the tiers. You can mix and match rounds of
+             different lengths to make up the total.</p>
+          <p>Unlike the outdoor classification system, <b>all</b> levels of
+             the indoor classifications are administered at club
+             level. Speak to your club Records Officer or other
+             officials to find out how to claim these awards.</p>
+      </div>
+      <div class="column">
+          <h3>Classification Tables</h3>
+          <p>The following pages of this document contain the
+             complete classification tables for all combinations of
+             bowstyle, gender and age-group, and also include
+             descriptions of each round. Print out the page that’s
+             relevant to you and keep it with your archery kit as a
+             quick reference.</p>
+      </div>
+  </div>
+  <table class="infoclasstable">
+    <thead>
+      <tr>
+        <th>Class</th>
+        <th>Sub-tiers</th>
+        <th>From rounds totalling</th>
+        <th>Rounds</th>
+        <th>Type of event</th>
+        <th>Administered by</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+          <td>Archer</td>
+          <td>Archer 3<sup>rd</sup> Class<br>Archer 2<sup>nd</sup> Class<br>Archer 1<sup>st</sup> Class</td>
+          <td>10 dozen arrows</td>
+          <td rowspan="3">Any indoor round</td>
+          <td>Any event</td>
+          <td rowspan="3">Clubs</td>
+      </tr>
+      <tr>
+          <td>Bowman</td>
+          <td>Bowman 3<sup>rd</sup> Class<br>Bowman 2<sup>nd</sup> Class<br>Bowman 1<sup>st</sup> Class</td>
+          <td rowspan="2">15 dozen Arrows</td>
+          <!-- Merged above -->
+          <td>Any competitive event</td>
+          <!-- Merged above -->
+      </tr>
+      <tr>
+          <td>Master Bowman</td>
+          <td>Master Bowman<br>Grand Master Bowman</td>
+          <!-- Merged above -->
+          <!-- Merged above -->
+          <td>Any record status competition</td>
+          <!-- Merged above -->
+      </tr>
+    </tbody>
+  </table>
+
+  {% elif discipline == "outdoor" %}
+  <div class="container">
+      <div class="column">
+          <h3>Overview</h3>
+              <p>The ArcheryGB outdoor classification system consists of 9 different
+                  awards that recognise progression through various milestones.
+                  The 9 awards are split into three tiers, each with three classifications
+                  in it:</p>
+              <ul>
+                <li>The <b>Archer Tier</b> is aimed at a wide range of club-level archers</li>
+                <li>The <b>Bowman Tier</b> is aimed at archers who are at the level where they
+                    might choose to enter competitions, right the way from club-level
+                    events to national level events.</li>
+                <li>The <b>Master Bowman Tier</b> is aimed archers competing at the highest levels of the sport.</li>
+              </ul>
+      </div>
+      <div class="column">
+          <h3>Claiming a Classification</h3>
+          <p>To claim a classification, you need to shoot a number of arrows above
+             a certain threshold score. The total amount of arrows changes as you move
+             up the tiers. You can mix and match rounds of different lengths in order
+             to make up the total.</p>
+          <p>For Archer and Bowman classifications, your club records officer can
+             confirm you’ve met the requirements. Badges are available from retail
+             suppliers for these tiers.</p>
+          <p>Master Bowman tier classifications need to be claimed from ArcheryGB.
+             A claim form is available on the website where you can submit your
+             qualifying scores</p>
+      </div>
+      <div class="column">
+          <h3>Classification Tables</h3>
+          <p>The following pages of this document contain the
+             complete classification tables for all combinations of
+             bowstyle, gender and age-group. Print out the page that’s
+             relevant to you and keep it with your archery kit as a
+             quick reference.</p>
+      </div>
+  </div>
+  <table class="infoclasstable">
+    <thead>
+      <tr>
+        <th>Class</th>
+        <th>Sub-tiers</th>
+        <th>From rounds totalling</th>
+        <th>Rounds</th>
+        <th>Type of event</th>
+        <th>Administered by</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+          <td>Archer</td>
+          <td>Archer 3rd Class<br>Archer 2nd Class<br>Archer 1st Class</td>
+          <td>12 dozen arrows</td>
+          <td rowspan="2">Any round of appropriate distance</td>
+          <td>Any event</td>
+          <td rowspan="2">Clubs</td>
+      </tr>
+      <tr>
+          <td>Bowman</td>
+          <td>Bowman 3rd Class<br>Bowman 2nd Class<br>Bowman 1st Class</td>
+          <td>18 dozen Arrows</td>
+          <!-- Merged above -->
+          <td>Any competitive event</td>
+          <!-- Merged above -->
+      </tr>
+      <tr>
+          <td>Master Bowman</td>
+          <td>Master Bowman<br>Grand Master Bowman<br>Elite Master Bowman</td>
+          <td>36 dozen Arrows</td>
+          <td>Any appropriate WA1440, York/Hereford/Bristol or WA720 round</td>
+          <td>Any record status competition</td>
+          <td>Archery GB</td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% elif discipline == "field" %}
+  <div class="container">
+      <div class="column">
+          <h3>Overview</h3>
+              <p>The ArcheryGB field classification system consists of 9 different
+              awards that recognise progression through various milestones.
+              The 9 awards are split into three tiers -</p>
+              <ul>
+                <li>The <b>Archer Tier</b> is aimed at a wide range of club-level archers</li>
+                <li>The <b>Bowman Tier</b> is aimed at archers who are at the level where they
+                    might choose to enter competitions, right the way from club-level
+                    events to national level events.</li>
+                <li>The <b>Master Bowman Tier</b> is aimed archers competing at the highest levels of the sport.</li>
+              </ul>
+      </div>
+      <div class="column">
+          <h3>Claiming a Classification</h3>
+          <p>To claim a classification, you need to shoot a
+          total of 3 rounds above a certain threshold score.
+          The eligible rounds changes as you move up the
+          tiers.</p>
+          <p>For Archer and Bowman classifications, your club
+          records officer can confirm you’ve met the
+          requirements. Badges are available from retail
+          suppliers for these tiers.</p>
+          <p>Master Bowman tier classifications need to be
+          claimed from ArcheryGB. A claim form is available
+          on the website where you can submit your
+          qualifying scores.</p>
+      </div>
+      <div class="column">
+          <h3>Classification Tables</h3>
+          <p>The following pages of this document contain the
+             complete classification tables for all combinations of
+             bowstyle, gender and age-group, and also include
+             descriptions of each round. Print out the page that’s
+             relevant to you and keep it with your archery kit as a
+             quick reference.</p>
+      </div>
+  </div>
+  <table class="infoclasstable">
+    <thead>
+      <tr>
+        <th>Class</th>
+        <th>Sub-tiers</th>
+        <th>Rounds</th>
+        <th>Type of event</th>
+        <th>Administered by</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+          <td>Archer</td>
+          <td>Archer 3<sup>rd</sup> Class<br>Archer 2<sup>nd</sup> Class<br>Archer 1<sup>st</sup> Class</td>
+          <td rowspan="2">3 Rounds<br>as listed in tables</td>
+          <td>Any event</td>
+          <td rowspan="2">Clubs</td>
+      </tr>
+      <tr>
+          <td>Bowman</td>
+          <td>Bowman 3<sup>rd</sup> Class<br>Bowman 2<sup>nd</sup> Class<br>Bowman 1<sup>st</sup> Class</td>
+          <!-- Merged above -->
+          <td>Any competitive event</td>
+          <!-- Merged above -->
+      </tr>
+      <tr>
+          <td>Master Bowman</td>
+          <td>Master Bowman<br>Grand Master Bowman<br>Elite Master Bowman</td>
+          <td>3 24-Target Rounds<br>as listed in tables</td>
+          <td>Any record status competition<br>(Scores must be from different events)</td>
+          <td rowspan=>Archery GB</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+
+
+  <!-- Loop over tables -->
+  {% if tables is defined %}
+  {% for key, value in tables.items() %}
+  <div class="pagebreak"> </div>
+  <div class="class-table-header">
+    <div class="text-container">
+      <h2>{{ key }}</h2>
+      <!-- ----------------------------- -->
+      {% if discipline == "indoor" %}
+      <h3>Indoor Classifications</h3>
+      {% elif discipline == "outdoor" %}
+      <h3>Outdoor Classifications</h3>
+      {% elif discipline == "field" %}
+      <h3>Field Classifications</h3>
+      {% endif %}
+    </div>
+    <img src="{{ url_for('static', filename='archery_gb_logo.png') }}" alt="ArcheryGB logo">
+  </div>
+  <!-- ----------------------------- -->
+  <br>
+    {% from "_formhelpers.html" import render_classification_table %}
+    {{ render_classification_table(classes, roundnames, value) }}
+    <br>
+
+    <!-- Set up extra info below tables if required -->
+    {% if discipline == "indoor" %}
+    <p style="font-size: 0.75em;">For rounds that allow multiple target face variants (see Table 4-1 in the Rules
+    of Shooting), all variants use the same classication values.</p>
+    <p style="font-size: 0.75em;">The WA Combined is treated as two separate rounds (WA25 and WA18) for classication and handicap
+    purposes.</p>
+    {% elif discipline == "field" %}
+    <p>The 12-target unit consists of 3 targets of each face size (20cm, 40cm, 60cm, and 80cm) at differing distances.<br>
+    For a marked course the targets will be at set distances, whilst for an unmarked course they will be within a set range.<br>
+    This is summarised below.</p>
+    <p>The 24-target round consists of two 12-target units either both marked or unmarked, or one of each for the Mixed round.<br>
+    The scores required for each classification are the same for each colour, regardless of course/round type.</p>
+    <table class="fieldroundtable">
+      <thead>
+        <tr>
+          <th>Round</th>
+          <th>Target Size</th>
+          <th>Marked</th>
+          <th>Unmarked</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Red -->
+        <tr>
+            <td rowspan="4">Red</td>
+            <td>20cm</td>
+            <td>10 &emsp; 15 &emsp; 20</td>
+            <td>10 -- 15</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>40cm</td>
+            <td>20 &emsp; 25 &emsp; 30</td>
+            <td>15 -- 25</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>60cm</td>
+            <td>35 &emsp; 40 &emsp; 45</td>
+            <td>20 -- 35</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>80cm</td>
+            <td>50 &emsp; 55 &emsp; 60</td>
+            <td>35 -- 55</td>
+        </tr>
+        <!-- Blue -->
+        <tr>
+            <td rowspan="4">Blue</td>
+            <td>20cm</td>
+            <td> &nbsp; 5 &emsp; 10 &emsp; 15</td>
+            <td> &nbsp; 5 -- 10</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>40cm</td>
+            <td>15 &emsp; 20 &emsp; 25</td>
+            <td>10 -- 20</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>60cm</td>
+            <td>30 &emsp; 35 &emsp; 40</td>
+            <td>15 -- 30</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>80cm</td>
+            <td>40 &emsp; 45 &emsp; 50</td>
+            <td>30 -- 45</td>
+        </tr>
+        <!-- Yellow -->
+        <tr>
+            <td rowspan="4">Yellow</td>
+            <td>20cm</td>
+            <td> &nbsp; 5 &emsp; 10 &emsp; 15</td>
+            <td> &nbsp; 5 -- 10</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>40cm</td>
+            <td>10 &emsp; 15 &emsp; 20</td>
+            <td>10 -- 15</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>60cm</td>
+            <td>30 &emsp; 25 &emsp; 30</td>
+            <td>15 -- 25</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>80cm</td>
+            <td>30 &emsp; 35 &emsp; 40</td>
+            <td>20 -- 35</td>
+        </tr>
+        <!-- White -->
+        <tr>
+            <td rowspan="4">White</td>
+            <td>20cm</td>
+            <td> &nbsp; 5 &emsp; &nbsp; 7 &emsp; 10</td>
+            <td> &nbsp; 5 -- 10</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>40cm</td>
+            <td>10 &emsp; 12 &emsp; 15</td>
+            <td> &nbsp; 5 -- 15</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>60cm</td>
+            <td>15 &emsp; 20 &emsp; 25</td>
+            <td>10 -- 20</td>
+        </tr>
+        <tr>
+            <!-- Merged above -->
+            <td>80cm</td>
+            <td>20 &emsp; 25 &emsp; 30</td>
+            <td>15 -- 25</td>
+        </tr>
+      </tbody>
+    </table>
+    {% endif %}
+    <br>
+  {% endfor %}
+  {% endif %}
+
+</section>
+
+</body>
