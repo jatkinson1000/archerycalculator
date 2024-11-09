@@ -539,14 +539,12 @@ def new_calculator():
                     else:
                         age_cat = age
 
-                    class_from_score = (
-                        class_func.calculate_agb_field_classification(
-                            float(score),
-                            round_codename,
-                            bowstyle.lower(),
-                            gender.lower(),
-                            age_cat.lower(),
-                        )
+                    class_from_score = class_func.calculate_agb_field_classification(
+                        float(score),
+                        round_codename,
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age_cat.lower(),
                     )
 
                     results["classification"] = class_from_score
@@ -590,5 +588,3 @@ def new_calculator():
         results=None,
         error=error,
     )
-
-
