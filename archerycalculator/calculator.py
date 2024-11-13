@@ -121,7 +121,7 @@ def calculator():
                             f"Note: Treating {bowstyle} as Barebow "
                             "for the purposes of classifications."
                         )
-                    elif bowstyle.lower() == "compound barebow":
+                    elif bowstyle.lower() in "compound barebow":
                         warning_bowstyle = (
                             f"Note: Treating {bowstyle} as Compound "
                             "for the purposes of classifications."
@@ -175,15 +175,12 @@ def calculator():
                     else:
                         age_cat = age
 
-                    # class_from_score = class_func.calculate_agb_field_classification(
-                    class_from_score = (
-                        class_func.calculate_old_agb_field_classification(
-                            round_codename,
-                            float(score),
-                            bowstyle.lower(),
-                            gender.lower(),
-                            age_cat.lower(),
-                        )
+                    class_from_score = class_func.calculate_agb_field_classification(
+                        float(score),
+                        round_codename,
+                        bowstyle.lower(),
+                        gender.lower(),
+                        age_cat.lower(),
                     )
 
                     results["classification"] = class_from_score
@@ -379,9 +376,9 @@ def check_max_score(round_obj, roundname, score, results):
     return results, error
 
 
-# Future home page with new field
-@bp.route("/new-calculator", methods=("GET", "POST"))
-def new_calculator():
+# Previous home page with old field
+@bp.route("/old-calculator", methods=("GET", "POST"))
+def old_calculator():
     """
     Generate the calculator page in the flask app.
 
@@ -485,7 +482,7 @@ def new_calculator():
                             f"Note: Treating {bowstyle} as Barebow "
                             "for the purposes of classifications."
                         )
-                    elif bowstyle.lower() in "compound barebow":
+                    elif bowstyle.lower() == "compound barebow":
                         warning_bowstyle = (
                             f"Note: Treating {bowstyle} as Compound "
                             "for the purposes of classifications."
@@ -539,12 +536,15 @@ def new_calculator():
                     else:
                         age_cat = age
 
-                    class_from_score = class_func.calculate_agb_field_classification(
-                        float(score),
-                        round_codename,
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age_cat.lower(),
+                    # class_from_score = class_func.calculate_agb_field_classification(
+                    class_from_score = (
+                        class_func.calculate_old_agb_field_classification(
+                            round_codename,
+                            float(score),
+                            bowstyle.lower(),
+                            gender.lower(),
+                            age_cat.lower(),
+                        )
                     )
 
                     results["classification"] = class_from_score
