@@ -351,7 +351,7 @@ th, td {
   font-size: min(calc(5px + 0.8vw), 1em);
 }
 
-.classtable th:first-child, .classtable td:first-child,
+.classtable th:nth-child(10n+1), .classtable td:nth-child(10n+1),
 .eventtable th:first-child, .eventtable td:first-child,
 .fieldtable th:first-child, .fieldtable td:first-child {
   white-space: nowrap;
@@ -366,42 +366,51 @@ th, td {
 */
 /* Archer Class - blue */
 .classtable th:nth-child(n+2):nth-child(-n+4),
+.classtable th:nth-child(n+12):nth-child(-n+14),
 .eventtable th:nth-child(n+3):nth-child(-n+5){
     background-color: #5D69D8;
     color: #FFFFFF;
 }
 .classtable tr:nth-child(odd) td:nth-child(n+2):nth-child(-n+4):not(:empty),
+.classtable tr:nth-child(odd) td:nth-child(n+12):nth-child(-n+14):not(:empty),
 .eventtable tr:nth-child(odd) td:nth-child(n+3):nth-child(-n+5):not(:empty){
     background-color: #A1AFFF;
 }
 .classtable tr:nth-child(even) td:nth-child(n+2):nth-child(-n+4):not(:empty),
+.classtable tr:nth-child(even) td:nth-child(n+12):nth-child(-n+14):not(:empty),
 .eventtable tr:nth-child(even) td:nth-child(n+3):nth-child(-n+5):not(:empty){
     background-color: #919FEE;
 }
 /* Bowman Class - red */
 .classtable th:nth-child(n+5):nth-child(-n+7),
+.classtable th:nth-child(n+15):nth-child(-n+17),
 .eventtable th:nth-child(n+6):nth-child(-n+8){
     background-color: #C75D6B;
     color: #FFFFFF;
 }
 .classtable tr:nth-child(odd) td:nth-child(n+5):nth-child(-n+7):not(:empty),
+.classtable tr:nth-child(odd) td:nth-child(n+15):nth-child(-n+17):not(:empty),
 .eventtable tr:nth-child(odd) td:nth-child(n+6):nth-child(-n+8):not(:empty){
     background-color: #E0A2AB;
 }
 .classtable tr:nth-child(even) td:nth-child(n+5):nth-child(-n+7):not(:empty),
+.classtable tr:nth-child(even) td:nth-child(n+15):nth-child(-n+17):not(:empty),
 .eventtable tr:nth-child(even) td:nth-child(n+6):nth-child(-n+8):not(:empty){
     background-color: #D0929B;
 }
 /* Master Bowman Class - grey */
 .classtable th:nth-child(n+8):nth-child(-n+10),
+.classtable th:nth-child(n+18):nth-child(-n+20),
 .eventtable th:nth-child(n+9):nth-child(-n+11){
     background-color: #D9D9D9;
 }
 .classtable tr:nth-child(odd) td:nth-child(n+8):nth-child(-n+10):not(:empty),
+.classtable tr:nth-child(odd) td:nth-child(n+18):nth-child(-n+20):not(:empty),
 .eventtable tr:nth-child(odd) td:nth-child(n+9):nth-child(-n+11):not(:empty){
     background-color: #E7E7E7;
 }
 .classtable tr:nth-child(even) td:nth-child(n+8):nth-child(-n+10):not(:empty),
+.classtable tr:nth-child(even) td:nth-child(n+18):nth-child(-n+20):not(:empty),
 .eventtable tr:nth-child(even) td:nth-child(n+9):nth-child(-n+11):not(:empty){
     background-color: #D7D7D7;
 }
@@ -510,6 +519,42 @@ th, td {
 
 /* Printing */
 
+.class-table-header {
+    display: flex;
+    justify-content: space-between; /* Space between the h2 and the image */
+    align-items: center;            /* Align items vertically centered */
+    padding: 10px;                  /* Optional padding */
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column; /* Stack h2 and h3 vertically */
+}
+
+.class-table-header h2,
+.class-table-header h3 {
+    margin: 0; /* Remove default margin */
+}
+
+.class-table-header img {
+    width: 20%; /* Adjust as needed */
+    height: auto;     /* Maintain aspect ratio */
+}
+
+.table-cover img {
+    height: 0;
+    visibility: hidden;
+}
+
+.table-cover .faded-image {
+    width: 50%; /* Double the width to ensure 50% is shown */
+    height: auto;
+    position: absolute;
+    top: 15%;
+    left: 75%; /* Shift the image to the left */
+    opacity: 0.25;
+}
+
 @media print {
     @page {
         size: landscape;
@@ -566,6 +611,7 @@ th, td {
         position: absolute;
         top: 85%;
         left: 5%; /* Shift the image to the left */
+        visibility: visible;
     }
     .tablename {
         position: absolute;
@@ -597,38 +643,4 @@ th, td {
         height: 65%;
         opacity: 0.75;
     }
-}
-
-
-
-
-.class-table-header {
-    display: flex;
-    justify-content: space-between; /* Space between the h2 and the image */
-    align-items: center;            /* Align items vertically centered */
-    padding: 10px;                  /* Optional padding */
-}
-
-.text-container {
-    display: flex;
-    flex-direction: column; /* Stack h2 and h3 vertically */
-}
-
-.class-table-header h2,
-.class-table-header h3 {
-    margin: 0; /* Remove default margin */
-}
-
-.class-table-header img {
-    width: 20%; /* Adjust as needed */
-    height: auto;     /* Maintain aspect ratio */
-}
-
-.table-cover .faded-image {
-    width: 50%; /* Double the width to ensure 50% is shown */
-    height: auto;
-    position: absolute;
-    top: 15%;
-    left: 75%; /* Shift the image to the left */
-    opacity: 0.25;
 }

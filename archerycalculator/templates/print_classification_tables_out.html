@@ -75,12 +75,14 @@
           <h2>{{ bowstyle }}</h2>
         </div>
           <div class="tablename"><b>Table 28-{% if bowstyle == "Recurve" %}1{% elif bowstyle == "Compound" %}2{% elif bowstyle == "Barebow" %}3{% elif bowstyle == "English Longbow" %}4{% endif %}</b></div>
+        <img src="{{ url_for('static', filename='triplespot.svg') }}" alt="Field archery target" class="faded-image" style="width: 20%; left: 90%; top: 7%;">
       {% elif discipline == "outdoor" %}
         <div class="title">
           <h1><b>Outdoor Classification Tables</b><h1>
           <h2>{{ bowstyle }}</h2>
         </div>
           <div class="tablename"><b>Table 9-{% if bowstyle == "Recurve" %}1{% elif bowstyle == "Compound" %}2{% elif bowstyle == "Barebow" %}3{% elif bowstyle == "English Longbow" %}4{% endif %}</b></div>
+        <img src="{{ url_for('static', filename='10zone.svg') }}" alt="Field archery target" class="faded-image">
       {% elif discipline == "field" %}
         <div class="title">
           <h1><b>Field Classification Tables</b></h1>
@@ -358,8 +360,13 @@
   </div>
   <!-- ----------------------------- -->
   <br>
-    {% from "_formhelpers.html" import render_classification_table %}
-    {{ render_classification_table(classes, roundnames, value) }}
+    {% if discipline == "outdoor" %}
+      {% from "_formhelpers.html" import render_classification_table %}
+      {{ render_classification_table(classes, roundnames, value) }}
+    {% else %}
+      {% from "_formhelpers.html" import render_classification_table %}
+      {{ render_classification_table(classes, roundnames, value) }}
+    {% endif %}
     <br>
 
     <!-- Set up extra info below tables if required -->
