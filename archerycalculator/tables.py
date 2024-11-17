@@ -551,15 +551,25 @@ def print_classification_tables():
 
                     tables[f"{bowstyle} {age} {gender}"] = results.astype(str)
 
+            classes = classlist[-2::-1]
+
         elif discipline in ["outdoor"]:
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
             )["shortname"]
 
-            use_rounds = sql_to_dol(
+            use_rounds_metric = sql_to_dol(
                 query_db(
                     "SELECT code_name,round_name,family FROM rounds "
-                    "WHERE location IN ('outdoor') AND body in ('AGB','WA')"
+                    "WHERE location IN ('outdoor') "
+                    "AND (body in ('WA') OR family in ('metric1440', 'metric720', 'metriclong', 'metricshort'))"
+                )
+            )
+            use_rounds_imperial = sql_to_dol(
+                query_db(
+                    "SELECT code_name,round_name,family FROM rounds "
+                    "WHERE location IN ('outdoor') "
+                    "AND body in ('AGB') AND family NOT in ('metric1440', 'metric720', 'metriclong', 'metricshort')"
                 )
             )
 
@@ -568,25 +578,50 @@ def print_classification_tables():
             elif bowstyle.lower() in ["compound barebow", "compound limited"]:
                 bowstyle = "Compound"
 
-            roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
+            roundsdicts_metric = dict(
+                zip(use_rounds_metric["code_name"], use_rounds_metric["round_name"])
+            )
+            roundsdicts_imperial = dict(
+                zip(use_rounds_imperial["code_name"], use_rounds_imperial["round_name"])
+            )
 
             # Loop over all categories to appear in tables and generate each table.
             for gender in genderlist:
                 for age in agelist:
-
-                    filtered_names = utils.check_blacklist(
-                        use_rounds["code_name"], age, gender, bowstyle
+                    filtered_names_metric = utils.check_blacklist(
+                        use_rounds_metric["code_name"], age, gender, bowstyle
+                    )
+                    filtered_names_imperial = utils.check_blacklist(
+                        use_rounds_imperial["code_name"], age, gender, bowstyle
                     )
 
                     # Sort filtered rounds into the order desired for outputting
-                    rounds_families = {
+                    rounds_families_metric = {
                         codename: family
                         for (codename, family) in dict(
-                            zip(use_rounds["code_name"], use_rounds["family"])
+                            zip(
+                                use_rounds_metric["code_name"],
+                                use_rounds_metric["family"],
+                            )
                         ).items()
-                        if codename in filtered_names
+                        if codename in filtered_names_metric
                     }
-                    ordered_names = list(utils.order_rounds(rounds_families).keys())
+                    ordered_names_metric = list(
+                        utils.order_rounds(rounds_families_metric).keys()
+                    )
+                    rounds_families_imperial = {
+                        codename: family
+                        for (codename, family) in dict(
+                            zip(
+                                use_rounds_imperial["code_name"],
+                                use_rounds_imperial["family"],
+                            )
+                        ).items()
+                        if codename in filtered_names_imperial
+                    }
+                    ordered_names_imperial = list(
+                        utils.order_rounds(rounds_families_imperial).keys()
+                    )
 
                     # Get list of actual names for pretty output
                     # round_names = [
@@ -594,32 +629,91 @@ def print_classification_tables():
                     #    for key in list(roundsdicts.keys())
                     #    if key in ordered_names
                     # ]
-                    round_names = [roundsdicts[codename] for codename in ordered_names]
+                    round_names_metric = [
+                        roundsdicts_metric[codename]
+                        for codename in ordered_names_metric
+                    ]
+                    round_names_imperial = [
+                        roundsdicts_imperial[codename] for codename in ordered_names_imperial
+                    ]
 
                     # Final dict of rounds to use
-                    filtered_rounds = {"code_name": ordered_names, "round_name": round_names}
+                    filtered_rounds_metric = {
+                        "code_name": ordered_names_metric,
+                        "round_name": round_names_metric,
+                    }
+                    filtered_rounds_imperial = {
+                        "code_name": ordered_names_imperial,
+                        "round_name": round_names_imperial,
+                    }
 
-                    results = np.zeros(
-                        [len(filtered_rounds["code_name"]), len(classlist) - 1]
+                    table_len = max(len(filtered_rounds_metric["code_name"]), len(filtered_rounds_imperial["code_name"]))
+
+                    results_metric = np.empty(
+                        [table_len, len(classlist) - 1]
                     )
-                    for i, round_i in enumerate(filtered_rounds["code_name"]):
-                        results[i, :] = np.asarray(
+                    results_metric[:,:] = -9999
+                    for i, round_i in enumerate(filtered_rounds_metric["code_name"]):
+                        results_metric[i, :] = np.asarray(
                             class_func.agb_outdoor_classification_scores(
                                 round_i, bowstyle, gender, age
                             )
                         )
-                    results = np.flip(
+                    results_metric = np.flip(
                         np.concatenate(
                             (
-                                results.astype(int),
-                                np.asarray(filtered_rounds["round_name"])[:, None],
+                                results_metric.astype(int),
+                                np.pad(
+                                    np.asarray(filtered_rounds_metric["round_name"])[
+                                        :, None
+                                    ],
+                                    ((0, max(0, table_len - len(filtered_rounds_metric["code_name"]))), (0, 0)),
+                                    'empty',
+                                ),
                             ),
                             axis=1,
                         ),
                         axis=1,
                     )
 
+                    results_imperial = np.empty(
+                        [table_len, len(classlist) - 1]
+                    )
+                    results_imperial[:,:] = np.nan
+                    for i, round_i in enumerate(filtered_rounds_imperial["code_name"]):
+                        results_imperial[i, :] = np.asarray(
+                            class_func.agb_outdoor_classification_scores(
+                                round_i, bowstyle, gender, age
+                            )
+                        )
+                    results_imperial = np.flip(
+                        np.concatenate(
+                            (
+                                results_imperial.astype(int),
+                                np.pad(
+                                    np.asarray(filtered_rounds_imperial["round_name"])[
+                                        :, None
+                                    ],
+                                    ((0, max(0, table_len - len(filtered_rounds_imperial["code_name"]))), (0, 0)),
+                                    'empty',
+                                ),
+                            ),
+                            axis=1,
+                        ),
+                        axis=1,
+                    )
+
+                    results = np.concatenate(
+                        (
+                            results_imperial,
+                            results_metric,
+                        ),
+                        axis=1,
+                    )
+
                     tables[f"{bowstyle} {age} {gender}"] = results.astype(str)
+
+            classes = np.concatenate((classlist[-2::-1], ["Round"], classlist[-2::-1]))
 
         elif discipline in ["field"]:
             classlist = sql_to_dol(
@@ -688,11 +782,11 @@ def print_classification_tables():
 
                     tables[f"{bowstyle} {age} {gender}"] = results.astype(str)
 
+            classes = classlist[-2::-1]
+
         else:
             # Should never get here... placeholder for next classification system.
             pass
-
-        classes = classlist[-2::-1]
 
         if error is None:
             # Return the results
