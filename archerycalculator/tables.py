@@ -1047,7 +1047,6 @@ def event_tables():
                 "englishlongbow",
                 "traditional",
                 "flatbow",
-                "compoundlimited",
                 "compoundbarebow",
             ]:
                 peglist = ["blue", "yellow", "white", "white"]
