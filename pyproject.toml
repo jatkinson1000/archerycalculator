@@ -4,36 +4,39 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "archerycalculator"
-version = "0.1.1"
+version = "0.2.0"
 description = "A flask web app to perform archery calculations"
 authors = [
   { name="Jack Atkinson", email="jack.atkinson1000@gmail.com" },
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Natural Language :: English",
     "Development Status :: 3 - Alpha",
-#    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "archeryutils @ git+https://github.com/jatkinson1000/archeryutils.git@new_field",
-    "black>=22.12.0",
-    "flake8>=6.0.0",
+    "archeryutils>=1.1.1",
     "Flask>=2.2.2",
     "wtforms>=3.0.1"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+lint = [
+    "mypy>=1.0.0",
+    "ruff>=0.7.3",
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/jatkinson1000/archerycalculator"
 "Bug Tracker" = "https://github.com/jatkinson1000/archerycalculator/Issues"
-
-[project.optional-dependencies]
-TEST = ["pytest"]
 
 [tool.setuptools]
 # By default, include-package-data is true in pyproject.toml, so you do
