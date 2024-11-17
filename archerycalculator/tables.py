@@ -634,7 +634,8 @@ def print_classification_tables():
                         for codename in ordered_names_metric
                     ]
                     round_names_imperial = [
-                        roundsdicts_imperial[codename] for codename in ordered_names_imperial
+                        roundsdicts_imperial[codename]
+                        for codename in ordered_names_imperial
                     ]
 
                     # Final dict of rounds to use
@@ -647,12 +648,13 @@ def print_classification_tables():
                         "round_name": round_names_imperial,
                     }
 
-                    table_len = max(len(filtered_rounds_metric["code_name"]), len(filtered_rounds_imperial["code_name"]))
-
-                    results_metric = np.empty(
-                        [table_len, len(classlist) - 1]
+                    table_len = max(
+                        len(filtered_rounds_metric["code_name"]),
+                        len(filtered_rounds_imperial["code_name"]),
                     )
-                    results_metric[:,:] = -9999
+
+                    results_metric = np.empty([table_len, len(classlist) - 1])
+                    results_metric[:, :] = -9999
                     for i, round_i in enumerate(filtered_rounds_metric["code_name"]):
                         results_metric[i, :] = np.asarray(
                             class_func.agb_outdoor_classification_scores(
@@ -667,8 +669,20 @@ def print_classification_tables():
                                     np.asarray(filtered_rounds_metric["round_name"])[
                                         :, None
                                     ],
-                                    ((0, max(0, table_len - len(filtered_rounds_metric["code_name"]))), (0, 0)),
-                                    'empty',
+                                    (
+                                        (
+                                            0,
+                                            max(
+                                                0,
+                                                table_len
+                                                - len(
+                                                    filtered_rounds_metric["code_name"]
+                                                ),
+                                            ),
+                                        ),
+                                        (0, 0),
+                                    ),
+                                    "empty",
                                 ),
                             ),
                             axis=1,
@@ -676,10 +690,8 @@ def print_classification_tables():
                         axis=1,
                     )
 
-                    results_imperial = np.empty(
-                        [table_len, len(classlist) - 1]
-                    )
-                    results_imperial[:,:] = np.nan
+                    results_imperial = np.empty([table_len, len(classlist) - 1])
+                    results_imperial[:, :] = np.nan
                     for i, round_i in enumerate(filtered_rounds_imperial["code_name"]):
                         results_imperial[i, :] = np.asarray(
                             class_func.agb_outdoor_classification_scores(
@@ -694,8 +706,22 @@ def print_classification_tables():
                                     np.asarray(filtered_rounds_imperial["round_name"])[
                                         :, None
                                     ],
-                                    ((0, max(0, table_len - len(filtered_rounds_imperial["code_name"]))), (0, 0)),
-                                    'empty',
+                                    (
+                                        (
+                                            0,
+                                            max(
+                                                0,
+                                                table_len
+                                                - len(
+                                                    filtered_rounds_imperial[
+                                                        "code_name"
+                                                    ]
+                                                ),
+                                            ),
+                                        ),
+                                        (0, 0),
+                                    ),
+                                    "empty",
                                 ),
                             ),
                             axis=1,
@@ -884,7 +910,7 @@ def event_tables():
             )
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
-            elif bowstyle.lower() in ["compound barebow"]:
+            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
                 bowstyle = "compound"
 
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
@@ -964,11 +990,11 @@ def event_tables():
             )
             if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
                 bowstyle = "barebow"
-            elif bowstyle.lower() in ["compound barebow"]:
+            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
                 bowstyle = "compound"
 
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))
+            agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
             )["shortname"]
@@ -977,7 +1003,7 @@ def event_tables():
 
             results = {}
             for gender in genderlist:
-                for age_j in agelist["age_group"]:
+                for age_j in agelist:
                     # Check for Compound round
                     if bowstyle.lower() in ["compound"]:
                         age_round = round_codename + "_compound"
@@ -1009,8 +1035,11 @@ def event_tables():
 
             # Done manually for now, update in future
             genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = {"age_group": ["Adult", "Under 18"], "peg": ["red", "red"]}
-            classlist = ["GMB", "MB", "B", "1", "2", "3", "UC"]
+            agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
+            agelist.remove("Under 21")
+            classlist = sql_to_dol(
+                query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
+            )["shortname"]
 
             if bowstyle.lower().replace(" ", "") in [
                 "barebow",
@@ -1021,7 +1050,9 @@ def event_tables():
                 "compoundlimited",
                 "compoundbarebow",
             ]:
-                agelist["peg"] = ["blue", "blue"]
+                peglist = ["blue", "yellow", "white", "white"]
+            else:
+                peglist = ["red", "blue", "yellow", "white"]
 
             roundslist = {"code_name": [], "round_name": []}
             for family_i in roundfamilies[roundfamily]:
@@ -1036,11 +1067,20 @@ def event_tables():
 
             results = {}
             for gender in genderlist:
-                for j, age_j in enumerate(agelist["age_group"]):
+                for j, age_j in enumerate(agelist):
                     # Get appropriate round from distance
                     age_app_rounds = []
                     for rnd_i in roundslist["code_name"]:
-                        if f"{agelist['peg'][j]}" in rnd_i:
+                        if age_j.lower().replace(" ", "") in ["under12", "under14"]:
+                            peg = peglist[-1]
+                        elif age_j.lower().replace(" ", "") in ["under15"]:
+                            peg = peglist[-2]
+                        elif age_j.lower().replace(" ", "") in ["under16"]:
+                            peg = peglist[-3]
+                        else:
+                            peg = peglist[0]
+
+                        if peg in rnd_i:
                             age_app_rounds.append(rnd_i)
 
                     # Ensure 24 target round, not 12 target unit and remove duplicates
@@ -1057,7 +1097,7 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.old_agb_field_classification_scores(
+                        for i in class_func.agb_field_classification_scores(
                             age_app_rounds[0], bowstyle, gender, age_j
                         )[-1::-1]
                     ]
