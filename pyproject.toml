@@ -20,7 +20,8 @@ classifiers = [
     "Development Status :: 3 - Alpha",
 ]
 dependencies = [
-    "archeryutils>=1.1.1",
+    # "archeryutils>=1.1.1",
+    "archeryutils @ git+https://github.com/jatkinson1000/archeryutils.git",
     "Flask>=2.2.2",
     "wtforms>=3.0.1"
 ]
