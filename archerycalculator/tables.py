@@ -52,9 +52,11 @@ def handicap_tables():
                 "AGB_outdoor_imperial.json",
                 "AGB_outdoor_metric.json",
                 "AGB_indoor.json",
+                "AGB_VI.json",
                 "WA_outdoor.json",
                 "WA_indoor.json",
                 "WA_field.json",
+                "WA_VI.json",
                 "IFAA_field.json",
                 "Miscellaneous.json",
             ]
