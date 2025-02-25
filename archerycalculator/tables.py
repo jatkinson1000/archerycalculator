@@ -283,6 +283,10 @@ def classification_tables():
             }
             ordered_names = list(utils.order_rounds(rounds_families).keys())
 
+            # hack to replace agb900_60 with WA900 in tables
+            ordered_names.remove("wa900")
+            ordered_names = list(map(lambda x: "wa900" if x == "agb900_60" else x, ordered_names))
+
             # Get list of actual names for pretty output
             # round_names = [
             #    roundsdicts[key]
@@ -855,6 +859,7 @@ def event_tables():
     roundfamilies = {
         "WA 1440/Metrics": ["wa1440", "metric1440"],
         "WA 720/Metrics": ["wa720", "metric720"],
+        "WA/AGB 900s": ["agb900"],
         "York/Hereford/Bristols": ["york_hereford_bristol"],
         "St. George/Albion/Windsor": ["stgeorge_albion_windsor"],
         "National": ["national"],
@@ -983,7 +988,7 @@ def event_tables():
             classes = classlist[-2::-1]
 
         # Target indoor:
-        if roundfamily in list(roundfamilies)[7:9]:
+        if roundfamily in list(roundfamilies)[8:10]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_indoor.json",
@@ -1028,7 +1033,7 @@ def event_tables():
             classes = classlist[-2::-1]
 
         # Field:
-        elif roundfamily in list(roundfamilies)[9:]:
+        elif roundfamily in list(roundfamilies)[10:]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",

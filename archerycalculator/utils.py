@@ -186,6 +186,10 @@ def check_alias(round_codename, age, gender, bowstyle):
     if round_codename == "metric_ii":
         round_codename = "wa1440_60"
 
+    # WA900s
+    if round_codename == "agb900_60":
+        round_codename = "wa900"
+
     # WA720s
     if (round_codename == "wa720_50_c") and (bowstyle.lower() != "compound"):
         round_codename = "metric_80_50"
@@ -227,7 +231,7 @@ def order_rounds(rounds):
         "stnicholas",
         "wa1440",
         "metric1440",
-        "wa900",
+        "agb900",  # Use agb900 family, but replace 60 with wa900 in main table routine
         # 720 have special treatment
         "720",
         "metriclong",
