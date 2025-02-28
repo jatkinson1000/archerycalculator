@@ -134,9 +134,9 @@ def get_hc_rounds(web_form):
     allowance_table = False
 
     for i in range(7):
-        if web_form[f"round{i+1}"]:
-            rounds_req.append(web_form[f"round{i+1}"])
-            if web_form.getlist(f"round{i+1}_compound"):
+        if web_form[f"round{i + 1}"]:
+            rounds_req.append(web_form[f"round{i + 1}"])
+            if web_form.getlist(f"round{i + 1}_compound"):
                 rounds_comp.append(True)
             else:
                 rounds_comp.append(False)
@@ -285,7 +285,9 @@ def classification_tables():
 
             # hack to replace agb900_60 with WA900 in tables
             ordered_names.remove("wa900")
-            ordered_names = list(map(lambda x: "wa900" if x == "agb900_60" else x, ordered_names))
+            ordered_names = list(
+                map(lambda x: "wa900" if x == "agb900_60" else x, ordered_names)
+            )
 
             # Get list of actual names for pretty output
             # round_names = [

@@ -90,7 +90,11 @@ def calculator():
             # Check for valid input score and get other round info
             results, error = check_max_score(round_obj, roundname, score, results)
             results["n_arrows"] = round_obj.n_arrows
-            results["n_dozen"] = (int(round_obj.n_arrows/12) if (round_obj.n_arrows/12)%2==0 else round_obj.n_arrows/12)
+            results["n_dozen"] = (
+                int(round_obj.n_arrows / 12)
+                if (round_obj.n_arrows / 12) % 2 == 0
+                else round_obj.n_arrows / 12
+            )
 
             if error is None:
                 hc_scheme = hc.handicap_scheme(scheme)
