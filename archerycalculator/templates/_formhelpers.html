@@ -246,3 +246,24 @@
 <br>
 {% endfor %}
 {% endmacro %}
+
+
+{% macro render_distance_conversion(unit_from, unit_to, results) %}
+
+  <div class="column">
+  <table class="distancetable">
+  <tr>
+    <th>{{ unit_from }}</th>
+    <th>{{ unit_to }}</th>
+  </tr>
+  {% for dists in results %}
+    <tr>
+      <td>{{ '%0.2f'|format(dists[0]|float) }}</td>
+      <td>{{ '%0.2f'|format(dists[1]|float) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  </div>
+
+{% endmacro %}

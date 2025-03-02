@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Distance conversions{% endblock %}</h1>
+{% endblock %}
+
+
+{% block meta %}
+    <meta name="description" content="A utility for comparing scores across World Archery, Archery GB, IFAA, and other rounds using the UK archery handicap system.">
+    <meta property="og:title" content="Round comparisons - ArcheryCalculator.co.uk">
+    <meta property="og:description" content="A utility for comparing scores across World Archery, Archery GB, IFAA, and other rounds using the UK archery handicap system.">
+    <meta property="og:url" content="https://archerycalculator.co.uk">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://archerycalculator.co.uk/static/image.png">
+    <link rel="canonical" href="https://archerycalculator.co.uk/extras/roundscomparison">
+    <!-- <link rel="icon" href="url_to_image" sizes="ssxss"> -->
+{% endblock %}
+
+
+{% block content %}
+
+  <p>
+  Convert distances from yards to metres and vice versa.
+  </p>
+
+  <p>
+  Select a direction for the conversion, input a minimum and maximum distance to
+  convert between, and the increment to step in.
+  </p>
+
+  {% from "_formhelpers.html" import render_textin_field, render_select2_no_search_field %}
+  <form method=post>
+    {{ render_select2_no_search_field(form.units_direction) }}
+    {{ render_textin_field(form.min_dist) }}
+    {{ render_textin_field(form.max_dist) }}
+    {{ render_textin_field(form.increment_dist) }}
+    <input type=submit value=Calculate>
+
+  {% if error %}
+  <p style="color: red;">{{ error }}</p>
+  {% endif %}
+  </form>
+
+    {% if results is not none %}
+      {% from "_formhelpers.html" import render_distance_conversion %}
+      {{ render_distance_conversion(unit_from, unit_to, results) }}
+    {% endif %}
+
+{% endblock %}

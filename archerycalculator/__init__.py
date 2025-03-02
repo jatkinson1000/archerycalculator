@@ -14,6 +14,7 @@ from archerycalculator import (
     rounds,
     tables,
     new_field,
+    sight,
 )
 
 
@@ -65,6 +66,8 @@ def create_app(test_config=None):
     app.register_blueprint(extras.bp)
 
     app.register_blueprint(new_field.bp)
+
+    app.register_blueprint(sight.bp)
 
     db.init_app(app)
 

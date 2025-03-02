@@ -333,12 +333,14 @@ th, td {
 .classtable th,
 .hctable th,
 .comparetable th,
+.distancetable th,
 .eventtable th {
   background-color: #D9D9D9;
 }
 .classtable tbody tr:nth-child(even),
 .hctable tbody tr:nth-child(even),
 .comparetable tbody tr:nth-child(even),
+.distancetable tbody tr:nth-child(even),
 .eventtable tbody tr:nth-child(even) {
   background-color: #EEEEEE;
 }
@@ -436,6 +438,20 @@ th, td {
 }
 .comparetable td:nth-child(2) {
   text-align: right;
+}
+
+
+/* Distance Table */
+.distancetable {
+  box-sizing: border-box;
+  text-align: left;
+  font-size: min(calc(8px + 0.8vw), 2em);
+}
+.distancetable td {
+  text-align: right;
+}
+.distancetable td:first-child {
+  padding-right: 30px;
 }
 
 
