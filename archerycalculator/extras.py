@@ -151,6 +151,7 @@ def roundcomparison():
                     "WA_outdoor.json",
                     "WA_indoor.json",
                     "WA_field.json",
+                    "WA_experimental.json",
                     "IFAA_field.json",
                     "AGB_VI.json",
                     "WA_VI.json",
@@ -280,7 +281,7 @@ def get_rounds_dict(form_results):
 
     if request.form.getlist("unofficial"):
         unofficial_rounds = sql_to_dol(
-            query_db("SELECT code_name,round_name FROM rounds WHERE body IN ('custom')")
+            query_db("SELECT code_name,round_name FROM rounds WHERE body IN ('custom','WAExp')")
         )
         use_rounds["Unofficial"] = unofficial_rounds
 

@@ -45,6 +45,8 @@ def rounds_page():
         query_db("SELECT code_name,round_name FROM rounds WHERE body in ('WA-VI')")
     )
 
+    rounds["WA Experimental"] = utils.fetch_and_sort_rounds(location="outdoor", body="WAExp")
+
     rounds["Custom"] = sql_to_dol(
         query_db("SELECT code_name,round_name FROM rounds WHERE body in ('custom')")
     )

@@ -326,6 +326,7 @@ def load_round(roundname, bowstyle):
             "WA_outdoor.json",
             "WA_indoor.json",
             "WA_field.json",
+            "WA_experimental.json",
             "IFAA_field.json",
             "AGB_VI.json",
             "WA_VI.json",
