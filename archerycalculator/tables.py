@@ -259,10 +259,10 @@ def classification_tables():
                 )
             )
 
-            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                bowstyle = "barebow"
-            elif bowstyle.lower() in ["compound barebow"]:
-                bowstyle = "compound"
+            if bowstyle in ["Traditional", "Flatbow", "Asiatic"]:
+                bowstyle = "Barebow"
+            elif bowstyle in ["Compound Barebow", "Compound Limited"]:
+                bowstyle = "Compound"
 
             # Filter based on category to make more aesthetic and avoid duplicates
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
@@ -303,9 +303,11 @@ def classification_tables():
                 results[i, :] = np.asarray(
                     cf.agb_outdoor_classification_scores(
                         round_i,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_outdoor_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                 )
 
@@ -321,10 +323,10 @@ def classification_tables():
                 )
             )
 
-            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                bowstyle = "barebow"
-            elif bowstyle.lower() in ["compound barebow"]:
-                bowstyle = "compound"
+            if bowstyle in ["Traditional", "Flatbow", "Asiatic"]:
+                bowstyle = "Barebow"
+            elif bowstyle in ["Compound Barebow", "Compound Limited"]:
+                bowstyle = "Compound"
 
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
 
@@ -351,9 +353,11 @@ def classification_tables():
                 results[i, :] = np.asarray(
                     cf.agb_indoor_classification_scores(
                         round_i,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_indoor_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                 )
 
@@ -408,9 +412,11 @@ def classification_tables():
                 results[i, :] = np.asarray(
                     cf.agb_field_classification_scores(
                         round_i,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_field_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                 )
 
@@ -508,9 +514,9 @@ def print_classification_tables():
                 )
             )
 
-            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+            if bowstyle in ["Traditional", "Flatbow", "Asiatic"]:
                 bowstyle = "Barebow"
-            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
+            elif bowstyle in ["Compound Barebow", "Compound Limited"]:
                 bowstyle = "Compound"
 
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
@@ -549,9 +555,11 @@ def print_classification_tables():
                         results[i, :] = np.asarray(
                             cf.agb_indoor_classification_scores(
                                 round_i,
-                                bowstyle_mapping[bowstyle],
-                                gender_mapping[gender],
-                                age_mapping[age],
+                                **cf.coax_indoor_group(
+                                    bowstyle_mapping[bowstyle],
+                                    gender_mapping[gender],
+                                    age_mapping[age],
+                                ),
                             )
                         )
                     results = np.flip(
@@ -589,9 +597,9 @@ def print_classification_tables():
                 )
             )
 
-            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
+            if bowstyle in ["Traditional", "Flatbow", "Asiatic"]:
                 bowstyle = "Barebow"
-            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
+            elif bowstyle in ["Compound Barebow", "Compound Limited"]:
                 bowstyle = "Compound"
 
             roundsdicts_metric = dict(
@@ -675,9 +683,11 @@ def print_classification_tables():
                         results_metric[i, :] = np.asarray(
                             cf.agb_outdoor_classification_scores(
                                 round_i,
-                                bowstyle_mapping[bowstyle],
-                                gender_mapping[gender],
-                                age_mapping[age],
+                                **cf.coax_outdoor_group(
+                                    bowstyle_mapping[bowstyle],
+                                    gender_mapping[gender],
+                                    age_mapping[age],
+                                ),
                             )
                         )
                     results_metric = np.flip(
@@ -715,9 +725,11 @@ def print_classification_tables():
                         results_imperial[i, :] = np.asarray(
                             cf.agb_outdoor_classification_scores(
                                 round_i,
-                                bowstyle_mapping[bowstyle],
-                                gender_mapping[gender],
-                                age_mapping[age],
+                                **cf.coax_outdoor_group(
+                                    bowstyle_mapping[bowstyle],
+                                    gender_mapping[gender],
+                                    age_mapping[age],
+                                ),
                             )
                         )
                     results_imperial = np.flip(
@@ -813,9 +825,11 @@ def print_classification_tables():
                         results[i, :] = np.asarray(
                             cf.agb_field_classification_scores(
                                 round_i,
-                                bowstyle_mapping[bowstyle],
-                                gender_mapping[gender],
-                                age_mapping[age],
+                                **cf.coax_field_group(
+                                    bowstyle_mapping[bowstyle],
+                                    gender_mapping[gender],
+                                    age_mapping[age],
+                                ),
                             )
                         )
 
@@ -933,10 +947,10 @@ def event_tables():
                     "WA_outdoor.json",
                 ]
             )
-            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                bowstyle = "barebow"
-            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
-                bowstyle = "compound"
+            if bowstyle in ["Traditional", "Flatbow", "Asiatic"]:
+                bowstyle = "Barebow"
+            elif bowstyle in ["Compound Barebow", "Compound Limited"]:
+                bowstyle = "Compound"
 
             agelist = sql_to_dol(
                 query_db("SELECT age_group,male_dist,female_dist FROM ages")
@@ -1000,9 +1014,11 @@ def event_tables():
                         str(int(i))
                         for i in cf.agb_outdoor_classification_scores(
                             age_round,
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age_j],
+                            **cf.coax_outdoor_group(
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age_j],
+                            ),
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
@@ -1015,10 +1031,10 @@ def event_tables():
                     "WA_indoor.json",
                 ]
             )
-            if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                bowstyle = "barebow"
-            elif bowstyle.lower() in ["compound barebow", "compound limited"]:
-                bowstyle = "compound"
+            if bowstyle in ["Traditional", "Flatbow", "Asiatic"]:
+                bowstyle = "Barebow"
+            elif bowstyle in ["Compound Barebow", "Compound Limited"]:
+                bowstyle = "Compound"
 
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
@@ -1046,9 +1062,11 @@ def event_tables():
                         str(int(i))
                         for i in cf.agb_indoor_classification_scores(
                             age_round,
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age_j],
+                            **cf.coax_indoor_group(
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age_j],
+                            ),
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
@@ -1123,9 +1141,11 @@ def event_tables():
                         str(int(i))
                         for i in cf.agb_field_classification_scores(
                             age_app_rounds[0],
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age_j],
+                            **cf.coax_field_group(
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age_j],
+                            ),
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]

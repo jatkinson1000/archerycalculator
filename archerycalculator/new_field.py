@@ -83,9 +83,11 @@ def rounds_page():
                     results[i, :] = np.asarray(
                         cf.agb_field_classification_scores(
                             round_i,
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
+                            **cf.coax_field_group(
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age],
+                            ),
                         )
                     )
 

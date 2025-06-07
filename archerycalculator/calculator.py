@@ -136,9 +136,11 @@ def calculator():
                     class_from_score = cf.calculate_agb_outdoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_outdoor_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -163,9 +165,11 @@ def calculator():
                     class_from_score = cf.calculate_agb_indoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_indoor_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -184,9 +188,11 @@ def calculator():
                     class_from_score = cf.calculate_agb_field_classification(
                         float(score),
                         round_codename,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_field_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
 
                     results["classification"] = class_from_score
@@ -497,9 +503,11 @@ def old_calculator():
                     class_from_score = cf.calculate_agb_outdoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_outdoor_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -524,9 +532,11 @@ def old_calculator():
                     class_from_score = cf.calculate_agb_indoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle_mapping[bowstyle],
-                        gender_mapping[gender],
-                        age_mapping[age],
+                        **cf.coax_old_indoor_group(
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
+                        ),
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -547,9 +557,11 @@ def old_calculator():
                         cf.calculate_old_agb_field_classification(
                             round_codename,
                             float(score),
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
+                            **cf.coax_old_field_group(
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age],
+                            ),
                         )
                     )
 
