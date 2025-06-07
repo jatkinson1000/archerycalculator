@@ -1,6 +1,6 @@
 """Main calculator page."""
 
-from archeryutils import classifications as class_func
+from archeryutils import classifications as cf
 from archeryutils import handicaps as hc
 from archeryutils import load_rounds
 from flask import (
@@ -10,7 +10,7 @@ from flask import (
 )
 
 from archerycalculator import hc_form, utils
-from archerycalculator.db import query_db, sql_to_dol
+from archerycalculator.db import query_db, sql_to_dol, generate_enum_mapping
 
 bp = Blueprint("calculator", __name__, url_prefix="/")
 
@@ -30,16 +30,16 @@ def calculator():
     html template :
         template for the calculator page
     """
+    # Set up enum mappings from flask inputs
+    bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
+    age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
+    gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
+
     # Set form choices
-    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
-        "bowstyle"
-    ]
-    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
     roundnames = utils.indoor_display_filter(
         dict(zip(roundnames["code_name"], roundnames["round_name"]))
     )
-    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
     # Load form and set defaults
     form = hc_form.HCForm(
@@ -47,9 +47,9 @@ def calculator():
     )
 
     # Set form choices
-    form.bowstyle.choices = ["", *bowstylelist]
-    form.gender.choices = ["", *genderlist]
-    form.age.choices = ["", *agelist]
+    form.bowstyle.choices = ["", *list(bowstyle_mapping.keys())]
+    form.gender.choices = ["", *list(gender_mapping.keys())]
+    form.age.choices = ["", *list(age_mapping.keys())]
     form.roundname.choices = ["", *roundnames]
 
     # Initialise any errors or warnings
@@ -133,12 +133,12 @@ def calculator():
                             "for the purposes of classifications."
                         )
 
-                    class_from_score = class_func.calculate_agb_outdoor_classification(
+                    class_from_score = cf.calculate_agb_outdoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age.lower(),
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -160,12 +160,12 @@ def calculator():
                             "for the purposes of classifications."
                         )
 
-                    class_from_score = class_func.calculate_agb_indoor_classification(
+                    class_from_score = cf.calculate_agb_indoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age.lower(),
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -181,12 +181,12 @@ def calculator():
                     else:
                         age_cat = age
 
-                    class_from_score = class_func.calculate_agb_field_classification(
+                    class_from_score = cf.calculate_agb_field_classification(
                         float(score),
                         round_codename,
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age_cat.lower(),
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
 
                     results["classification"] = class_from_score
@@ -397,16 +397,16 @@ def old_calculator():
     html template :
         template for the calculator page
     """
+    # Set up enum mappings from flask inputs
+    bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
+    age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
+    gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
+
     # Set form choices
-    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
-        "bowstyle"
-    ]
-    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
     roundnames = sql_to_dol(query_db("SELECT code_name,round_name FROM rounds"))
     roundnames = utils.indoor_display_filter(
         dict(zip(roundnames["code_name"], roundnames["round_name"]))
     )
-    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
 
     # Load form and set defaults
     form = hc_form.HCForm(
@@ -414,9 +414,9 @@ def old_calculator():
     )
 
     # Set form choices
-    form.bowstyle.choices = ["", *bowstylelist]
-    form.gender.choices = ["", *genderlist]
-    form.age.choices = ["", *agelist]
+    form.bowstyle.choices = ["", *list(bowstyle_mapping.keys())]
+    form.gender.choices = ["", *list(gender_mapping.keys())]
+    form.age.choices = ["", *list(age_mapping.keys())]
     form.roundname.choices = ["", *roundnames]
 
     # Initialise any errors or warnings
@@ -494,12 +494,12 @@ def old_calculator():
                             "for the purposes of classifications."
                         )
 
-                    class_from_score = class_func.calculate_agb_outdoor_classification(
+                    class_from_score = cf.calculate_agb_outdoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age.lower(),
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -521,12 +521,12 @@ def old_calculator():
                             "for the purposes of classifications."
                         )
 
-                    class_from_score = class_func.calculate_agb_indoor_classification(
+                    class_from_score = cf.calculate_agb_indoor_classification(
                         float(score),
                         round_codename,
-                        bowstyle.lower(),
-                        gender.lower(),
-                        age.lower(),
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                     class_from_score = query_db(
                         "SELECT longname FROM classes WHERE shortname IS (?)",
@@ -542,14 +542,14 @@ def old_calculator():
                     else:
                         age_cat = age
 
-                    # class_from_score = class_func.calculate_agb_field_classification(
+                    # class_from_score = cf.calculate_agb_field_classification(
                     class_from_score = (
-                        class_func.calculate_old_agb_field_classification(
+                        cf.calculate_old_agb_field_classification(
                             round_codename,
                             float(score),
-                            bowstyle.lower(),
-                            gender.lower(),
-                            age_cat.lower(),
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
                         )
                     )
 
