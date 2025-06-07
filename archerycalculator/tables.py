@@ -1,7 +1,7 @@
 """Generate table pages on archerycalculator."""
 
 import numpy as np
-from archeryutils import classifications as class_func
+from archeryutils import classifications as cf
 from archeryutils import handicaps as hc
 from archeryutils import load_rounds
 from flask import (
@@ -11,7 +11,7 @@ from flask import (
 )
 
 from archerycalculator import table_form, utils
-from archerycalculator.db import query_db, sql_to_dol
+from archerycalculator.db import query_db, sql_to_dol, generate_enum_mapping
 
 bp = Blueprint("tables", __name__, url_prefix="/tables")
 
@@ -200,19 +200,17 @@ def classification_tables():
         template for the classification table pages
 
     """
-    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
-        "bowstyle"
-    ]
-    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
+    bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
+    age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
+    gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
 
     # Load form and set defaults
     form = table_form.ClassificationTableForm(
-        request.form, bowstyle=bowstylelist[1], gender=genderlist[1], age=agelist[1]
+        request.form, bowstyle=list(bowstyle_mapping.keys())[1], gender=list(gender_mapping.keys())[1], age=list(age_mapping.keys())[1]
     )
-    form.bowstyle.choices = bowstylelist
-    form.gender.choices = genderlist
-    form.age.choices = agelist
+    form.bowstyle.choices = list(bowstyle_mapping.keys())
+    form.gender.choices = list(gender_mapping.keys())
+    form.age.choices = list(age_mapping.keys())
 
     form.discipline.choices = [
         ("outdoor", "Target Outdoor"),
@@ -303,8 +301,11 @@ def classification_tables():
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.agb_outdoor_classification_scores(
-                        round_i, bowstyle, gender, age
+                    cf.agb_outdoor_classification_scores(
+                        round_i,
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                 )
 
@@ -348,8 +349,11 @@ def classification_tables():
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.agb_indoor_classification_scores(
-                        round_i, bowstyle, gender, age
+                    cf.agb_indoor_classification_scores(
+                        round_i,
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                 )
 
@@ -402,8 +406,11 @@ def classification_tables():
             results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
             for i, round_i in enumerate(use_rounds["code_name"]):
                 results[i, :] = np.asarray(
-                    class_func.agb_field_classification_scores(
-                        round_i, bowstyle, gender, age
+                    cf.agb_field_classification_scores(
+                        round_i,
+                        bowstyle_mapping[bowstyle],
+                        gender_mapping[gender],
+                        age_mapping[age],
                     )
                 )
 
@@ -457,18 +464,16 @@ def print_classification_tables():
         template for the classification table pages that is print-friendly
 
     """
-    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
-        "bowstyle"
-    ]
-    genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-    agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
+    bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
+    age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
+    gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
 
     # Load form and set defaults
     form = table_form.PrintClassificationTableForm(
         request.form,
-        bowstyle=bowstylelist[1],
+        bowstyle=list(bowstyle_mapping.keys())[1],
     )
-    form.bowstyle.choices = bowstylelist
+    form.bowstyle.choices = list(bowstyle_mapping.keys())
     form.discipline.choices = [
         ("outdoor", "Target Outdoor"),
         ("indoor", "Target Indoor"),
@@ -511,8 +516,8 @@ def print_classification_tables():
             roundsdicts = dict(zip(use_rounds["code_name"], use_rounds["round_name"]))
 
             # Loop over all categories to appear in tables and generate each table.
-            for gender in genderlist:
-                for age in agelist:
+            for gender in list(gender_mapping.keys()):
+                for age in list(age_mapping.keys()):
                     # Filter out inappropriate rounds:
                     #   - compound rounds for non-recurve and vice versa
                     #   - triple spot rounds for all
@@ -542,8 +547,11 @@ def print_classification_tables():
                     )
                     for i, round_i in enumerate(use_rounds["code_name"]):
                         results[i, :] = np.asarray(
-                            class_func.agb_indoor_classification_scores(
-                                round_i, bowstyle, gender, age
+                            cf.agb_indoor_classification_scores(
+                                round_i,
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age],
                             )
                         )
                     results = np.flip(
@@ -594,8 +602,8 @@ def print_classification_tables():
             )
 
             # Loop over all categories to appear in tables and generate each table.
-            for gender in genderlist:
-                for age in agelist:
+            for gender in list(gender_mapping.keys()):
+                for age in list(age_mapping.keys()):
                     filtered_names_metric = utils.check_blacklist(
                         use_rounds_metric["code_name"], age, gender, bowstyle
                     )
@@ -665,8 +673,11 @@ def print_classification_tables():
                     results_metric[:, :] = -9999
                     for i, round_i in enumerate(filtered_rounds_metric["code_name"]):
                         results_metric[i, :] = np.asarray(
-                            class_func.agb_outdoor_classification_scores(
-                                round_i, bowstyle, gender, age
+                            cf.agb_outdoor_classification_scores(
+                                round_i,
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age],
                             )
                         )
                     results_metric = np.flip(
@@ -702,8 +713,11 @@ def print_classification_tables():
                     results_imperial[:, :] = np.nan
                     for i, round_i in enumerate(filtered_rounds_imperial["code_name"]):
                         results_imperial[i, :] = np.asarray(
-                            class_func.agb_outdoor_classification_scores(
-                                round_i, bowstyle, gender, age
+                            cf.agb_outdoor_classification_scores(
+                                round_i,
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age],
                             )
                         )
                     results_imperial = np.flip(
@@ -753,7 +767,6 @@ def print_classification_tables():
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
             )["shortname"]
-            agelist.remove("Under 21")
 
             use_rounds = {
                 "code_name": [
@@ -791,15 +804,18 @@ def print_classification_tables():
                 use_rounds["code_name"].pop(3)
                 use_rounds["round_name"].pop(3)
 
-            for gender in genderlist:
-                for age in agelist:
+            for gender in list(gender_mapping.keys()):
+                for age in [key for key in age_mapping if key != "Under 21"]:
                     results = np.zeros(
                         [len(use_rounds["code_name"]), len(classlist) - 1]
                     )
                     for i, round_i in enumerate(use_rounds["code_name"]):
                         results[i, :] = np.asarray(
-                            class_func.agb_field_classification_scores(
-                                round_i, bowstyle, gender, age
+                            cf.agb_field_classification_scores(
+                                round_i,
+                                bowstyle_mapping[bowstyle],
+                                gender_mapping[gender],
+                                age_mapping[age],
                             )
                         )
 
@@ -874,13 +890,13 @@ def event_tables():
         "WA Field 24 Mixed": ["wafield_24_mixed"],
     }
 
-    bowstylelist = sql_to_dol(query_db("SELECT bowstyle,disciplines FROM bowstyles"))[
-        "bowstyle"
-    ]
+    bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
+    age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
+    gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
 
     # Load form and set defaults
-    form = table_form.EventTableForm(request.form, bowstyle=bowstylelist[1])
-    form.bowstyle.choices = bowstylelist
+    form = table_form.EventTableForm(request.form, bowstyle=list(bowstyle_mapping.keys())[1])
+    form.bowstyle.choices = list(bowstyle_mapping.keys())
 
     form.roundfamily.choices = list(roundfamilies.keys())
 
@@ -922,7 +938,6 @@ def event_tables():
             elif bowstyle.lower() in ["compound barebow", "compound limited"]:
                 bowstyle = "compound"
 
-            genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
             agelist = sql_to_dol(
                 query_db("SELECT age_group,male_dist,female_dist FROM ages")
             )
@@ -942,7 +957,7 @@ def event_tables():
                     roundslist[k] = roundslist[k] + roundslist_i[k]
 
             results = {}
-            for gender in genderlist:
+            for gender in list(gender_mapping.keys()):
                 for j, age_j in enumerate(agelist["age_group"]):
                     # Get appropriate round from distance
                     for i, rnd_i in enumerate(roundslist["code_name"]):
@@ -983,8 +998,11 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.agb_outdoor_classification_scores(
-                            age_round, bowstyle, gender, age_j
+                        for i in cf.agb_outdoor_classification_scores(
+                            age_round,
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age_j],
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
@@ -1002,8 +1020,6 @@ def event_tables():
             elif bowstyle.lower() in ["compound barebow", "compound limited"]:
                 bowstyle = "compound"
 
-            genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'indoor'")
             )["shortname"]
@@ -1011,8 +1027,8 @@ def event_tables():
             round_codename = roundfamilies[roundfamily][0]
 
             results = {}
-            for gender in genderlist:
-                for age_j in agelist:
+            for gender in list(gender_mapping.keys()):
+                for age_j in list(age_mapping.keys()):
                     # Check for Compound round
                     if bowstyle.lower() in ["compound"]:
                         age_round = round_codename + "_compound"
@@ -1028,8 +1044,11 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.agb_indoor_classification_scores(
-                            age_round, bowstyle, gender, age_j
+                        for i in cf.agb_indoor_classification_scores(
+                            age_round,
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age_j],
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
@@ -1043,9 +1062,6 @@ def event_tables():
             )
 
             # Done manually for now, update in future
-            genderlist = sql_to_dol(query_db("SELECT gender FROM genders"))["gender"]
-            agelist = sql_to_dol(query_db("SELECT age_group FROM ages"))["age_group"]
-            agelist.remove("Under 21")
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
             )["shortname"]
@@ -1074,8 +1090,8 @@ def event_tables():
                     roundslist[k] = roundslist[k] + roundslist_i[k]
 
             results = {}
-            for gender in genderlist:
-                for j, age_j in enumerate(agelist):
+            for gender in list(gender_mapping.keys()):
+                for age_j in [key for key in age_mapping if key != "Under 21"]:
                     # Get appropriate round from distance
                     age_app_rounds = []
                     for rnd_i in roundslist["code_name"]:
@@ -1105,8 +1121,11 @@ def event_tables():
                         )["round_name"][0]
                     ] + [
                         str(int(i))
-                        for i in class_func.agb_field_classification_scores(
-                            age_app_rounds[0], bowstyle, gender, age_j
+                        for i in cf.agb_field_classification_scores(
+                            age_app_rounds[0],
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age_j],
                         )[-1::-1]
                     ]
             classes = classlist[-2::-1]
