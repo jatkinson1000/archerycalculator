@@ -131,6 +131,29 @@ def sql_to_dol(sql_result):
         return {}
 
 
+def generate_enum_mapping(enum_class, query):
+    """
+    Generate a mapping dict from database query results to enum members.
+
+    Used to provide a mapping from the string name displayed to users on the site to
+    the enum member.
+
+    Parameters
+    ----------
+    enum_class :
+        the enum class to map to.
+    query : str
+        the sql query string to fetch enum_name and str_name pairs.
+
+    Returns
+    -------
+    dict
+        Dictionary mapping str_name to enum_class members.
+    """
+    results = query_db(query)
+    return {str_name: enum_class[enum_name] for enum_name, str_name in results}
+
+
 # define command line argument 'init-db' to run init_db function at startup
 @click.command("init-db")
 def init_db_command():
