@@ -8,9 +8,9 @@ from flask import (
     render_template,
 )
 
-from archeryutils import classifications as class_func
+from archeryutils import classifications as cf
 from archerycalculator import utils
-from archerycalculator.db import query_db, sql_to_dol
+from archerycalculator.db import query_db, sql_to_dol, generate_enum_mapping
 
 bp = Blueprint("new-field", __name__, url_prefix="/new-field")
 
@@ -25,11 +25,9 @@ def rounds_page():
     html template :
         template for the rounds list page
     """
-    rounds = {}
-
-    rounds["AGB Outdoor"] = utils.fetch_and_sort_rounds(location="outdoor", body="AGB")
-
-    # Construct tables for all combinations in a dict
+    bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
+    age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
+    gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
 
     # Send to html constructor
     tables = {}
@@ -62,16 +60,7 @@ def rounds_page():
         ],
     }
 
-    for bowstyle in [
-        "compound",
-        "recurve",
-        "barebow",
-        "traditional",
-        "flatbow",
-        "english longbow",
-        "compound limited",
-        "compound barebow",
-    ]:
+    for bowstyle in list(bowstyle_mapping.keys()):
         use_rounds = copy.deepcopy(field_rounds)
         if bowstyle.lower().replace(" ", "") in [
             "barebow",
@@ -86,26 +75,17 @@ def rounds_page():
             use_rounds["code_name"].pop(3)
             use_rounds["round_name"].pop(3)
 
-        for gender in ["male", "female"]:
-            for age in [
-                "50+",
-                "adult",
-                # "under21",
-                "under18",
-                "under16",
-                "under15",
-                "under14",
-                "under12",
-            ]:
-                # Handle age groups - field has no U21
-                if age.lower().replace(" ", "") in ("under21"):
-                    age = "Adult"
+        for gender in list(gender_mapping.keys()):
+            for age in [key for key in age_mapping if key != "Under 21"]:
 
                 results = np.zeros([len(use_rounds["code_name"]), len(classlist) - 1])
                 for i, round_i in enumerate(use_rounds["code_name"]):
                     results[i, :] = np.asarray(
-                        class_func.agb_field_classification_scores(
-                            round_i, bowstyle, gender, age
+                        cf.agb_field_classification_scores(
+                            round_i,
+                            bowstyle_mapping[bowstyle],
+                            gender_mapping[gender],
+                            age_mapping[age],
                         )
                     )
 
