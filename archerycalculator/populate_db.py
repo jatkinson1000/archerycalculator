@@ -1,6 +1,6 @@
 """Populate the database used by archerycalculator."""
 
-import archeryutils.classifications.classification_utils as class_func
+import archeryutils.classifications.classification_utils as cf
 from archeryutils import load_rounds
 
 
@@ -17,7 +17,7 @@ def load_bowstyles_to_db(database):
     -------
     None
     """
-    bowstyles = class_func.read_bowstyles_json()
+    bowstyles = cf.read_bowstyles_json()
     for bowstyle_id, bowstyle_data in bowstyles.items():
         # Hardcode "Longbow" from archeryutils to "English Longbow" for display
         if bowstyle_data["bowstyle"] == "Longbow":
@@ -38,7 +38,7 @@ def load_genders_to_db(database):
     database :
         sqlite database connection
     """
-    genders = class_func.read_genders_json()
+    genders = cf.read_genders_json()
     for item in genders:
         database.execute("INSERT INTO genders (gender_enum,gender) VALUES (?,?);", (item.upper(), item))
     database.commit()
@@ -53,7 +53,7 @@ def load_ages_to_db(database):
     database :
         sqlite database connection
     """
-    ages = class_func.read_ages_json()
+    ages = cf.read_ages_json()
     for age_id, age_data in ages.items():
         database.execute(
             "INSERT INTO ages (age_enum,age_group,gov_body,male_dist,female_dist,sighted_dist_max,sighted_dist_min,unsighted_dist_max,unsighted_dist_min) VALUES (?,?,?,?,?,?,?,?,?);",
@@ -120,8 +120,8 @@ def load_classes_to_db(database):
     database :
         sqlite database connection
     """
-    classes_in = class_func.read_classes_json("agb_indoor")
-    classes_out = class_func.read_classes_json("agb_outdoor")
+    classes_in = cf.read_classes_json("agb_indoor")
+    classes_out = cf.read_classes_json("agb_outdoor")
 
     for classes in [classes_in, classes_out]:
         for i, shortname in enumerate(classes["classes"]):
