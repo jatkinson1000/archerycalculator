@@ -18,14 +18,14 @@ def load_bowstyles_to_db(database):
     None
     """
     bowstyles = class_func.read_bowstyles_json()
-    for item in bowstyles:
+    for bowstyle_id, bowstyle_data in bowstyles.items():
         # Hardcode "Longbow" from archeryutils to "English Longbow" for display
-        if item["bowstyle"] == "Longbow":
-            item["bowstyle"] = "English Longbow"
+        if bowstyle_data["bowstyle"] == "Longbow":
+            bowstyle_data["bowstyle"] = "English Longbow"
 
         database.execute(
-            "INSERT INTO bowstyles (bowstyle,disciplines) VALUES (?,?);",
-            (item["bowstyle"], "TF"),
+            "INSERT INTO bowstyles (bowstyle_enum,bowstyle,disciplines) VALUES (?,?,?);",
+            (bowstyle_id, bowstyle_data["bowstyle"], "TF"),
         )
 
 
@@ -40,7 +40,7 @@ def load_genders_to_db(database):
     """
     genders = class_func.read_genders_json()
     for item in genders:
-        database.execute("INSERT INTO genders (gender) VALUES (?);", [item])
+        database.execute("INSERT INTO genders (gender_enum,gender) VALUES (?,?);", (item.upper(), item))
     database.commit()
 
 
@@ -54,18 +54,19 @@ def load_ages_to_db(database):
         sqlite database connection
     """
     ages = class_func.read_ages_json()
-    for item in ages:
+    for age_id, age_data in ages.items():
         database.execute(
-            "INSERT INTO ages (age_group,gov_body,male_dist,female_dist,red_dist_max,red_dist_min,blue_dist_max,blue_dist_min) VALUES (?,?,?,?,?,?,?,?);",
+            "INSERT INTO ages (age_enum,age_group,gov_body,male_dist,female_dist,sighted_dist_max,sighted_dist_min,unsighted_dist_max,unsighted_dist_min) VALUES (?,?,?,?,?,?,?,?,?);",
             (
-                item["age_group"],
+                age_id,
+                age_data["age_group"],
                 "AGB",
-                item["male"][0],
-                item["female"][0],
-                item["red"][1],
-                item["red"][0],
-                item["blue"][1],
-                item["blue"][0],
+                age_data["male"][0],
+                age_data["female"][0],
+                age_data["sighted"][1],
+                age_data["sighted"][0],
+                age_data["unsighted"][1],
+                age_data["unsighted"][0],
             ),
         )
     database.commit()
