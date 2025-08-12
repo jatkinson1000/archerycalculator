@@ -23,7 +23,8 @@ dependencies = [
     # "archeryutils>=1.1.1",
     "archeryutils @ git+https://github.com/jatkinson1000/archeryutils.git",
     "Flask>=2.2.2",
-    "wtforms>=3.0.1"
+    "wtforms>=3.0.1",
+    "flask-sitemap>=0.4.0"
 ]
 
 [project.optional-dependencies]
