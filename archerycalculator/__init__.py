@@ -4,6 +4,7 @@ import contextlib
 import os
 
 from flask import Flask
+from flask_sitemap import Sitemap
 
 from archerycalculator import (
     about,
@@ -37,6 +38,8 @@ def create_app(test_config=None):
         DATABASE=os.path.join(app.instance_path, "archerycalculator.sqlite")
     )
 
+    ext = Sitemap(app=app)
+
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
@@ -52,21 +55,81 @@ def create_app(test_config=None):
 
     app.register_blueprint(calculator.bp)
     # Not 100% sure next line is neccessary... TODO: investigate further
-    app.add_url_rule("/", endpoint="calculator")
+    app.add_url_rule("/", endpoint="calculator.calculator")
+
+    @ext.register_generator
+    def calculator():
+        """Register / (calculator page) on sitemap."""
+        yield "calculator.calculator", {}
 
     app.register_blueprint(tables.bp)
 
+    @ext.register_generator
+    def handicap_tables():
+        """Register /tables/handicap on sitemap."""
+        yield "tables.handicap_tables", {}
+
+    @ext.register_generator
+    def classification_tables():
+        """Register /tables/classification on sitemap."""
+        yield "tables.classification_tables", {}
+
+    @ext.register_generator
+    def print_classification_tables():
+        """Register /tables/classification on sitemap."""
+        yield "tables.print_classification_tables", {}
+
+    @ext.register_generator
+    def event_tables():
+        """Register /tables/classbyevent on sitemap."""
+        yield "tables.event_tables", {}
+
     app.register_blueprint(rounds.bp)
+
+    @ext.register_generator
+    def round_page():
+        """Register /rounds on sitemap."""
+        yield "rounds.rounds_page", {}
 
     app.register_blueprint(info.bp)
 
+    @ext.register_generator
+    def info_page():
+        """Register /info on sitemap."""
+        yield "info.info", {}
+
     app.register_blueprint(about.bp)
+
+    @ext.register_generator
+    def about_page():
+        """Register /about on sitemap."""
+        yield "about.about", {}
 
     app.register_blueprint(extras.bp)
 
+    @ext.register_generator
+    def groups():
+        """Register /extras/groups on sitemap."""
+        yield "extras.groups", {}
+
+    @ext.register_generator
+    def roundcomparison():
+        """Register /extras/roundscomparison on sitemap."""
+        yield "extras.roundcomparison", {}
+
     app.register_blueprint(new_field.bp)
 
+    @ext.register_generator
+    def rounds_page():
+        """Register /new-field on sitemap."""
+        yield "new-field.rounds_page", {}
+
     app.register_blueprint(sight.bp)
+
+    @ext.register_generator
+    def distance_conversion():
+        """Register /sight/distance-conversion on sitemap."""
+        yield "sight.distance_conversion", {}
 
     db.init_app(app)
 
