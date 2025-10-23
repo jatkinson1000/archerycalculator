@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 61"]
+requires = ["setuptools >= 73"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -20,8 +20,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
 ]
 dependencies = [
-    # "archeryutils>=1.1.1",
-    "archeryutils @ git+https://github.com/jatkinson1000/archeryutils.git",
+    "archeryutils>=2.0.0",
     "Flask>=2.2.2",
     "wtforms>=3.0.1",
     "flask-sitemap>=0.4.0"
