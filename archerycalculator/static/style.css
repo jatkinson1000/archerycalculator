@@ -324,6 +324,7 @@ th, td {
     border: None;
     overflow-wrap: break-word;
     overflow: hidden;
+    height: min(calc(12px + 0.8vw), 2em);
 }
 
 .row {
