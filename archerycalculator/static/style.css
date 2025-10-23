@@ -383,6 +383,7 @@ th, td {
   white-space: nowrap;
   font-weight: bold;
   text-align: right;
+  padding-right: 0.5em;
 }
 
 /* Fancy Formatting for classification Tables
