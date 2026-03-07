@@ -22,7 +22,7 @@ CREATE TABLE ages (
   age_enum TEXT NOT NULL,
   age_group TEXT NOT NULL,
   gov_body TEXT NOT NULL,
-  male_dist TEXT NOT NULL,
+  open_dist TEXT NOT NULL,
   female_dist TEXT NOT NULL,
   sighted_dist_max TEXT NOT NULL,
   sighted_dist_min TEXT NOT NULL,

@@ -33,7 +33,7 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     blacklist.append("wa1440_60_small")
 
     # Gender
-    if gender.lower() in ["male"]:
+    if gender.lower() in ["open"]:
         # Men don't get ladies rounds
         blacklist.append("hereford")
         blacklist.append("long_metric_ladies")
@@ -175,7 +175,7 @@ def check_alias(round_codename, age, gender, bowstyle):
 
     """
     # York, Hereford, Bristols
-    if (round_codename == "hereford") and (gender.lower() == "male"):
+    if (round_codename == "hereford") and (gender.lower() == "open"):
         round_codename = "bristol_i"
     if (round_codename == "bristol_i") and (gender.lower() == "female"):
         round_codename = "hereford"

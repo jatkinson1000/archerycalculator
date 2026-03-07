@@ -39,6 +39,8 @@ def load_genders_to_db(database):
         sqlite database connection
     """
     genders = cf.read_genders_json()
+    # Remove the Male gender as duplicate of Open
+    genders.remove("Male")
     for item in genders:
         database.execute("INSERT INTO genders (gender_enum,gender) VALUES (?,?);", (item.upper(), item))
     database.commit()
@@ -56,12 +58,13 @@ def load_ages_to_db(database):
     ages = cf.read_ages_json()
     for age_id, age_data in ages.items():
         database.execute(
-            "INSERT INTO ages (age_enum,age_group,gov_body,male_dist,female_dist,sighted_dist_max,sighted_dist_min,unsighted_dist_max,unsighted_dist_min) VALUES (?,?,?,?,?,?,?,?,?);",
+            "INSERT INTO ages (age_enum,age_group,gov_body,open_dist,female_dist,sighted_dist_max,sighted_dist_min,unsighted_dist_max,unsighted_dist_min) VALUES (?,?,?,?,?,?,?,?,?);",
+
             (
                 age_id,
                 age_data["age_group"],
                 "AGB",
-                age_data["male"][0],
+                age_data["open"][0],
                 age_data["female"][0],
                 age_data["sighted"][1],
                 age_data["sighted"][0],
