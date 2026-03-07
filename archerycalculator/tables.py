@@ -954,7 +954,7 @@ def event_tables():
                 bowstyle = "Compound"
 
             agelist = sql_to_dol(
-                query_db("SELECT age_group,male_dist,female_dist FROM ages")
+                query_db("SELECT age_group,open_dist,female_dist FROM ages")
             )
             classlist = sql_to_dol(
                 query_db("SELECT shortname FROM classes WHERE location IS 'outdoor'")
