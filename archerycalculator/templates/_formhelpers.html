@@ -1,6 +1,6 @@
 {% macro render_textin_field(field) %}
-  <span >{{ field.label }}:</span>
-  <span>{{ field(class_="text-input", **kwargs)|safe }}</span>
+  <div class="select2stacked">{{ field.label }}:</div>
+  <div class="select2stacked">{{ field(class_="text-input", **kwargs)|safe }}</div>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}
@@ -8,11 +8,10 @@
     {% endfor %}
     </ul>
   {% endif %}
-  &nbsp;
 {% endmacro %}
 
 {% macro render_checkbox(field) %}
-  <span >{{ field.label }}:</span>
+  <span>{{ field.label }}:</span>
   <span>{{ field(class_="checkbox", **kwargs)|safe }}</span>
   {% if field.errors %}
     <ul class=errors>
@@ -21,12 +20,11 @@
     {% endfor %}
     </ul>
   {% endif %}
-  &nbsp;
 {% endmacro %}
 
 {% macro render_select2_no_search_field(field) %}
-  <span >{{ field.label }}:</span>
-  <span>{{ field(class_="select2-js-basic-hide-search", **kwargs)|safe }}</span>
+  <div class="select2stacked">{{ field.label }}:</div>
+  <div class="select2stacked">{{ field(class_="select2-js-basic-hide-search", **kwargs)|safe }}</div>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}
@@ -34,12 +32,11 @@
     {% endfor %}
     </ul>
   {% endif %}
-  &nbsp;
 {% endmacro %}
 
 {% macro render_select2_field(field) %}
-  <span >{{ field.label }}:</span>
-  <span>{{ field(class_="select2-js-basic", **kwargs)|safe }}</span>
+  <div class="select2stacked">{{ field.label }}:</div>
+  <div class="select2stacked">{{ field(class_="select2-js-basic", **kwargs)|safe }}</div>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}
@@ -47,11 +44,10 @@
     {% endfor %}
     </ul>
   {% endif %}
-  &nbsp;
 {% endmacro %}
 
 {% macro render_box(field, message) %}
-  <span >{{ field.label }}: {{ field()|safe }}</span>
+  <div class="checkboxinline">{{ field.label }}: {{ field()|safe }}</div>
   {% if field.errors %}
     <ul class=errors>
     {% for error in field.errors %}
@@ -59,12 +55,11 @@
     {% endfor %}
     </ul>
   {% endif %}
-  <span style="font-size: .8em;">{{ message }}</span>
-  &nbsp;
+  <div style="font-size: .8em;">{{ message }}</div>
 {% endmacro %}
 
 {% macro render_field_with_box(mainfield, boxfield) %}
-  <span >{{ mainfield.label }}: {{ mainfield(**kwargs)|safe }}</span>
+  <div >{{ mainfield.label }}: {{ mainfield(**kwargs)|safe }}</div>
   {% if mainfield.errors %}
     <ul class=errors>
     {% for error in mainfield.errors %}
@@ -72,32 +67,31 @@
     {% endfor %}
     </ul>
   {% endif %}
-  <span >{{ boxfield.label }}: {{ boxfield()|safe }}</span>
-  &nbsp;
+  <div >{{ boxfield.label }}: {{ boxfield()|safe }}</div>
 {% endmacro %}
 
 {% macro render_select2_field_with_box(mainfield, boxfield) %}
-  <span >{{ mainfield.label }}: {{ mainfield(class_="select2-js-basic", **kwargs)|safe }}</span>
-  {% if mainfield.errors %}
-    <ul class=errors>
-    {% for error in mainfield.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-  <span >{{ boxfield.label }}: {{ boxfield()|safe }}</span>
-  &nbsp;
+  <div class="select2fieldbox">
+    <div class="select2inline">{{ mainfield.label }}: {{ mainfield(class_="select2-js-basic", **kwargs)|safe }}</div>
+    {% if mainfield.errors %}
+      <ul class=errors>
+      {% for error in mainfield.errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    <div class="select2inline">{{ boxfield.label }}: {{ boxfield()|safe }}</div>
+  </div>
 {% endmacro %}
 
 {% macro render_box_list(fields) %}
   {% for field in fields %}
-  <span style = "margin-left: 40px">{{ field()|safe }} - {{ field.label }}</span><br>
+  <div style = "margin-left: 40px">{{ field()|safe }} - {{ field.label }}</div>
   {% endfor %}
-  &nbsp;
 {% endmacro %}
 
 {% macro render_field_with_unit(mainfield, unitfield) %}
-<span>{{ mainfield(**kwargs)|safe }} {{ unitfield()|safe }}</span>
+<div>{{ mainfield(**kwargs)|safe }} {{ unitfield()|safe }}</div>
   {% if mainfield.errors %}
     <ul class=errors>
     {% for error in mainfield.errors %}
@@ -193,7 +187,6 @@
     </table>
     </div>
 
-
 <br>
 {% endfor %}
 {% endmacro %}
@@ -203,43 +196,44 @@
 {% for item in results %}
 
   {% if results[item]["round_name"]|length > 33 %}
-  <div class="column">
-  <table class="comparetable">
-  <b>{{ item }}</b>
-  <tbody>
-  {% for round in results[item]["round_name"][:33] %}
-    <tr>
-      <td>{{ round }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-  </table>
-  </div>
-  <div class="column">
-  <table class="comparetable">
-      <b><br></b>
-  <tbody>
-  {% for round in results[item]["round_name"][33:] %}
-    <tr>
-      <td>{{ round }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-  </table>
-  </div>
+    <div class="column">
+      <table class="comparetable">
+        <b>{{ item }}</b>
+        <tbody>
+          {% for round in results[item]["round_name"][:33] %}
+            <tr>
+              <td>{{ round }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="column">
+      <table class="comparetable">
+          <b><br></b>
+        <tbody>
+        {% for round in results[item]["round_name"][33:] %}
+          <tr>
+            <td>{{ round }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
   {% else %}
-  <div class="column">
-  <table class="comparetable">
-  <b>{{ item }}</b>
-  {% for round in results[item]["round_name"] %}
-    <tr>
-      <td>{{ round }}</td>
-    </tr>
-  {% endfor %}
-  </tbody>
-  </table>
-  </div>
+    <div class="column">
+      <table class="comparetable">
+        <b>{{ item }}</b>
+        {% for round in results[item]["round_name"] %}
+          <tr>
+            <td>{{ round }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
 {% endif %}
 
