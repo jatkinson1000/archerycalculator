@@ -983,21 +983,35 @@ def event_tables():
 
                     # Check for 720 based on bowstyle
                     if roundfamily in list(roundfamilies)[1]:
+                        # Compound (and compound limited and compound barebow)
                         if bowstyle.lower() in ["compound"]:
                             age_round = age_round.replace("122", "80")
                             age_round = age_round.replace("70", "50_c")
                             age_round = age_round.replace("60", "50_c")
-                        else:
-                            age_round = age_round.replace("80", "122")
-                            if age_j.lower().replace(" ", "") in ["adult", "under21"]:
-                                age_round = "wa720_70"
-                            elif age_j.lower().replace(" ", "") in ["50+", "under18"]:
-                                age_round = age_round.replace("70", "60")
-                            elif age_j.lower().replace(" ", "") in ["under16"]:
-                                age_round = "metric_122_50"
-                            if bowstyle.lower() in ["barebow"]:
-                                age_round = age_round.replace("70", "50_b")
-                                age_round = age_round.replace("60", "50_b")
+                            if age_j.lower().replace(" ", "") in ["under15", "under14"]:
+                                age_round = "wa720_40_c"
+                            elif age_j.lower().replace(" ", "") in ["under12"]:
+                                age_round = "metric_80_30"
+                        # Barebow (and trad and flatbow)
+                        elif bowstyle.lower() in ["barebow"]:
+                            age_round = "wa720_50_b"
+                            if age_j.lower().replace(" ", "") in [
+                                "under15",
+                                "under14",
+                                "under12",
+                            ]:
+                                age_round = "wa720_30_b"
+                        # Other bowstyles (Recurve, Longbow)
+                        elif age_j.lower().replace(" ", "") in ["adult", "under21"]:
+                            age_round = "wa720_70"
+                        elif age_j.lower().replace(" ", "") in ["50+", "under18"]:
+                            age_round = age_round.replace("70", "60")
+                        elif age_j.lower().replace(" ", "") in ["under16"]:
+                            age_round = "metric_122_50"
+                        elif age_j.lower().replace(" ", "") in ["under15", "under14"]:
+                            age_round = "wa720_40"
+                        elif age_j.lower().replace(" ", "") in ["under12"]:
+                            age_round = "metric_122_30"
 
                     # Check aliases
                     age_round = utils.check_alias(
