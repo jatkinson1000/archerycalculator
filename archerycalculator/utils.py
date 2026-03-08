@@ -1,5 +1,7 @@
 """Module of useful utilities for archerycalculator."""
 
+import re
+
 import numpy as np
 
 from archerycalculator.db import query_db, sql_to_dol
@@ -61,16 +63,25 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     else:
         blacklist.append("short_metric")
 
-    # Bowstyle
+    # Bowstyle-specific treatment of 720 rounds
     if bowstyle.lower() in ["compound"]:
         blacklist.append("metric_80_50")
+        blacklist.append("metric_80_40")
     else:
         blacklist.append("wa720_50_c")
+        blacklist.append("wa720_40_c")
 
     if bowstyle.lower() in ["barebow"]:
         blacklist.append("metric_122_50")
+        blacklist.append("metric_122_30")
     else:
         blacklist.append("wa720_50_b")
+        blacklist.append("wa720_30_b")
+    if bowstyle.lower() not in ["compound", "barebow"]:
+        # Use WA 720 40m instead of Metric round
+        blacklist.append("metric_122_40")
+    else:
+        blacklist.append("wa720_40")
 
     # Triple face rounds indoor
     blacklist.append("bray_i_triple")
@@ -251,34 +262,43 @@ def order_rounds(rounds):
     for family in order:
         if family == "720":
             # Special treatment needed to sort the wa720 and metric720 families
-            sorted_rounds.update(
-                {
-                    key: value
-                    for (key, value) in rounds.items()
-                    if value == "wa720" and "wa720_50_c" not in key
-                }
+
+            # Get all 720 rounds (both wa720 and metric720)
+            rounds_720 = {
+                key: value
+                for (key, value) in rounds.items()
+                if value in ("wa720", "metric720")
+            }
+
+            def _extract_720_distance(codename: str) -> int:
+                """Extract distance from round codename using regex."""
+                # Look for patterns like: _70, ..., _30 nat end of string
+                # compound/barebow: _DISTANCE_c or _DISTANCE_b
+                match = re.search(r"_(\d{2,3})_[bc]$", codename)
+                if match:
+                    return int(match.group(1))
+                # Otherwise _DISTANCE at end
+                match = re.search(r"_(\d{2,3})$", codename)
+                if match:
+                    return int(match.group(1))
+                # Fallback
+                return 0
+
+            # Sort by: 1) 122 vs 80 face, 2) distance (descending), 3) name
+            sorted_720_rounds = sorted(
+                rounds_720.items(),
+                key=lambda item: (
+                    # Group: 0 for 122cm faces, 1 for 80cm
+                    1 if ("_c" in item[0] or "metric_80" in item[0]) else 0,
+                    # Distance (descending so take -ve)
+                    -_extract_720_distance(item[0]),
+                    # Name for consistency
+                    item[0]
+                )
             )
-            sorted_rounds.update(
-                {
-                    key: value
-                    for (key, value) in rounds.items()
-                    if value == "metric720" and "metric_80" not in key
-                }
-            )
-            sorted_rounds.update(
-                {
-                    key: value
-                    for (key, value) in rounds.items()
-                    if value == "wa720" and "wa720_50_c" in key
-                }
-            )
-            sorted_rounds.update(
-                {
-                    key: value
-                    for (key, value) in rounds.items()
-                    if value == "metric720" and "metric_80" in key
-                }
-            )
+
+            sorted_rounds.update(dict(sorted_720_rounds))
+
         elif family == "ifaafield":
             # Select full rounds first, then units
             sorted_rounds.update(
