@@ -38,7 +38,7 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     if gender.lower() in ["open"]:
         # Men don't get ladies rounds
         blacklist.append("hereford")
-        blacklist.append("long_metric_ladies")
+        blacklist.append("long_metric_70")
         blacklist.append("wa1440_60")
         # 50+ and U18 Men get 70m 1440, rest get Metric I
         if age.lower().replace(" ", "") not in ["adult", "under21"]:
