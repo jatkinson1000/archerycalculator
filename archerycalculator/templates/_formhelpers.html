@@ -46,7 +46,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro render_box(field, message) %}
+{% macro render_box(field) %}
   <div class="checkboxinline">{{ field.label }}: {{ field()|safe }}</div>
   {% if field.errors %}
     <ul class=errors>
@@ -55,8 +55,20 @@
     {% endfor %}
     </ul>
   {% endif %}
-  <div style="font-size: .8em;">{{ message }}</div>
 {% endmacro %}
+
+{% macro render_message_box(field, message) %}
+  <div class="checkboxwithmessage">{{ field.label }}: {{ field()|safe }}</div>
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  <div class="checkboxmessage" style="font-size: .8em;">{{ message }}</div>
+{% endmacro %}
+
 
 {% macro render_field_with_box(mainfield, boxfield) %}
   <div >{{ mainfield.label }}: {{ mainfield(**kwargs)|safe }}</div>

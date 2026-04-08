@@ -258,6 +258,7 @@ footer a:hover:not(.active) {
 }
 .content form > span:has(input[type="checkbox"]),
 .content form .checkboxinline,
+.content form .checkboxmessage,
 .content form .select2fieldbox {
   margin-bottom: 1em;
 }
