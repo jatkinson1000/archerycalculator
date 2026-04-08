@@ -595,6 +595,15 @@ th, td {
 
 /* Printing */
 
+.version-display {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    color: #000;
+    font-style: italic;
+}
+
 .class-table-header {
     display: flex;
     justify-content: space-between; /* Space between the h2 and the image */
@@ -718,5 +727,16 @@ th, td {
         width: 35%;
         height: 65%;
         opacity: 0.75;
+    }
+
+    /* Version display for all printed pages */
+    .version-display {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-size: 0.8em;
+        color: #666;
+        font-style: italic;
+        z-index: 1000;
     }
 }
