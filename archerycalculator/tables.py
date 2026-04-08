@@ -471,6 +471,8 @@ def print_classification_tables():
         template for the classification table pages that is print-friendly
 
     """
+    # Version information for display on printed pages
+    CLASSIFICATION_VERSION = "Version 2026-1"
     bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
     age_mapping = generate_enum_mapping(cf.AGB_ages, "SELECT age_enum,age_group FROM ages")
     gender_mapping = generate_enum_mapping(cf.AGB_genders, "SELECT gender_enum,gender FROM genders")
@@ -861,6 +863,7 @@ def print_classification_tables():
                 tables=tables,
                 classes=classes,
                 discipline=discipline,
+                version=CLASSIFICATION_VERSION,
             )
 
         # If errors reload default with error message

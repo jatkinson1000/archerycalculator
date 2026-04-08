@@ -41,6 +41,10 @@
   {% endfor %}
 
     <meta name="theme-color" content="#3bf">
+    <!-- Version information for display -->
+    {% if version is defined %}
+    <div class="version-display">{{ version }}</div>
+    {% endif %}
 </head>
 
 <!-- Google tag (gtag.js) -->
