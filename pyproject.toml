@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "archerycalculator"
-version = "0.2.0"
+version = "0.3.0"
 description = "A flask web app to perform archery calculations"
 authors = [
   { name="Jack Atkinson", email="jack.atkinson1000@gmail.com" },
@@ -20,7 +20,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
 ]
 dependencies = [
-    "archeryutils>=2.0.0",
+    "archeryutils>=3.0.0",
     "Flask>=2.2.2",
     "wtforms>=3.0.1",
     "flask-sitemap>=0.4.0"
