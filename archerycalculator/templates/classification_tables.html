@@ -43,6 +43,14 @@
   <p style="color: red;">{{ error }}</p>
   {% endif %}
 
+  {% if non_strict %}
+  <p style="color: red;">
+    <b>Warning:</b> Scores that are normally unavailable due to prestige
+    round or distance restrictions are shown.<br>
+    Not all scores in this table are valid for classification purposes.
+  </p>
+  {% endif %}
+
   {% if results is defined %}
     {% from "_formhelpers.html" import render_classification_table %}
     {{ render_classification_table(classes, roundnames, results) }}
