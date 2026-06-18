@@ -29,12 +29,13 @@
   Select your category and click 'Generate' to produce a table of scores.
   </p>
 
-    {% from "_formhelpers.html" import render_select2_no_search_field %}
+    {% from "_formhelpers.html" import render_select2_no_search_field, render_message_box %}
   <form method=post>
     {{ render_select2_no_search_field(form.bowstyle) }}
     {{ render_select2_no_search_field(form.gender) }}
     {{ render_select2_no_search_field(form.age) }}
     {{ render_select2_no_search_field(form.discipline) }}
+    {{ render_message_box(form.non_strict, "Shows classification scores that are normally unavailable on non-prestige or short distance rounds.\nNote that not all scores shown will be valid for classification purposes.") }}
     <input type=submit value=Generate>
   </form>
 
