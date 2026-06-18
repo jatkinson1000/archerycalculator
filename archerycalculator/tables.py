@@ -522,6 +522,18 @@ def print_classification_tables():
         if len(bowstylecheck) == 0:
             error = "Invalid bowstyle. Please select from dropdown."
 
+        # Load Round objects so we can pass them to classification functions
+        all_rounds_objs = load_rounds.read_json_to_round_dict(
+            [
+                "AGB_outdoor_imperial.json",
+                "AGB_outdoor_metric.json",
+                "AGB_indoor.json",
+                "WA_outdoor.json",
+                "WA_indoor.json",
+                "WA_field.json",
+            ]
+        )
+
         tables = {}
 
         if discipline in ["indoor"]:
@@ -576,7 +588,7 @@ def print_classification_tables():
                     for i, round_i in enumerate(use_rounds["code_name"]):
                         results[i, :] = np.asarray(
                             cf.agb_indoor_classification_scores(
-                                round_i,
+                                all_rounds_objs[round_i],
                                 **cf.coax_indoor_group(
                                     bowstyle_mapping[bowstyle],
                                     gender_mapping[gender],
@@ -704,7 +716,7 @@ def print_classification_tables():
                     for i, round_i in enumerate(filtered_rounds_metric["code_name"]):
                         results_metric[i, :] = np.asarray(
                             cf.agb_outdoor_classification_scores(
-                                round_i,
+                                all_rounds_objs[round_i],
                                 **cf.coax_outdoor_group(
                                     bowstyle_mapping[bowstyle],
                                     gender_mapping[gender],
@@ -746,7 +758,7 @@ def print_classification_tables():
                     for i, round_i in enumerate(filtered_rounds_imperial["code_name"]):
                         results_imperial[i, :] = np.asarray(
                             cf.agb_outdoor_classification_scores(
-                                round_i,
+                                all_rounds_objs[round_i],
                                 **cf.coax_outdoor_group(
                                     bowstyle_mapping[bowstyle],
                                     gender_mapping[gender],
@@ -846,7 +858,7 @@ def print_classification_tables():
                     for i, round_i in enumerate(use_rounds["code_name"]):
                         results[i, :] = np.asarray(
                             cf.agb_field_classification_scores(
-                                round_i,
+                                all_rounds_objs[round_i],
                                 **cf.coax_field_group(
                                     bowstyle_mapping[bowstyle],
                                     gender_mapping[gender],
@@ -1050,7 +1062,7 @@ def event_tables():
                     ] + [
                         str(int(i))
                         for i in cf.agb_outdoor_classification_scores(
-                            age_round,
+                            all_rounds_objs[age_round],
                             **cf.coax_outdoor_group(
                                 bowstyle_mapping[bowstyle],
                                 gender_mapping[gender],
@@ -1098,7 +1110,7 @@ def event_tables():
                     ] + [
                         str(int(i))
                         for i in cf.agb_indoor_classification_scores(
-                            age_round,
+                            all_rounds_objs[age_round],
                             **cf.coax_indoor_group(
                                 bowstyle_mapping[bowstyle],
                                 gender_mapping[gender],
@@ -1177,7 +1189,7 @@ def event_tables():
                     ] + [
                         str(int(i))
                         for i in cf.agb_field_classification_scores(
-                            age_app_rounds[0],
+                            all_rounds_objs[age_app_rounds[0]],
                             **cf.coax_field_group(
                                 bowstyle_mapping[bowstyle],
                                 gender_mapping[gender],
