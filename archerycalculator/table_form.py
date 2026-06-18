@@ -72,6 +72,9 @@ class ClassificationTableForm(Form):
     )
     age = SelectField("Age category", [validators.InputRequired("Please provide.")])
     discipline = SelectField("Discipline")
+    non_strict = BooleanField(
+        label="Show scores for all rounds", false_values=(False, "")
+    )
 
 
 class PrintClassificationTableForm(Form):

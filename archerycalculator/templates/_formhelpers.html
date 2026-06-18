@@ -66,7 +66,7 @@
     {% endfor %}
     </ul>
   {% endif %}
-  <div class="checkboxmessage" style="font-size: .8em;">{{ message }}</div>
+  <div class="checkboxmessage" style="font-size: .8em;">{{ message | replace("\n", "<br>") | safe }}</div>
 {% endmacro %}
 
 

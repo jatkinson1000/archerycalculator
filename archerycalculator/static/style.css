@@ -389,6 +389,14 @@ th, td {
 .eventtable th {
   background-color: #D9D9D9;
 }
+/* Set row backgrounds: odd rows light grey, even darker */
+.classtable tbody tr:nth-child(odd),
+.hctable tbody tr:nth-child(odd),
+.comparetable tbody tr:nth-child(odd),
+.distancetable tbody tr:nth-child(odd),
+.eventtable tbody tr:nth-child(odd) {
+  background-color: #F8F8F8;
+}
 .classtable tbody tr:nth-child(even),
 .hctable tbody tr:nth-child(even),
 .comparetable tbody tr:nth-child(even),
@@ -431,12 +439,12 @@ th, td {
 .classtable tr:nth-child(odd) td:nth-child(n+2):nth-child(-n+4):not(:empty),
 .classtable tr:nth-child(odd) td:nth-child(n+12):nth-child(-n+14):not(:empty),
 .eventtable tr:nth-child(odd) td:nth-child(n+3):nth-child(-n+5):not(:empty){
-    background-color: #A1AFFF;
+    background-color: #B0BFFF;
 }
 .classtable tr:nth-child(even) td:nth-child(n+2):nth-child(-n+4):not(:empty),
 .classtable tr:nth-child(even) td:nth-child(n+12):nth-child(-n+14):not(:empty),
 .eventtable tr:nth-child(even) td:nth-child(n+3):nth-child(-n+5):not(:empty){
-    background-color: #919FEE;
+    background-color: #A5AAF0;
 }
 /* Bowman Class - red */
 .classtable th:nth-child(n+5):nth-child(-n+7),
@@ -448,28 +456,28 @@ th, td {
 .classtable tr:nth-child(odd) td:nth-child(n+5):nth-child(-n+7):not(:empty),
 .classtable tr:nth-child(odd) td:nth-child(n+15):nth-child(-n+17):not(:empty),
 .eventtable tr:nth-child(odd) td:nth-child(n+6):nth-child(-n+8):not(:empty){
-    background-color: #E0A2AB;
+    background-color: #E8B0BA;
 }
 .classtable tr:nth-child(even) td:nth-child(n+5):nth-child(-n+7):not(:empty),
 .classtable tr:nth-child(even) td:nth-child(n+15):nth-child(-n+17):not(:empty),
 .eventtable tr:nth-child(even) td:nth-child(n+6):nth-child(-n+8):not(:empty){
-    background-color: #D0929B;
+    background-color: #DCA5AD;
 }
 /* Master Bowman Class - grey */
 .classtable th:nth-child(n+8):nth-child(-n+10),
 .classtable th:nth-child(n+18):nth-child(-n+20),
 .eventtable th:nth-child(n+9):nth-child(-n+11){
-    background-color: #D9D9D9;
+    background-color: #B0B0B0;
 }
 .classtable tr:nth-child(odd) td:nth-child(n+8):nth-child(-n+10):not(:empty),
 .classtable tr:nth-child(odd) td:nth-child(n+18):nth-child(-n+20):not(:empty),
 .eventtable tr:nth-child(odd) td:nth-child(n+9):nth-child(-n+11):not(:empty){
-    background-color: #E7E7E7;
+    background-color: #CECECE;
 }
 .classtable tr:nth-child(even) td:nth-child(n+8):nth-child(-n+10):not(:empty),
 .classtable tr:nth-child(even) td:nth-child(n+18):nth-child(-n+20):not(:empty),
 .eventtable tr:nth-child(even) td:nth-child(n+9):nth-child(-n+11):not(:empty){
-    background-color: #D7D7D7;
+    background-color: #C0C0C0;
 }
 
 
