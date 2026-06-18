@@ -461,6 +461,7 @@ def classification_tables():
                 form=form,
                 results=results.astype(str),
                 classes=classes,
+                non_strict=non_strict,
             )
 
         # If errors reload default with error message
