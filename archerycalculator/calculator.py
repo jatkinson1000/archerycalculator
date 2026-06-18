@@ -83,7 +83,7 @@ def calculator():
 
         if error is None:
             # Get round info
-            round_obj, round_codename, round_location, round_body = load_round(
+            round_obj, _, round_location, round_body = load_round(
                 roundname, bowstyle
             )
 
@@ -135,7 +135,7 @@ def calculator():
 
                     class_from_score = cf.calculate_agb_outdoor_classification(
                         float(score),
-                        round_codename,
+                        round_obj,
                         **cf.coax_outdoor_group(
                             bowstyle_mapping[bowstyle],
                             gender_mapping[gender],
@@ -164,7 +164,7 @@ def calculator():
 
                     class_from_score = cf.calculate_agb_indoor_classification(
                         float(score),
-                        round_codename,
+                        round_obj,
                         **cf.coax_indoor_group(
                             bowstyle_mapping[bowstyle],
                             gender_mapping[gender],
@@ -187,7 +187,7 @@ def calculator():
 
                     class_from_score = cf.calculate_agb_field_classification(
                         float(score),
-                        round_codename,
+                        round_obj,
                         **cf.coax_field_group(
                             bowstyle_mapping[bowstyle],
                             gender_mapping[gender],
@@ -457,7 +457,7 @@ def old_calculator():
 
         if error is None:
             # Get round info
-            round_obj, round_codename, round_location, round_body = load_round(
+            round_obj, _, round_location, round_body = load_round(
                 roundname, bowstyle
             )
 
@@ -503,7 +503,7 @@ def old_calculator():
 
                     class_from_score = cf.calculate_agb_outdoor_classification(
                         float(score),
-                        round_codename,
+                        round_obj,
                         **cf.coax_outdoor_group(
                             bowstyle_mapping[bowstyle],
                             gender_mapping[gender],
@@ -532,7 +532,7 @@ def old_calculator():
 
                     class_from_score = cf.calculate_agb_indoor_classification(
                         float(score),
-                        round_codename,
+                        round_obj,
                         **cf.coax_old_indoor_group(
                             bowstyle_mapping[bowstyle],
                             gender_mapping[gender],
@@ -556,7 +556,7 @@ def old_calculator():
                     # class_from_score = cf.calculate_agb_field_classification(
                     class_from_score = (
                         cf.calculate_old_agb_field_classification(
-                            round_codename,
+                            round_obj,
                             float(score),
                             **cf.coax_old_field_group(
                                 bowstyle_mapping[bowstyle],
