@@ -8,6 +8,7 @@ from flask_sitemap import Sitemap
 
 from archerycalculator import (
     about,
+    api,
     calculator,
     db,
     extras,
@@ -130,6 +131,8 @@ def create_app(test_config=None):
     def distance_conversion():
         """Register /sight/distance-conversion on sitemap."""
         yield "sight.distance_conversion", {}
+
+    app.register_blueprint(api.bp)
 
     db.init_app(app)
 
