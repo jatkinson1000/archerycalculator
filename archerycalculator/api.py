@@ -4,13 +4,28 @@ from flask import Blueprint, jsonify, request
 
 from archeryutils import classifications as cf
 from archeryutils import handicaps as hc
+from archeryutils import load_rounds
 
-from archerycalculator import calculator, utils
+from archerycalculator import utils
 from archerycalculator.db import generate_enum_mapping
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
 VALID_SCHEMES = ("AGB", "AGBold", "AA", "AA2")
+
+ROUND_SETS = [
+    "AGB_outdoor_imperial.json",
+    "AGB_outdoor_metric.json",
+    "AGB_indoor.json",
+    "WA_outdoor.json",
+    "WA_indoor.json",
+    "WA_field.json",
+    "WA_experimental.json",
+    "IFAA_field.json",
+    "AGB_VI.json",
+    "WA_VI.json",
+    "Miscellaneous.json",
+]
 
 
 def parse_input(data) -> tuple[dict | str, int]:
@@ -32,12 +47,12 @@ def parse_input(data) -> tuple[dict | str, int]:
     bowstyle = data.get("bowstyle")
     gender = data.get("gender")
     age = data.get("age")
-    roundname = data.get("roundname")
+    roundcode = data.get("roundcode")
     score = data.get("score")
 
     missing = [
         field
-        for field in ("bowstyle", "gender", "age", "roundname", "score")
+        for field in ("bowstyle", "gender", "age", "roundcode", "score")
         if data.get(field) is None
     ]
     if missing:
@@ -45,7 +60,7 @@ def parse_input(data) -> tuple[dict | str, int]:
 
     scheme = data.get("scheme", "AGB")
     if scheme not in VALID_SCHEMES:
-        return f"Invalid scheme. Must be one of: {', '.join(VALID_SCHEMES)}", 400
+        return f"Invalid handicap scheme. Must be one of: {', '.join(VALID_SCHEMES)}", 400
 
     decimal_hc = data.get("decimalHC", False)
     if isinstance(decimal_hc, str):
@@ -65,7 +80,7 @@ def parse_input(data) -> tuple[dict | str, int]:
         "bowstyle": bowstyle,
         "gender": gender,
         "age": age,
-        "roundname": roundname,
+        "roundcode": roundcode,
         "score": score,
         "scheme": scheme,
         "decimal_hc": decimal_hc,
@@ -90,17 +105,31 @@ def calc_single(input_data: dict):
         200 on success, 400 on validation failure
     """
     (
-        bowstyle, gender, age, roundname, score, scheme, decimal_hc, diameter
+        bowstyle, gender, age, roundcode, score, scheme, decimal_hc, diameter
     ) = (
         input_data["bowstyle"],
         input_data["gender"],
         input_data["age"],
-        input_data["roundname"],
+        input_data["roundcode"],
         input_data["score"],
         input_data["scheme"],
         input_data["decimal_hc"],
         input_data["diameter"],
     )
+
+    # Load round sets and resolve codename
+    all_rounds = load_rounds.read_json_to_round_dict(ROUND_SETS)
+
+    # Check compound variant
+    if bowstyle.lower() == "compound":
+        roundcode = utils.get_compound_codename(roundcode)
+        if roundcode not in all_rounds:
+            return {"error": f"Compound variant '{roundcode}' not found."}, 400
+
+    if roundcode not in all_rounds:
+        return {"error": f"Unknown roundcode '{roundcode}'."}, 400
+
+    round_obj = all_rounds[roundcode]
 
     # Enum mappings for classification lookups
     bowstyle_mapping = generate_enum_mapping(
@@ -113,22 +142,17 @@ def calc_single(input_data: dict):
         cf.AGB_genders, "SELECT gender_enum,gender FROM genders"
     )
 
-    # Validate inputs
-    results, error = calculator.check_inputs({}, bowstyle, gender, age, roundname)
-    if error:
-        return {"error": error}, 400
-
-    # Load round
-    round_obj, _, round_location, round_body = calculator.load_round(
-        roundname, bowstyle
-    )
-
     # Validate score
-    results, error = calculator.check_max_score(
-        round_obj, roundname, score, results
-    )
-    if error:
-        return {"error": error}, 400
+    max_score = round_obj.max_score()
+    if int(score) <= 0:
+        return {"error": "A score of 0 or less is not valid."}, 400
+    elif int(score) > max_score:
+        return {
+            "error": (
+                f"{score} is larger than the maximum possible "
+                f"score of {int(max_score)} for a {round_obj.name}."
+            )
+        }, 400
 
     # Calculate handicap
     hc_scheme = hc.handicap_scheme(scheme)
@@ -138,7 +162,7 @@ def calc_single(input_data: dict):
 
     # Calculate classification using shared function
     classification_result = utils.calculate_classification(
-        float(score), round_obj, round_location, round_body,
+        float(score), round_obj, round_obj.location, round_obj.body,
         bowstyle, gender, age,
         bowstyle_mapping[bowstyle], gender_mapping[gender], age_mapping[age],
     )
@@ -146,7 +170,7 @@ def calc_single(input_data: dict):
     response = {
         "bowstyle": bowstyle,
         "gender": gender,
-        "roundname": roundname,
+        "roundcode": round_obj.codename,
         "classification": classification_result.classification,
         "handicap": hc_from_score,
         "score": int(score),
@@ -167,22 +191,44 @@ def handicap():
     """
     Calculate handicap and classification for a given score.
 
-    Accepts data via GET URL parameters or POST JSON body.
+    Auto-detects single vs batch mode based on input type:
+      - GET with URL parameters  -> single request
+      - POST JSON object          -> single request
+      - POST JSON array           -> batch request
 
-    Parameters
-    ----------
-    bowstyle, gender, age, roundname, score (required)
+    Parameters (single)
+    -------------------
+    bowstyle, gender, age, roundcode, score (required)
     decimalHC, diameter, scheme (optional)
 
     Returns
     -------
-    JSON response containing handicap, classification, and warnings.
+    Single request: JSON with handicap, classification, and warnings.
+    Batch request: JSON array of results matching input order.
     """
-    if request.method == "POST" and request.is_json:
+    # --- extract raw input ---
+    if request.method == "POST":
+        if not request.is_json:
+            return jsonify({"error": "POST requires JSON body"}), 400
         data = request.get_json()
     else:
-        data = request.args
+        # GET -> convert ImmutableMultiDict to a plain dict
+        data = {k: v for k, v in request.args.items()}
 
+    # --- dispatch: array = batch, object = single ---
+    if isinstance(data, list):
+        # Batch mode
+        outputs = []
+        for item in data:
+            parsed, status = parse_input(item)
+            if status != 200:
+                outputs.append({"error": parsed})
+            else:
+                response, _ = calc_single(parsed)
+                outputs.append(response)
+        return jsonify(outputs), 200
+
+    # Single mode
     parsed, status = parse_input(data)
     if status != 200:
         return jsonify({"error": parsed}), 400
