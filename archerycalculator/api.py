@@ -1,68 +1,106 @@
 """API endpoint for handicap calculation."""
 
-from archeryutils import classifications as cf
-from archeryutils import handicaps as hc
 from flask import Blueprint, jsonify, request
 
-from archerycalculator import calculator
-from archerycalculator.db import generate_enum_mapping, query_db
+from archeryutils import classifications as cf
+from archeryutils import handicaps as hc
+
+from archerycalculator import calculator, utils
+from archerycalculator.db import generate_enum_mapping
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
+VALID_SCHEMES = ("AGB", "AGBold", "AA", "AA2")
 
-@bp.route("/handicap", methods=("GET", "POST"))
-def handicap():
+
+def parse_input(data) -> tuple[dict | str, int]:
     """
-    Calculate handicap and classification for a given score.
-
-    Accepts data via GET URL parameters or POST JSON body.
+    Parse and validate API input data.
 
     Parameters
     ----------
-    All parameters can be provided via GET query string or POST JSON:
-        bowstyle (required): e.g. "Recurve", "Compound", "Barebow"
-        gender (required): e.g. "Open", "Female"
-        age (required): e.g. "Adult", "50+", "Under 21"
-        roundname (required): e.g. "WA 1440 70m", "720 18m"
-        score (required): archer's score as integer
-        decimalHC (optional): true/false for decimal handicap
-        diameter (optional): custom arrow diameter in mm
-        scheme (optional): handicap scheme, one of "AGB", "AGBold", "AA", "AA2"
+    data : dict
+        raw input data from query string or JSON body
 
     Returns
     -------
-    JSON response containing handicap, classification, and warnings.
+    validated : dict or error message : str
+        validated input or error description
+    status_code : int
+        200 on success, 400 on validation failure
     """
-    if request.method == "POST" and request.is_json:
-        data = request.get_json()
-    else:
-        data = request.args
-
-    # Required fields
     bowstyle = data.get("bowstyle")
     gender = data.get("gender")
     age = data.get("age")
     roundname = data.get("roundname")
     score = data.get("score")
 
-    # Check required fields
     missing = [
         field
         for field in ("bowstyle", "gender", "age", "roundname", "score")
         if data.get(field) is None
     ]
     if missing:
-        msg = f"Missing required parameters: {', '.join(missing)}"
-        return jsonify({"error": msg}), 400
+        return f"Missing required parameters: {', '.join(missing)}", 400
 
-    # Optional fields
-    diameter = float(data.get("diameter", 0.0)) * 1.0e-3
     scheme = data.get("scheme", "AGB")
+    if scheme not in VALID_SCHEMES:
+        return f"Invalid scheme. Must be one of: {', '.join(VALID_SCHEMES)}", 400
+
     decimal_hc = data.get("decimalHC", False)
     if isinstance(decimal_hc, str):
         decimal_hc = decimal_hc.lower() in ("true", "1", "yes")
+
+    try:
+        diameter = float(data.get("diameter", 0.0)) * 1.0e-3
+    except ValueError:
+        return "Invalid diameter value", 400
+
+    if diameter < 0:
+        return "Invalid arrow diameter, must be positive", 400
     if diameter == 0.0:
         diameter = None
+
+    return {
+        "bowstyle": bowstyle,
+        "gender": gender,
+        "age": age,
+        "roundname": roundname,
+        "score": score,
+        "scheme": scheme,
+        "decimal_hc": decimal_hc,
+        "diameter": diameter,
+    }, 200
+
+
+def calc_single(input_data: dict):
+    """
+    Perform the full handicap calculation for a single set of inputs.
+
+    Parameters
+    ----------
+    input_data : dict
+        validated input data from parse_input
+
+    Returns
+    -------
+    result_or_error : dict
+        JSON-serialisable result or error dict
+    status_code : int
+        200 on success, 400 on validation failure
+    """
+    (
+        bowstyle, gender, age, roundname, score, scheme, decimal_hc, diameter
+    ) = (
+        input_data["bowstyle"],
+        input_data["gender"],
+        input_data["age"],
+        input_data["roundname"],
+        input_data["score"],
+        input_data["scheme"],
+        input_data["decimal_hc"],
+        input_data["diameter"],
+    )
 
     # Enum mappings for classification lookups
     bowstyle_mapping = generate_enum_mapping(
@@ -78,7 +116,7 @@ def handicap():
     # Validate inputs
     results, error = calculator.check_inputs({}, bowstyle, gender, age, roundname)
     if error:
-        return jsonify({"error": error}), 400
+        return {"error": error}, 400
 
     # Load round
     round_obj, _, round_location, round_body = calculator.load_round(
@@ -86,9 +124,11 @@ def handicap():
     )
 
     # Validate score
-    results, error = calculator.check_max_score(round_obj, roundname, score, results)
+    results, error = calculator.check_max_score(
+        round_obj, roundname, score, results
+    )
     if error:
-        return jsonify({"error": error}), 400
+        return {"error": error}, 400
 
     # Calculate handicap
     hc_scheme = hc.handicap_scheme(scheme)
@@ -96,136 +136,56 @@ def handicap():
         float(score), round_obj, arw_d=diameter, int_prec=True
     )
 
+    # Calculate classification using shared function
+    classification_result = utils.calculate_classification(
+        float(score), round_obj, round_location, round_body,
+        bowstyle, gender, age,
+        bowstyle_mapping[bowstyle], gender_mapping[gender], age_mapping[age],
+    )
+
     response = {
         "bowstyle": bowstyle,
         "gender": gender,
-        "age": age,
         "roundname": roundname,
-        "score": int(score),
+        "classification": classification_result.classification,
         "handicap": hc_from_score,
+        "score": int(score),
     }
 
-    # Optional decimal handicap
     if decimal_hc:
-        decimal_hc_value = hc_scheme.handicap_from_score(
+        response["decimal_handicap"] = hc_scheme.handicap_from_score(
             float(score), round_obj, arw_d=diameter, int_prec=False
         )
-        response["decimal_handicap"] = decimal_hc_value
 
-    # Warnings
-    warnings = []
+    response["warnings"] = classification_result.warnings
 
-    # Calculate classification
-    warning_bowstyle = None
+    return response, 200
 
-    if round_location == "outdoor" and round_body in ("AGB", "WA"):
-        if bowstyle.lower() in ("traditional", "flatbow", "asiatic"):
-            warning_bowstyle = (
-                f"Note: Treating {bowstyle} as Barebow "
-                "for the purposes of classifications."
-            )
-        elif bowstyle.lower() in ("compound barebow", "compound limited"):
-            warning_bowstyle = (
-                f"Note: Treating {bowstyle} as Compound "
-                "for the purposes of classifications."
-            )
 
-        class_short = cf.calculate_agb_outdoor_classification(
-            float(score),
-            round_obj,
-            **cf.coax_outdoor_group(
-                bowstyle_mapping[bowstyle],
-                gender_mapping[gender],
-                age_mapping[age],
-            ),
-        )
-        class_long = query_db(
-            "SELECT longname FROM classes WHERE shortname IS (?)",
-            [class_short],
-            one=True,
-        )["longname"]
-        response["classification"] = class_long
+@bp.route("/handicap", methods=("GET", "POST"))
+def handicap():
+    """
+    Calculate handicap and classification for a given score.
 
-    elif round_location == "indoor" and round_body in ("AGB", "WA"):
-        if bowstyle.lower() in ("traditional", "flatbow", "asiatic"):
-            warning_bowstyle = (
-                f"Note: Treating {bowstyle} as Barebow "
-                "for the purposes of classifications."
-            )
-        elif bowstyle.lower() in ("compound barebow", "compound limited"):
-            warning_bowstyle = (
-                f"Note: Treating {bowstyle} as Compound "
-                "for the purposes of classifications."
-            )
+    Accepts data via GET URL parameters or POST JSON body.
 
-        class_short = cf.calculate_agb_indoor_classification(
-            float(score),
-            round_obj,
-            **cf.coax_indoor_group(
-                bowstyle_mapping[bowstyle],
-                gender_mapping[gender],
-                age_mapping[age],
-            ),
-        )
-        class_long = query_db(
-            "SELECT longname FROM classes WHERE shortname IS (?)",
-            [class_short],
-            one=True,
-        )["longname"]
-        response["classification"] = class_long
+    Parameters
+    ----------
+    bowstyle, gender, age, roundname, score (required)
+    decimalHC, diameter, scheme (optional)
 
-    elif round_location == "field" and round_body in ("AGB", "WA"):
-        class_short = cf.calculate_agb_field_classification(
-            float(score),
-            round_obj,
-            **cf.coax_field_group(
-                bowstyle_mapping[bowstyle],
-                gender_mapping[gender],
-                age_mapping[age],
-            ),
-        )
-        response["classification"] = class_short
-        warnings.append(
-            "Note: This round is not officially recognised by "
-            "Archery GB for the purposes of handicapping."
-        )
+    Returns
+    -------
+    JSON response containing handicap, classification, and warnings.
+    """
+    if request.method == "POST" and request.is_json:
+        data = request.get_json()
     else:
-        response["classification"] = "not currently available"
-        warnings.append(
-            "Note: This round is not officially recognised by "
-            "Archery GB for the purposes of handicapping."
-        )
+        data = request.args
 
-    if warning_bowstyle:
-        warnings.append(warning_bowstyle)
+    parsed, status = parse_input(data)
+    if status != 200:
+        return jsonify({"error": parsed}), 400
 
-    # Sigma statistics (group size estimates)
-    RAD2DEG = 57.295779513
-    sig_t = hc_scheme.sigma_t(hc_from_score, 0.0)
-    sig_r_18 = hc_scheme.sigma_r(hc_from_score, 18.0)
-    sig_r_50 = hc_scheme.sigma_r(hc_from_score, 50.0)
-    sig_r_70 = hc_scheme.sigma_r(hc_from_score, 70.0)
-
-    response["sigma"] = {
-        "angular_spread_deg": round(2.0 * RAD2DEG * sig_t, 4),
-        "group_18m_cm": round(2.0 * 100.0 * sig_r_18, 2),
-        "group_50m_cm": round(2.0 * 100.0 * sig_r_50, 2),
-        "group_70m_cm": round(2.0 * 100.0 * sig_r_70, 2),
-    }
-
-    response["warnings"] = warnings
-
-    # Reorder response fields
-    ordered_response = {
-        "bowstyle": response["bowstyle"],
-        "gender": response["gender"],
-        "age": response["age"],
-        "roundname": response["roundname"],
-        "score": response["score"],
-        "handicap": response["handicap"],
-        "classification": response["classification"],
-        **({"decimal_handicap": response["decimal_handicap"]} if "decimal_handicap" in response else {}),
-        "warnings": response["warnings"],
-    }
-
-    return jsonify(ordered_response)
+    response, status = calc_single(parsed)
+    return jsonify(response), status

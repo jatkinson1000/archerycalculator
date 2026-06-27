@@ -52,11 +52,8 @@ def calculator():
     form.age.choices = ["", *list(age_mapping.keys())]
     form.roundname.choices = ["", *roundnames]
 
-    # Initialise any errors or warnings
     error = None
-    warning_bowstyle = None
-    warning_handicap_round = None
-    warning_handicap_system = None
+
     if request.method == "POST" and form.validate():
         # Get essential form results
         bowstyle = request.form["bowstyle"]
@@ -119,93 +116,13 @@ def calculator():
                     results["decimal_handicap"] = decimal_hc_from_score
 
                 # Calculate the classification
-                if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
-                    # Handle non-outdoor bowstyles
-                    # Warn about bowstyle (handled by archeryutils).
-                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Barebow "
-                            "for the purposes of classifications."
-                        )
-                    elif bowstyle.lower() in ["compound barebow", "compound limited"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Compound "
-                            "for the purposes of classifications."
-                        )
-
-                    class_from_score = cf.calculate_agb_outdoor_classification(
-                        float(score),
-                        round_obj,
-                        **cf.coax_outdoor_group(
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
-                        ),
-                    )
-                    class_from_score = query_db(
-                        "SELECT longname FROM classes WHERE shortname IS (?)",
-                        [class_from_score],
-                        one=True,
-                    )["longname"]
-                    results["classification"] = class_from_score
-
-                elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
-                    # Warn about bowstyle (handled by archeryutils).
-                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Barebow "
-                            "for the purposes of classifications."
-                        )
-                    elif bowstyle.lower() in ["compound barebow", "compound limited"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Compound "
-                            "for the purposes of classifications."
-                        )
-
-                    class_from_score = cf.calculate_agb_indoor_classification(
-                        float(score),
-                        round_obj,
-                        **cf.coax_indoor_group(
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
-                        ),
-                    )
-                    class_from_score = query_db(
-                        "SELECT longname FROM classes WHERE shortname IS (?)",
-                        [class_from_score],
-                        one=True,
-                    )["longname"]
-                    results["classification"] = class_from_score
-
-                elif round_location in ["field"] and round_body in ["AGB", "WA"]:
-                    # Handle non-field age groups
-                    if age.lower().replace(" ", "") in ("under21"):
-                        age_cat = "Adult"
-                    else:
-                        age_cat = age
-
-                    class_from_score = cf.calculate_agb_field_classification(
-                        float(score),
-                        round_obj,
-                        **cf.coax_field_group(
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
-                        ),
-                    )
-
-                    results["classification"] = class_from_score
-                    warning_handicap_round = (
-                        "Note: This round is not officially recognised by "
-                        "Archery GB for the purposes of handicapping."
-                    )
-                else:
-                    results["classification"] = "not currently available"
-                    warning_handicap_round = (
-                        "Note: This round is not officially recognised by "
-                        "Archery GB for the purposes of handicapping."
-                    )
+                classification_result = utils.calculate_classification(
+                    float(score), round_obj, round_location, round_body,
+                    bowstyle, gender, age,
+                    bowstyle_mapping[bowstyle], gender_mapping[gender], age_mapping[age],
+                )
+                results["classification"] = classification_result.classification
+                results["classification_warnings"] = classification_result.warnings
 
                 # Other stats
                 RAD2DEG = 57.295779513
@@ -223,9 +140,6 @@ def calculator():
                     sig_r_18=2.0 * 100.0 * sig_r_18,
                     sig_r_50=2.0 * 100.0 * sig_r_50,
                     sig_r_70=2.0 * 100.0 * sig_r_70,
-                    warning_bowstyle=warning_bowstyle,
-                    warning_handicap_round=warning_handicap_round,
-                    warning_handicap_system=warning_handicap_system,
                 )
 
     # If errors reload page with error reports
@@ -426,11 +340,8 @@ def old_calculator():
     form.age.choices = ["", *list(age_mapping.keys())]
     form.roundname.choices = ["", *roundnames]
 
-    # Initialise any errors or warnings
     error = None
-    warning_bowstyle = None
-    warning_handicap_round = None
-    warning_handicap_system = None
+
     if request.method == "POST" and form.validate():
         # Get essential form results
         bowstyle = request.form["bowstyle"]
@@ -487,96 +398,14 @@ def old_calculator():
                     results["decimal_handicap"] = decimal_hc_from_score
 
                 # Calculate the classification
-                if round_location in ["outdoor"] and round_body in ["AGB", "WA"]:
-                    # Handle non-outdoor bowstyles
-                    # Warn about bowstyle (handled by archeryutils).
-                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Barebow "
-                            "for the purposes of classifications."
-                        )
-                    elif bowstyle.lower() in ["compound barebow", "compound limited"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Compound "
-                            "for the purposes of classifications."
-                        )
-
-                    class_from_score = cf.calculate_agb_outdoor_classification(
-                        float(score),
-                        round_obj,
-                        **cf.coax_outdoor_group(
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
-                        ),
-                    )
-                    class_from_score = query_db(
-                        "SELECT longname FROM classes WHERE shortname IS (?)",
-                        [class_from_score],
-                        one=True,
-                    )["longname"]
-                    results["classification"] = class_from_score
-
-                elif round_location in ["indoor"] and round_body in ["AGB", "WA"]:
-                    # Warn about bowstyle (handled by archeryutils).
-                    if bowstyle.lower() in ["traditional", "flatbow", "asiatic"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Barebow "
-                            "for the purposes of classifications."
-                        )
-                    elif bowstyle.lower() in ["compound barebow", "compound limited"]:
-                        warning_bowstyle = (
-                            f"Note: Treating {bowstyle} as Compound "
-                            "for the purposes of classifications."
-                        )
-
-                    class_from_score = cf.calculate_agb_indoor_classification(
-                        float(score),
-                        round_obj,
-                        **cf.coax_old_indoor_group(
-                            bowstyle_mapping[bowstyle],
-                            gender_mapping[gender],
-                            age_mapping[age],
-                        ),
-                    )
-                    class_from_score = query_db(
-                        "SELECT longname FROM classes WHERE shortname IS (?)",
-                        [class_from_score],
-                        one=True,
-                    )["longname"]
-                    results["classification"] = class_from_score
-
-                elif round_location in ["field"] and round_body in ["AGB", "WA"]:
-                    # Handle non-field age groups
-                    if age.lower().replace(" ", "") in ("under21"):
-                        age_cat = "Adult"
-                    else:
-                        age_cat = age
-
-                    # class_from_score = cf.calculate_agb_field_classification(
-                    class_from_score = (
-                        cf.calculate_old_agb_field_classification(
-                            round_obj,
-                            float(score),
-                            **cf.coax_old_field_group(
-                                bowstyle_mapping[bowstyle],
-                                gender_mapping[gender],
-                                age_mapping[age],
-                            ),
-                        )
-                    )
-
-                    results["classification"] = class_from_score
-                    warning_handicap_round = (
-                        "Note: This round is not officially recognised by "
-                        "Archery GB for the purposes of handicapping."
-                    )
-                else:
-                    results["classification"] = "not currently available"
-                    warning_handicap_round = (
-                        "Note: This round is not officially recognised by "
-                        "Archery GB for the purposes of handicapping."
-                    )
+                classification_result = utils.calculate_classification(
+                    float(score), round_obj, round_location, round_body,
+                    bowstyle, gender, age,
+                    bowstyle_mapping[bowstyle], gender_mapping[gender], age_mapping[age],
+                    use_old=True,
+                )
+                results["classification"] = classification_result.classification
+                results["classification_warnings"] = classification_result.warnings
 
                 # Other stats
                 RAD2DEG = 57.295779513
@@ -594,9 +423,6 @@ def old_calculator():
                     sig_r_18=2.0 * 100.0 * sig_r_18,
                     sig_r_50=2.0 * 100.0 * sig_r_50,
                     sig_r_70=2.0 * 100.0 * sig_r_70,
-                    warning_bowstyle=warning_bowstyle,
-                    warning_handicap_round=warning_handicap_round,
-                    warning_handicap_system=warning_handicap_system,
                 )
 
     # If errors reload page with error reports

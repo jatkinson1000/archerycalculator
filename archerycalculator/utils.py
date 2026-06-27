@@ -1,10 +1,153 @@
 """Module of useful utilities for archerycalculator."""
 
 import re
+from dataclasses import dataclass, field
 
 import numpy as np
+from archeryutils import classifications as cf
 
 from archerycalculator.db import query_db, sql_to_dol
+
+
+@dataclass
+class ClassificationResults:
+    """Return class for handicap and classification calculation."""
+
+    handicap: float
+    classification: str
+    warnings: list[str] = field(default_factory=list)
+
+
+def calculate_classification(
+    score: float,
+    round_obj,
+    round_location: str,
+    round_body: str,
+    bowstyle: str,
+    gender: str,
+    age: str,
+    bowstyle_archeryutils,
+    gender_archeryutils,
+    age_archeryutils,
+    use_old: bool = False,
+) -> ClassificationResults:
+    """
+    Calculate classification and warnings for a given score.
+
+    Parameters
+    ----------
+    score : float
+        archer's score
+    round_obj : Round
+        Round object
+    round_location : str
+        location of round (outdoor, indoor, field)
+    round_body : str
+        governing body (AGB, WA, etc.)
+    bowstyle : str
+        bowstyle string
+    gender : str
+        gender string
+    age : str
+        age string
+    bowstyle_archeryutils
+        archeryutils bowstyle enum
+    gender_archeryutils
+        archeryutils gender enum
+    age_archeryutils
+        archeryutils age enum
+    use_old : bool
+        if True, use old AGB classification schemes (pre-2023)
+
+    Returns
+    -------
+    ClassificationResults
+        dataclass containing classification and warnings
+    """
+    warnings = []
+    class_short = None
+
+    if round_location == "outdoor" and round_body in ("AGB", "WA"):
+        # Bowstyle warnings only apply for outdoor and indoor
+        if bowstyle.lower() in ("traditional", "flatbow", "asiatic"):
+            warnings.append(
+                f"Note: Treating {bowstyle} as Barebow "
+                "for the purposes of classifications."
+            )
+        elif bowstyle.lower() in ("compound barebow", "compound limited"):
+            warnings.append(
+                f"Note: Treating {bowstyle} as Compound "
+                "for the purposes of classifications."
+            )
+
+        if use_old:
+            class_short = cf.calculate_old_agb_outdoor_classification(
+                score, round_obj,
+                **cf.coax_old_outdoor_group(bowstyle_archeryutils, gender_archeryutils, age_archeryutils),
+            )
+        else:
+            class_short = cf.calculate_agb_outdoor_classification(
+                score, round_obj,
+                **cf.coax_outdoor_group(bowstyle_archeryutils, gender_archeryutils, age_archeryutils),
+            )
+
+    elif round_location == "indoor" and round_body in ("AGB", "WA"):
+        # Bowstyle warnings only apply for outdoor and indoor
+        if bowstyle.lower() in ("traditional", "flatbow", "asiatic"):
+            warnings.append(
+                f"Note: Treating {bowstyle} as Barebow "
+                "for the purposes of classifications."
+            )
+        elif bowstyle.lower() in ("compound barebow", "compound limited"):
+            warnings.append(
+                f"Note: Treating {bowstyle} as Compound "
+                "for the purposes of classifications."
+            )
+
+        if use_old:
+            class_short = cf.calculate_old_agb_indoor_classification(
+                score, round_obj,
+                **cf.coax_old_indoor_group(bowstyle_archeryutils, gender_archeryutils, age_archeryutils),
+            )
+        else:
+            class_short = cf.calculate_agb_indoor_classification(
+                score, round_obj,
+                **cf.coax_indoor_group(bowstyle_archeryutils, gender_archeryutils, age_archeryutils),
+            )
+
+    elif round_location == "field" and round_body in ("AGB", "WA"):
+        if age.lower().replace(" ", "") == "under21":
+            warnings.append("Note: Under 21 age group is treated as Adult for field classifications.")
+
+        if use_old:
+            class_short = cf.calculate_old_agb_field_classification(
+                round_obj, score,
+                **cf.coax_old_field_group(bowstyle_archeryutils, gender_archeryutils, age_archeryutils),
+            )
+        else:
+            class_short = cf.calculate_agb_field_classification(
+                score, round_obj,
+                **cf.coax_field_group(bowstyle_archeryutils, gender_archeryutils, age_archeryutils),
+            )
+
+    else:
+        warnings.append(
+            "Note: This round is not officially recognised by "
+            "Archery GB for the purposes of handicapping."
+        )
+        class_short = None
+
+    # Single DB lookup for long classification name
+    if class_short is not None:
+        class_long = query_db(
+            "SELECT longname FROM classes WHERE shortname IS (?)",
+            [class_short], one=True,
+        )
+        classification = class_long["longname"]
+    else:
+        classification = "not currently available"
+
+    return ClassificationResults(handicap=0.0, classification=classification, warnings=warnings)
 
 
 def check_blacklist(roundlist, age, gender, bowstyle):
@@ -166,7 +309,7 @@ def get_compound_codename(round_codenames):
 
 def check_alias(round_codename, age, gender, bowstyle):
     """
-    select the 'appropriate' round from aliases.
+    Select the 'appropriate' round from aliases.
 
     Parameters
     ----------

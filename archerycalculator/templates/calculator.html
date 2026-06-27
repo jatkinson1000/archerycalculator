@@ -52,14 +52,11 @@
   {% endif %}
 
     {% if results %}
+      {% for w in results["classification_warnings"] %}
+      <span style="color: red; font-size: 0.8em">{{ w }}</span>{% if not loop.last %}<br>{% endif %}
+      {% endfor %}
       <p>
       The <b>handicap</b> for a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ '%0.0f'|format(results["handicap"]) }}</b>.
-        {% if warning_handicap_round %}
-        <br><span style="color: red; font-size: 0.8em">{{ warning_handicap_round }}</span>
-        {% endif %}
-        {% if warning_handicap_system %}
-        <br><span style="color: red; font-size: 0.8em">{{ warning_handicap_system }}</span>
-        {% endif %}
       </p>
       {% if results["decimal_handicap"] %}
       <p>
@@ -68,9 +65,6 @@
       {% endif %}
       <p>
         Your <b>classification</b> for a score of {{ results["score"] }} on a {{ results["roundname"] }} is <b>{{ results["classification"] }}</b>.
-        {% if warning_bowstyle %}
-        <br><span style="color: red; font-size: 0.8em">{{ warning_bowstyle }}</span>
-        {% endif %}
       </p>
       <p>
       The <b>{{ results["roundname"] }}</b> consists of <b>{{ results["n_arrows"] }} arrows ({{ results["n_dozen"] }} dozen)</b> and has a <b>maximum</b> possible score of <b>{{ results["maxscore"] }}</b>.
