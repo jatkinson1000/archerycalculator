@@ -700,9 +700,9 @@ th, td {
           color: #15224A;
         }
     .table-cover img {
-        height: 10%;
+        height: 17.5%;
         position: absolute;
-        top: 85%;
+        top: 40%;
         left: 5%; /* Shift the image to the left */
         visibility: visible;
     }
@@ -746,5 +746,14 @@ th, td {
         color: #666;
         font-style: italic;
         z-index: 1000;
+    }
+
+    /* Compact outdoor tables so each fits on a single page. */
+    body.outdoor .classtable {
+        font-size: clamp(10px, calc(5.5px + 0.8vw), 0.95em);
+    }
+    body.outdoor .classtable th,
+    body.outdoor .classtable td {
+        height: min(calc(11px + 0.8vw), 1.9em);
     }
 }
