@@ -56,6 +56,7 @@ def handicap_tables():
                 "WA_outdoor.json",
                 "WA_indoor.json",
                 "WA_field.json",
+                "AGB_field.json",
                 "WA_experimental.json",
                 "WA_VI.json",
                 "IFAA_field.json",
@@ -238,6 +239,7 @@ def classification_tables():
                 "WA_outdoor.json",
                 "WA_indoor.json",
                 "WA_field.json",
+                "AGB_field.json",
             ]
         )
 
@@ -531,6 +533,7 @@ def print_classification_tables():
                 "WA_outdoor.json",
                 "WA_indoor.json",
                 "WA_field.json",
+                "AGB_field.json",
             ]
         )
 
@@ -1125,6 +1128,7 @@ def event_tables():
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "WA_field.json",
+                    "AGB_field.json",
                 ]
             )
 

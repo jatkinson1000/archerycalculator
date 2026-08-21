@@ -151,6 +151,7 @@ def roundcomparison():
                     "WA_outdoor.json",
                     "WA_indoor.json",
                     "WA_field.json",
+                    "AGB_field.json",
                     "WA_experimental.json",
                     "IFAA_field.json",
                     "AGB_VI.json",
