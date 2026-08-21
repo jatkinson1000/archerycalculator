@@ -297,12 +297,6 @@ def classification_tables():
             }
             ordered_names = list(utils.order_rounds(rounds_families).keys())
 
-            # hack to replace agb900_60 with WA900 in tables
-            ordered_names.remove("wa900")
-            ordered_names = list(
-                map(lambda x: "wa900" if x == "agb900_60" else x, ordered_names)
-            )
-
             # Get list of actual names for pretty output
             # round_names = [
             #    roundsdicts[key]
@@ -387,24 +381,24 @@ def classification_tables():
 
             use_rounds = {
                 "code_name": [
-                    "wa_field_24_red_marked",
-                    "wa_field_24_blue_marked",
-                    "wa_field_24_yellow_marked",
-                    "wa_field_24_white_marked",
-                    "wa_field_12_red_marked",
-                    "wa_field_12_blue_marked",
-                    "wa_field_12_yellow_marked",
-                    "wa_field_12_white_marked",
+                    "wa_field_24_marked_red",
+                    "wa_field_24_marked_blue",
+                    "wa_field_24_marked_yellow",
+                    "agb_field_24_marked_white",
+                    "wa_field_12_marked_red",
+                    "wa_field_12_marked_blue",
+                    "wa_field_12_marked_yellow",
+                    "agb_field_12_marked_white",
                 ],
                 "round_name": [
-                    "WA Field 24 Red",
-                    "WA Field 24 Blue",
-                    "WA Field 24 Yellow",
-                    "WA Field 24 White",
-                    "WA Field 12 Red",
-                    "WA Field 12 Blue",
-                    "WA Field 12 Yellow",
-                    "WA Field 12 White",
+                    "WA Field 24 (Red)",
+                    "WA Field 24 (Blue)",
+                    "WA Field 24 (Yellow)",
+                    "AGB Field 24 (White)",
+                    "WA Field 12 (Red)",
+                    "WA Field 12 (Blue)",
+                    "WA Field 12 (Yellow)",
+                    "AGB Field 12 (White)",
                 ],
             }
 
@@ -623,14 +617,14 @@ def print_classification_tables():
                 query_db(
                     "SELECT code_name,round_name,family FROM rounds "
                     "WHERE location IN ('outdoor') "
-                    "AND (body in ('WA') OR family in ('metric1440', 'metric720', 'metriclong', 'metricshort'))"
+                    "AND (body in ('WA') OR family in ('wa_1440', 'wa_720', 'agb_long_metric', 'agb_short_metric'))"
                 )
             )
             use_rounds_imperial = sql_to_dol(
                 query_db(
                     "SELECT code_name,round_name,family FROM rounds "
                     "WHERE location IN ('outdoor') "
-                    "AND body in ('AGB') AND family NOT in ('metric1440', 'metric720', 'metriclong', 'metricshort')"
+                    "AND body in ('AGB') AND family NOT in ('wa_1440', 'wa_720', 'agb_long_metric', 'agb_short_metric')"
                 )
             )
 
@@ -819,24 +813,24 @@ def print_classification_tables():
 
             use_rounds = {
                 "code_name": [
-                    "wa_field_24_red_marked",
-                    "wa_field_24_blue_marked",
-                    "wa_field_24_yellow_marked",
-                    "wa_field_24_white_marked",
-                    "wa_field_12_red_marked",
-                    "wa_field_12_blue_marked",
-                    "wa_field_12_yellow_marked",
-                    "wa_field_12_white_marked",
+                    "wa_field_24_marked_red",
+                    "wa_field_24_marked_blue",
+                    "wa_field_24_marked_yellow",
+                    "agb_field_24_marked_white",
+                    "wa_field_12_marked_red",
+                    "wa_field_12_marked_blue",
+                    "wa_field_12_marked_yellow",
+                    "agb_field_12_marked_white",
                 ],
                 "round_name": [
-                    "WA Field 24 Red",
-                    "WA Field 24 Blue",
-                    "WA Field 24 Yellow",
-                    "WA Field 24 White",
-                    "WA Field 12 Red",
-                    "WA Field 12 Blue",
-                    "WA Field 12 Yellow",
-                    "WA Field 12 White",
+                    "WA Field 24 (Red)",
+                    "WA Field 24 (Blue)",
+                    "WA Field 24 (Yellow)",
+                    "AGB Field 24 (White)",
+                    "WA Field 12 (Red)",
+                    "WA Field 12 (Blue)",
+                    "WA Field 12 (Yellow)",
+                    "AGB Field 12 (White)",
                 ],
             }
 
@@ -927,19 +921,19 @@ def event_tables():
 
     """
     roundfamilies = {
-        "WA 1440/Metrics": ["wa1440", "metric1440"],
-        "WA 720/Metrics": ["wa720", "metric720"],
-        "WA/AGB 900s": ["agb900"],
+        "WA 1440/Metrics": ["wa_1440"],
+        "WA 720/Metrics": ["wa_720"],
+        "WA/AGB 900s": ["wa_900"],
         "York/Hereford/Bristols": ["york_hereford_bristol"],
-        "St. George/Albion/Windsor": ["stgeorge_albion_windsor"],
+        "St. George/Albion/Windsor": ["st_george_albion_windsor"],
         "National": ["national"],
         "Western": ["western"],
         "Warwick": ["warwick"],
         "Portsmouth": ["portsmouth"],
-        "WA 18": ["wa18"],
-        "WA Field 24 Marked": ["wafield_24_marked"],
-        "WA Field 24 Unmarked": ["wafield_24_unmarked"],
-        "WA Field 24 Mixed": ["wafield_24_mixed"],
+        "WA 18": ["wa_18"],
+        "WA Field 24 Marked": ["wa_field_24_marked"],
+        "WA Field 24 Unmarked": ["wa_field_24_unmarked"],
+        "WA Field 24 Mixed": ["wa_field_24_mixed"],
     }
 
     bowstyle_mapping = generate_enum_mapping(cf.AGB_bowstyles, "SELECT bowstyle_enum,bowstyle FROM bowstyles")
@@ -962,7 +956,7 @@ def event_tables():
         # If restricting to named round set max dist as 60
         if (
             request.form.getlist("restrict_to_named")
-            and roundfamily in list(roundfamilies)[3:7]
+            and roundfamily in list(roundfamilies)[2:3] + list(roundfamilies)[4:8]
         ):
             max_dist = 60
         else:
@@ -977,7 +971,7 @@ def event_tables():
 
         # Account for nuances in each discipline and generate results
         # Target outdoor:
-        if roundfamily in list(roundfamilies)[:7]:
+        if roundfamily in list(roundfamilies)[:8]:
             all_rounds_objs = load_rounds.read_json_to_round_dict(
                 [
                     "AGB_outdoor_imperial.json",
@@ -1012,43 +1006,49 @@ def event_tables():
             for gender in list(gender_mapping.keys()):
                 for j, age_j in enumerate(agelist["age_group"]):
                     # Get appropriate round from distance
-                    for i, rnd_i in enumerate(roundslist["code_name"]):
-                        if all_rounds_objs[rnd_i].max_distance().value >= min(
-                            max_dist, int(agelist[f"{gender.lower()}_dist"][j])
-                        ):
-                            age_round = roundslist["code_name"][i]
+                    # Select the round with the smallest max_distance that still
+                    # reaches the archer's shooting distance.
+                    age_limit = min(max_dist, int(agelist[f"{gender.lower()}_dist"][j]))
+                    eligible = [
+                        rnd for rnd in roundslist["code_name"]
+                        if all_rounds_objs[rnd].max_distance().value >= age_limit
+                    ]
+                    if eligible:
+                        age_round = min(eligible, key=lambda r: all_rounds_objs[r].max_distance().value)
+                    else:
+                        age_round = max(roundslist["code_name"], key=lambda r: all_rounds_objs[r].max_distance().value)
 
                     # Check for 720 based on bowstyle
                     if roundfamily in list(roundfamilies)[1]:
                         # Compound (and compound limited and compound barebow)
                         if bowstyle.lower() in ["compound"]:
+                            age_round = age_round.replace("70", "50")
+                            age_round = age_round.replace("60", "50")
                             age_round = age_round.replace("122", "80")
-                            age_round = age_round.replace("70", "50_c")
-                            age_round = age_round.replace("60", "50_c")
                             if age_j.lower().replace(" ", "") in ["under15", "under14"]:
-                                age_round = "wa720_40_c"
+                                age_round = "wa_40_80"
                             elif age_j.lower().replace(" ", "") in ["under12"]:
-                                age_round = "metric_80_30"
+                                age_round = "agb_30_80"
                         # Barebow (and trad and flatbow)
                         elif bowstyle.lower() in ["barebow"]:
-                            age_round = "wa720_50_b"
+                            age_round = "wa_50_122"
                             if age_j.lower().replace(" ", "") in [
                                 "under15",
                                 "under14",
                                 "under12",
                             ]:
-                                age_round = "wa720_30_b"
+                                age_round = "wa_30_122"
                         # Other bowstyles (Recurve, Longbow)
                         elif age_j.lower().replace(" ", "") in ["adult", "under21"]:
-                            age_round = "wa720_70"
+                            age_round = "wa_70_122"
                         elif age_j.lower().replace(" ", "") in ["50+", "under18"]:
                             age_round = age_round.replace("70", "60")
                         elif age_j.lower().replace(" ", "") in ["under16"]:
-                            age_round = "metric_122_50"
+                            age_round = "wa_50_122"
                         elif age_j.lower().replace(" ", "") in ["under15", "under14"]:
-                            age_round = "wa720_40"
+                            age_round = "wa_40_122"
                         elif age_j.lower().replace(" ", "") in ["under12"]:
-                            age_round = "metric_122_30"
+                            age_round = "wa_30_122"
 
                     # Check aliases
                     age_round = utils.check_alias(

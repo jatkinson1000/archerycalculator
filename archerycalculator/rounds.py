@@ -31,7 +31,7 @@ def rounds_page():
 
     rounds["WA Indoor"] = utils.fetch_and_sort_rounds(location="indoor", body="WA")
 
-    rounds["WA Field"] = utils.fetch_and_sort_rounds(location="field", body="WA")
+    rounds["WA Field"] = utils.fetch_and_sort_rounds(location="field", body=["AGB", "WA"])
 
     rounds["IFAA Field"] = utils.fetch_and_sort_rounds(location="field", body="IFAA")
 
@@ -45,7 +45,7 @@ def rounds_page():
         query_db("SELECT code_name,round_name FROM rounds WHERE body in ('WA-VI')")
     )
 
-    rounds["WA Experimental"] = utils.fetch_and_sort_rounds(location="outdoor", body="WAExp")
+    rounds["WA Experimental"] = utils.fetch_and_sort_rounds(location="outdoor", body="WA-Exp")
 
     rounds["Custom"] = sql_to_dol(
         query_db("SELECT code_name,round_name FROM rounds WHERE body in ('custom')")

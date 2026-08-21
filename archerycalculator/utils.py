@@ -30,66 +30,17 @@ def check_blacklist(roundlist, age, gender, bowstyle):
     """
     blacklist = []
 
-    blacklist.append("wa1440_90_small")
-    blacklist.append("wa1440_70_small")
-    blacklist.append("wa1440_60_small")
-
-    # Gender
-    if gender.lower() in ["open"]:
-        # Men don't get ladies rounds
-        blacklist.append("hereford")
-        blacklist.append("long_metric_70")
-        blacklist.append("wa1440_60")
-        # 50+ and U18 Men get 70m 1440, rest get Metric I
-        if age.lower().replace(" ", "") not in ["adult", "under21"]:
-            blacklist.append("metric_i")
-        else:
-            blacklist.append("wa1440_70")
-
-    if gender.lower() in ["female"]:
-        # Ladies get ladies rounds
-        blacklist.append("bristol_i")
-        blacklist.append("long_metric_i")
-        blacklist.append("metric_i")
-        # 50+ and U18 Ladies get 60m 1440, rest get Metric II
-        if age.lower().replace(" ", "") not in ["adult", "under21"]:
-            blacklist.append("metric_ii")
-        else:
-            blacklist.append("wa1440_60")
-
-    # Age
-    if age.lower().replace(" ", "") in ["adult", "50+", "under21"]:
-        blacklist.append("short_metric_i")
-    else:
-        blacklist.append("short_metric")
-
-    # Bowstyle-specific treatment of 720 rounds
-    if bowstyle.lower() in ["compound"]:
-        blacklist.append("metric_80_50")
-        blacklist.append("metric_80_40")
-    else:
-        blacklist.append("wa720_50_c")
-        blacklist.append("wa720_40_c")
-
-    if bowstyle.lower() in ["barebow"]:
-        blacklist.append("metric_122_50")
-        blacklist.append("metric_122_30")
-    else:
-        blacklist.append("wa720_50_b")
-        blacklist.append("wa720_30_b")
-    if bowstyle.lower() not in ["compound", "barebow"]:
-        # Use WA 720 40m instead of Metric round
-        blacklist.append("metric_122_40")
-    else:
-        blacklist.append("wa720_40")
+    blacklist.append("wa_1440_90_6_zone")
+    blacklist.append("wa_1440_70_6_zone")
+    blacklist.append("wa_1440_60_6_zone")
 
     # Triple face rounds indoor
     blacklist.append("bray_i_triple")
     blacklist.append("bray_ii_triple")
     blacklist.append("portsmouth_triple")
-    blacklist.append("wa18_triple")
-    blacklist.append("wa25_triple")
-    blacklist.append("worcester_5_centre")
+    blacklist.append("wa_18_triple")
+    blacklist.append("wa_25_triple")
+    blacklist.append("worcester_5_spot")
     blacklist.append("vegas_300_triple")
 
     saferounds = []
@@ -150,10 +101,10 @@ def get_compound_codename(round_codenames):
         "portsmouth": "portsmouth_compound",
         "portsmouth_triple": "portsmouth_compound_triple",
         "vegas": "vegas_compound",
-        "wa18": "wa18_compound",
-        "wa18_triple": "wa18_compound_triple",
-        "wa25": "wa25_compound",
-        "wa25_triple": "wa25_compound_triple",
+        "wa_18": "wa_18_compound",
+        "wa_18_triple": "wa_18_compound_triple",
+        "wa_25": "wa_25_compound",
+        "wa_25_triple": "wa_25_compound_triple",
     }
 
     for i, codename in enumerate(round_codenames):
@@ -185,32 +136,9 @@ def check_alias(round_codename, age, gender, bowstyle):
         amended round codenames
 
     """
-    # York, Hereford, Bristols
-    if (round_codename == "hereford") and (gender.lower() == "open"):
-        round_codename = "bristol_i"
-    if (round_codename == "bristol_i") and (gender.lower() == "female"):
-        round_codename = "hereford"
-
-    # WA1440s
-    if round_codename == "metric_i":
-        round_codename = "wa1440_70"
-    if round_codename == "metric_ii":
-        round_codename = "wa1440_60"
-
     # WA900s
-    if round_codename == "agb900_60":
-        round_codename = "wa900"
-
-    # WA720s
-    if (round_codename == "wa720_50_c") and (bowstyle.lower() != "compound"):
-        round_codename = "metric_80_50"
-    if (round_codename == "metric_80_50") and (bowstyle.lower() == "compound"):
-        round_codename = "wa720_50_c"
-
-    if (round_codename == "wa720_50_b") and (bowstyle.lower() != "barebow"):
-        round_codename = "metric_122_50"
-    if (round_codename == "metric_122_50") and (bowstyle.lower() == "barebow"):
-        round_codename = "wa720_50_b"
+    if round_codename == "agb_900_60":
+        round_codename = "wa_900"
 
     return round_codename
 
@@ -234,19 +162,18 @@ def order_rounds(rounds):
     order = [
         # OUTDOOR
         "york_hereford_bristol",
-        "stgeorge_albion_windsor",
+        "st_george_albion_windsor",
         "national",
         "western",
         "warwick",
         "american",
-        "stnicholas",
-        "wa1440",
-        "metric1440",
-        "agb900",  # Use agb900 family, but replace 60 with wa900 in main table routine
+        "st_nicholas",
+        "wa_1440",
+        "wa_900",
         # 720 have special treatment
-        "720",
-        "metriclong",
-        "metricshort",
+        "wa_720",
+        "agb_long_metric",
+        "agb_short_metric",
         # INDOOR
         # FIELD
         "wafield_24_marked",
@@ -260,44 +187,84 @@ def order_rounds(rounds):
 
     sorted_rounds = {}
     for family in order:
-        if family == "720":
-            # Special treatment needed to sort the wa720 and metric720 families
+        if family == "wa_720":
+            # # Special treatment needed to sort the wa720 and metric720 families
 
-            # Get all 720 rounds (both wa720 and metric720)
+            # Get all wa_720 rounds
             rounds_720 = {
                 key: value
                 for (key, value) in rounds.items()
-                if value in ("wa720", "metric720")
+                if value == "wa_720"
             }
 
-            def _extract_720_distance(codename: str) -> int:
-                """Extract distance from round codename using regex."""
-                # Look for patterns like: _70, ..., _30 nat end of string
-                # compound/barebow: _DISTANCE_c or _DISTANCE_b
-                match = re.search(r"_(\d{2,3})_[bc]$", codename)
+            def _extract_720_info(codename: str) -> int:
+                """Extract distance and face size from round codename with regex."""
+                match = re.search(r"_(\d{2})_(\d{2,3})$", codename)
                 if match:
-                    return int(match.group(1))
-                # Otherwise _DISTANCE at end
-                match = re.search(r"_(\d{2,3})$", codename)
-                if match:
-                    return int(match.group(1))
+                    return int(match.group(1)), int(match.group(2))
                 # Fallback
-                return 0
+                return 0, 0
 
             # Sort by: 1) 122 vs 80 face, 2) distance (descending), 3) name
             sorted_720_rounds = sorted(
                 rounds_720.items(),
                 key=lambda item: (
                     # Group: 0 for 122cm faces, 1 for 80cm
-                    1 if ("_c" in item[0] or "metric_80" in item[0]) else 0,
+                    0 if _extract_720_info(item[0])[1] == 122 else 1,
                     # Distance (descending so take -ve)
-                    -_extract_720_distance(item[0]),
+                    -_extract_720_info(item[0])[0],
                     # Name for consistency
                     item[0]
                 )
             )
 
             sorted_rounds.update(dict(sorted_720_rounds))
+
+        elif family == "wa_1440":
+            # # Special treatment needed to sort the wa720 and metric720 families
+
+            # Get all rounds
+            rounds_1440 = {
+                key: value
+                for (key, value) in rounds.items()
+                if value == family
+            }
+
+            def _extract_1440_info(codename: str) -> int:
+                """Extract distance from round codename with regex."""
+                match = re.search(r"_(\d{2})$", codename)
+                if match:
+                    return int(match.group(1))
+                # Fallback
+                return 0
+
+            # Sort by: 1) distance (descending), 2) name
+            sorted_1440_rounds = sorted(
+                rounds_1440.items(),
+                key=lambda item: (
+                    # Distance (descending so take -ve)
+                    -_extract_1440_info(item[0]),
+                    # Name for consistency
+                    item[0]
+                )
+            )
+
+            sorted_rounds.update(dict(sorted_1440_rounds))
+
+        elif family == "wa_900":
+            wa_900_rounds = {k: v for k, v in rounds.items() if v == "wa_900"}
+
+            def _900_distance(codename):
+                if codename == "wa_900":
+                    return 60
+                match = re.search(r"_(\d{2})$", codename)
+                if match:
+                    return int(match.group(1))
+                # Fallback
+                return 0
+
+            for codename in sorted(wa_900_rounds, key=lambda c: -_900_distance(c)):
+                sorted_rounds[codename] = wa_900_rounds[codename]
 
         elif family == "ifaafield":
             # Select full rounds first, then units
