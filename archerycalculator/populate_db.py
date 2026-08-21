@@ -94,6 +94,7 @@ def load_rounds_to_db(database):
             "AGB_VI.json",
             "WA_VI.json",
             "WA_field.json",
+            "AGB_field.json",
             "WA_experimental.json",
             "IFAA_field.json",
             "Miscellaneous.json",
